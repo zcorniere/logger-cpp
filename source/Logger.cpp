@@ -26,7 +26,7 @@ void Logger::thread_loop()
             stream << "\r\033[K";
             stream.flush();
         } catch (const std::exception &e) {
-            stream << "LOGGER ERROR:" << e.what() << std::endl;
+            std::cerr << "LOGGER ERROR:" << e.what() << std::endl;
         }
     }
 }
@@ -55,8 +55,7 @@ void Logger::flush()
 
 void Logger::deleteProgressBar(const std::shared_ptr<ProgressBar> &bar)
 {
-    std::erase(qBars, bar);
-    newBars -= 1;
+    if (std::erase(qBars, bar) > 0) newBars -= 1;
 }
 
 void Logger::endl()

@@ -19,6 +19,8 @@ public:
     uint64_t getProgress() const;
     void setProgress(uint64_t value);
 
+    bool isComplete() const;
+
     ProgressBar &operator++();
     ProgressBar &operator--();
 
@@ -30,7 +32,7 @@ private:
 private:
     uint64_t uMax = 100;
     uint64_t uProgress = 0;
-    std::string message;
+    std::string message = "";
     bool bShowTime = false;
     std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 };

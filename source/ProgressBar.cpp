@@ -50,9 +50,11 @@ void ProgressBar::setMaximum(uint64_t value) { uMax = value; }
 uint64_t ProgressBar::getProgress() const { return uProgress; }
 void ProgressBar::setProgress(uint64_t value) { uProgress = value; }
 
+bool ProgressBar::isComplete() const { return uProgress == uMax; }
+
 ProgressBar &ProgressBar::operator++()
 {
-    uProgress++;
+    if (!this->isComplete()) uProgress++;
     return *this;
 }
 ProgressBar &ProgressBar::operator--()
