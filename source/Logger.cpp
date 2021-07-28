@@ -5,6 +5,8 @@
 #include <optional>
 #include <utility>
 
+#include "ProgressBar.hpp"
+
 Logger::Logger(std::ostream &stream): stream(stream) {}
 
 Logger::~Logger() { this->stop(); }

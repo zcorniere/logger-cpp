@@ -1,5 +1,9 @@
 #include "ProgressBar.hpp"
+
 #include <chrono>
+#include <compare>
+#include <cstdint>
+#include <ratio>
 
 ProgressBar::ProgressBar(std::string _message, uint64_t max, bool show_time_)
     : uMax(max), message(_message), bShowTime(show_time_)
@@ -38,6 +42,23 @@ void ProgressBar::update(std::ostream &out) const
         }
     }
     out << std::endl;
+}
+
+uint64_t ProgressBar::getMaximum() const { return uMax; }
+void ProgressBar::setMaximum(uint64_t value) { uMax = value; }
+
+uint64_t ProgressBar::getProgress() const { return uProgress; }
+void ProgressBar::setProgress(uint64_t value) { uProgress = value; }
+
+ProgressBar &ProgressBar::operator++()
+{
+    uProgress++;
+    return *this;
+}
+ProgressBar &ProgressBar::operator--()
+{
+    uProgress--;
+    return *this;
 }
 
 void ProgressBar::writeTime(std::ostream &out, std::chrono::duration<float> dur) const

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <deque>
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -11,6 +12,8 @@
 
 #include "ProgressBar.hpp"
 #include "ThreadedQ.hpp"
+
+class ProgressBar;
 
 #define S1(x) #x
 #define S2(x) S1(x)

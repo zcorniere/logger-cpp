@@ -6,17 +6,6 @@
 #include <mutex>
 #include <optional>
 
-class QError : public std::exception
-{
-public:
-    QError(const std::string &s): msg(s) {}
-    ~QError() {}
-    const std::string &getMsg() const { return msg; }
-
-private:
-    std::string msg;
-};
-
 template <typename T>
 class ThreadedQ
 {
