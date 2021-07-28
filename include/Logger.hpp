@@ -26,7 +26,16 @@ public:
     void stop();
     void flush();
 
-    std::shared_ptr<ProgressBar> newProgressBar(const std::string &message = "", uint64_t uMax = 100);
+    template <class... Args>
+    std::shared_ptr<ProgressBar> newProgressBar(Args &&...agrs)
+    {
+        auto p = std::make_shared<ProgressBar>(agrs...);
+
+        qBars.push_back(p);
+        newBars += 1;
+        return p;
+    }
+
     void deleteProgressBar(const std::shared_ptr<ProgressBar> &bar);
 
     void endl();

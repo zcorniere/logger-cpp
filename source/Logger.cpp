@@ -51,15 +51,6 @@ void Logger::flush()
     }
 }
 
-std::shared_ptr<ProgressBar> Logger::newProgressBar(const std::string &message, uint64_t uMax)
-{
-    auto p = std::make_shared<ProgressBar>(message, uMax);
-
-    qBars.push_back(p);
-    newBars += 1;
-    return p;
-}
-
 void Logger::deleteProgressBar(const std::shared_ptr<ProgressBar> &bar)
 {
     std::erase(qBars, bar);
