@@ -1,9 +1,7 @@
 #pragma once
 
 #include <atomic>
-#include <deque>
-#include <iostream>
-#include <memory>
+#include <iterator>
 #include <mutex>
 #include <sstream>
 #include <string>
@@ -13,33 +11,33 @@
 #include "ProgressBar.hpp"
 #include "ThreadedQ.hpp"
 
-class ProgressBar;
-
-#define S1(x) #x
-#define S2(x) S1(x)
-#define LOCATION __FILE__ ":" S2(__LINE__)
-#define BRACKETS(c, s) "[\e[" << c << "m" << s << "\e[0m] "
-
 class Logger
 {
 public:
     Logger(std::ostream &stream);
     ~Logger();
     void start();
-    void stop();
+    void stop(bool bFlush = true);
     void flush();
 
     template <class... Args>
-    std::shared_ptr<ProgressBar> newProgressBar(Args &&...agrs)
+    ProgressBar &newProgressBar(Args &&...args)
     {
-        auto p = std::make_shared<ProgressBar>(agrs...);
-
-        qBars.push_back(p);
-        newBars += 1;
-        return p;
+        std::unique_lock<std::mutex> lBuffers(mutBars);
+        qBars.emplace_back(args...);
+        iNewBars += 1;
+        qMsg.notify();
+        return qBars.back();
     }
 
-    void deleteProgressBar(const std::shared_ptr<ProgressBar> &bar);
+    template <class... deletedBars>
+    void deleteProgressBar(const deletedBars &...bar)
+    {
+        std::unique_lock<std::mutex> lBuffers(mutBars);
+        auto e = std::remove_if(qBars.begin(), qBars.end(), [&](const auto &i) { return (((i == bar) || ...)); });
+        iNewBars -= std::distance(e, qBars.end());
+        qBars.erase(e, qBars.end());
+    }
 
     void endl();
     std::stringstream &warn(const std::string &msg = "WARNING");
@@ -52,17 +50,25 @@ public:
 private:
     void thread_loop();
 
+private:
     std::ostream &stream;
     std::mutex mutBuffer;
     std::atomic_bool bExit = false;
     std::thread msgT;
     ThreadedQ<std::string> qMsg;
-    std::deque<std::shared_ptr<ProgressBar>> qBars;
-    std::atomic_int newBars = 0;
     std::unordered_map<std::thread::id, std::stringstream> mBuffers;
+
+    // Progress Bars
+    ThreadedQ<ProgressBar> qBars;
+    std::mutex mutBars;
+    std::atomic_int16_t iNewBars = 0;
 };
 
 extern Logger *logger;
+
+#define S1(x) #x
+#define S2(x) S1(x)
+#define LOCATION __FILE__ ":" S2(__LINE__)
 
 #define LOGGER_WARN logger->warn(LOCATION)
 #define LOGGER_ERR logger->err(LOCATION)

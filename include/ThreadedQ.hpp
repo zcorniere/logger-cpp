@@ -24,11 +24,30 @@ public:
         std::scoped_lock lock(q_mut);
         return q.empty();
     }
+
+    auto begin()
+    {
+        std::scoped_lock lock(q_mut);
+        return q.begin();
+    }
+    auto end()
+    {
+        std::scoped_lock lock(q_mut);
+        return q.end();
+    }
+
     auto size() const
     {
         std::scoped_lock lock(q_mut);
         return q.size();
     }
+
+    auto erase(auto i, auto e = {})
+    {
+        std::scoped_lock lock(q_mut);
+        q.erase(i, e);
+    }
+
     void clear()
     {
         std::scoped_lock lock(q_mut);
@@ -50,6 +69,21 @@ public:
         q.pop_back();
         return t;
     }
+
+    template <typename... Args>
+    void emplace_back(Args... args)
+    {
+        auto t = T(args...);
+        this->push_back(t);
+    }
+
+    template <typename... Args>
+    void emplace_fron(Args... args)
+    {
+        auto t = T(args...);
+        this->push_front(t);
+    }
+
     void push_back(const T &i)
     {
         std::scoped_lock lock(q_mut);
@@ -67,6 +101,12 @@ public:
         vBlocking.notify_one();
     }
 
+    T &back()
+    {
+        std::scoped_lock lock(q_mut);
+        return q.back();
+    }
+
     void wait()
     {
         while (this->bWait && this->empty()) {
@@ -79,6 +119,12 @@ public:
     {
         std::unique_lock<std::mutex> ul(mutBlocking);
         vBlocking.wait_for(ul, std::chrono::milliseconds(D));
+    }
+
+    void waitTimeout(unsigned d = 10)
+    {
+        std::unique_lock<std::mutex> ul(mutBlocking);
+        vBlocking.wait_for(ul, std::chrono::milliseconds(d));
     }
 
     void notify()

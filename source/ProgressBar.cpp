@@ -10,7 +10,10 @@ ProgressBar::ProgressBar(std::string _message, uint64_t max, bool show_time_)
 {
 }
 
-ProgressBar::~ProgressBar() {}
+ProgressBar::ProgressBar(const ProgressBar &other): ProgressBar(other.getMessage(), other.getMaximum())
+{
+    uProgress = other.getProgress();
+}
 
 void ProgressBar::update(std::ostream &out) const
 {
@@ -32,7 +35,7 @@ void ProgressBar::update(std::ostream &out) const
         if (uProgress > 0 && uProgress < uMax) {
             out << ' ';
             auto elapsed = (std::chrono::steady_clock::now() - start_time);
-            auto estimate = elapsed / uProgress * (uMax - uProgress);
+            auto estimate = elapsed / uProgress.load() * (uMax - uProgress);
             writeTime(out, estimate);
             out << " remaining; ";
             writeTime(out, elapsed);
@@ -44,13 +47,11 @@ void ProgressBar::update(std::ostream &out) const
     out << std::endl;
 }
 
-uint64_t ProgressBar::getMaximum() const { return uMax; }
-void ProgressBar::setMaximum(uint64_t value) { uMax = value; }
-
-uint64_t ProgressBar::getProgress() const { return uProgress; }
-void ProgressBar::setProgress(uint64_t value) { uProgress = value; }
-
-bool ProgressBar::isComplete() const { return uProgress == uMax; }
+ProgressBar &ProgressBar::operator=(const ProgressBar &other)
+{
+    *this = ProgressBar(other);
+    return *this;
+}
 
 ProgressBar &ProgressBar::operator++()
 {

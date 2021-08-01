@@ -1,11 +1,12 @@
 #include "Logger.hpp"
 
+#include <deque>
 #include <exception>
 #include <iostream>
 #include <optional>
 #include <utility>
 
-#include "ProgressBar.hpp"
+#define BRACKETS(c, s) "[\e[" << c << "m" << s << "\e[0m] "
 
 Logger::Logger(std::ostream &stream): stream(stream) {}
 
@@ -15,15 +16,25 @@ void Logger::thread_loop()
 {
     while (!bExit) {
         try {
-            qMsg.waitTimeout<100>();
-            for (int i = 0; i < static_cast<int>(qBars.size()) - newBars; i++) stream << "\r\033[2K\033[1A";
-            newBars = 0;
+            if (qBars.empty())
+                qMsg.wait();
+            else {
+                qMsg.waitTimeout<100>();
+                // come up line and clear them to display the messages (seen man console_codes)
+                std::unique_lock<std::mutex> ul(mutBars);
+                stream << "\033[" << qBars.size() - iNewBars << "F\033[J";
+                iNewBars = 0;
+            }
+
+            // Flush the messages q
             while (!qMsg.empty()) {
                 auto i = qMsg.pop_front();
-                if (i) stream << "\33[K" << *i << "\e[0m" << std::endl;
+                if (i) stream << "\33[2K" << *i << "\e[0m" << std::endl;
             }
-            for (const auto &bar: qBars) bar->update(stream);
-            stream << "\r\033[K";
+
+            // redraw the progress bars
+            for (const auto &bar: qBars) bar.update(stream);
+
             stream.flush();
         } catch (const std::exception &e) {
             std::cerr << "LOGGER ERROR:" << e.what() << std::endl;
@@ -33,12 +44,12 @@ void Logger::thread_loop()
 
 void Logger::start() { msgT = std::thread(&Logger::thread_loop, this); }
 
-void Logger::stop()
+void Logger::stop(bool bFlush)
 {
     bExit = true;
     qMsg.setWaitMode(false);
 
-    this->flush();
+    if (bFlush) this->flush();
     if (msgT.joinable()) { msgT.join(); }
 }
 
@@ -51,11 +62,6 @@ void Logger::flush()
         if (!msg.empty()) stream << msg << std::endl;
         i = std::stringstream();
     }
-}
-
-void Logger::deleteProgressBar(const std::shared_ptr<ProgressBar> &bar)
-{
-    if (std::erase(qBars, bar) > 0) newBars -= 1;
 }
 
 void Logger::endl()
