@@ -64,7 +64,10 @@ private:
     std::atomic_int16_t iNewBars = 0;
 };
 
+#ifndef LOGGER_NO_GLOBAL_OBJECT
 extern Logger *logger;
+
+#ifndef LOGGER_NO_MACROS
 
 #define S1(x) #x
 #define S2(x) S1(x)
@@ -75,3 +78,7 @@ extern Logger *logger;
 #define LOGGER_INFO logger->info(LOCATION)
 #define LOGGER_DEBUG logger->debug(LOCATION)
 #define LOGGER_ENDL logger->endl();
+
+#endif    // LOGGER_NO_MACROS
+
+#endif    // LOGGER_NO_GLOBAL_OBJECT

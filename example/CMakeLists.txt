@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
-project(testLogger)
+project(examples)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(example example.cpp)
+target_link_libraries(example PRIVATE logger pthread)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE logger pthread)
+add_executable(example_noglobal example_noglobal.cpp)
+target_link_libraries(example_noglobal PRIVATE logger pthread)
