@@ -1,4 +1,5 @@
 #include <Logger.hpp>
+#include <unistd.h>
 #include <iostream>
 
 Logger *logger = nullptr;
