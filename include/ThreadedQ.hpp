@@ -19,41 +19,42 @@ public:
 
     virtual ~ThreadedQ() { this->clear(); }
 
-    bool empty() const
+    inline bool empty() const
     {
         std::scoped_lock lock(q_mut);
         return q.empty();
     }
 
-    auto begin()
+    inline auto begin()
     {
         std::scoped_lock lock(q_mut);
         return q.begin();
     }
-    auto end()
+
+    inline auto end()
     {
         std::scoped_lock lock(q_mut);
         return q.end();
     }
 
-    auto size() const
+    inline auto size() const
     {
         std::scoped_lock lock(q_mut);
         return q.size();
     }
 
-    auto erase(auto i, auto e = {})
+    inline auto erase(auto i, auto e = {})
     {
         std::scoped_lock lock(q_mut);
         q.erase(i, e);
     }
 
-    void clear()
+    inline void clear()
     {
         std::scoped_lock lock(q_mut);
         q.clear();
     }
-    std::optional<T> pop_front()
+    inline std::optional<T> pop_front()
     {
         std::scoped_lock lock(q_mut);
         if (q.size() == 0) return std::nullopt;
@@ -61,7 +62,7 @@ public:
         q.pop_front();
         return t;
     }
-    std::optional<T> pop_back()
+    inline std::optional<T> pop_back()
     {
         std::scoped_lock lock(q_mut);
         if (q.size() == 0) return std::nullopt;
@@ -71,20 +72,20 @@ public:
     }
 
     template <typename... Args>
-    void emplace_back(Args... args)
+    inline void emplace_back(Args... args)
     {
         auto t = T(args...);
         this->push_back(t);
     }
 
     template <typename... Args>
-    void emplace_fron(Args... args)
+    inline void emplace_fron(Args... args)
     {
         auto t = T(args...);
         this->push_front(t);
     }
 
-    void push_back(const T &i)
+    inline void push_back(const T &i)
     {
         std::scoped_lock lock(q_mut);
         q.emplace_back(std::move(i));
@@ -92,7 +93,7 @@ public:
         std::unique_lock<std::mutex> ul(mutBlocking);
         vBlocking.notify_one();
     }
-    void push_front(const T &i)
+    inline void push_front(const T &i)
     {
         std::scoped_lock lock(q_mut);
         q.emplace_front(std::move(i));
@@ -101,13 +102,18 @@ public:
         vBlocking.notify_one();
     }
 
-    T &back()
+    inline T &back()
     {
         std::scoped_lock lock(q_mut);
         return q.back();
     }
+    inline T &front()
+    {
+        std::scoped_lock lock(q_mut);
+        return q.front();
+    }
 
-    void wait()
+    inline void wait()
     {
         while (this->bWait && this->empty()) {
             std::unique_lock<std::mutex> ul(mutBlocking);
@@ -115,25 +121,25 @@ public:
         }
     }
     template <unsigned D = 10>
-    void waitTimeout()
+    inline void waitTimeout()
     {
         std::unique_lock<std::mutex> ul(mutBlocking);
         vBlocking.wait_for(ul, std::chrono::milliseconds(D));
     }
 
-    void waitTimeout(unsigned d = 10)
+    inline void waitTimeout(unsigned d = 10)
     {
         std::unique_lock<std::mutex> ul(mutBlocking);
         vBlocking.wait_for(ul, std::chrono::milliseconds(d));
     }
 
-    void notify()
+    inline void notify()
     {
         std::unique_lock<std::mutex> ul(mutBlocking);
         vBlocking.notify_all();
     }
 
-    void setWaitMode(bool mode)
+    inline void setWaitMode(bool mode)
     {
         bWait = mode;
         this->notify();

@@ -20,13 +20,13 @@ void Logger::thread_loop()
                 qMsg.wait();
             else {
                 qMsg.waitTimeout<100>();
-                // come up line and clear them to display the messages (seen man console_codes)
+                // come up some line and clear them to display the messages (see man console_codes)
                 std::unique_lock<std::mutex> ul(mutBars);
                 stream << "\033[" << qBars.size() - iNewBars << "F\033[J";
                 iNewBars = 0;
             }
 
-            // Flush the messages q
+            // Flush the messages queue
             while (!qMsg.empty()) {
                 auto i = qMsg.pop_front();
                 if (i) stream << "\33[2K" << *i << "\e[0m" << std::endl;
