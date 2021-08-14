@@ -54,7 +54,7 @@ private:
     std::ostream &stream;
     std::mutex mutBuffer;
     std::atomic_bool bExit = false;
-    std::thread msgT;
+    std::jthread msgT;
     ThreadedQ<std::string> qMsg;
     std::unordered_map<std::thread::id, std::stringstream> mBuffers;
 

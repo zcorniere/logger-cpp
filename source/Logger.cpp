@@ -6,7 +6,8 @@
 #include <optional>
 #include <utility>
 
-#define BRACKETS(c, s) "[\e[" << c << "m" << s << "\e[0m] "
+#define COLOR_CODE(COLOR) "\e[" #COLOR "m"
+#define BRACKETS(COLOR, STRING) "[" COLOR_CODE(COLOR) << STRING << COLOR_CODE(0) "] "
 
 Logger::Logger(std::ostream &stream): stream(stream) {}
 
@@ -22,7 +23,7 @@ void Logger::thread_loop()
                 qMsg.waitTimeout<100>();
                 // come up some line and clear them to display the messages (see man console_codes)
                 std::unique_lock<std::mutex> ul(mutBars);
-                stream << "\033[" << qBars.size() - iNewBars << "F\033[J";
+                stream << "\e[" << qBars.size() - iNewBars << "F\e[J";
                 iNewBars = 0;
             }
 
@@ -42,7 +43,7 @@ void Logger::thread_loop()
     }
 }
 
-void Logger::start() { msgT = std::thread(&Logger::thread_loop, this); }
+void Logger::start() { msgT = std::jthread(&Logger::thread_loop, this); }
 
 void Logger::stop(bool bFlush)
 {
@@ -50,7 +51,6 @@ void Logger::stop(bool bFlush)
     qMsg.setWaitMode(false);
 
     if (bFlush) this->flush();
-    if (msgT.joinable()) { msgT.join(); }
 }
 
 void Logger::flush()
