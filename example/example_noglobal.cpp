@@ -1,4 +1,3 @@
-#define LOGGER_NO_GLOBAL_OBJECT
 #include <Logger.hpp>
 #include <iostream>
 #include <unistd.h>

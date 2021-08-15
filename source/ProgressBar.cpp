@@ -64,7 +64,7 @@ ProgressBar &ProgressBar::operator--()
     return *this;
 }
 
-void ProgressBar::writeTime(std::ostream &out, std::chrono::duration<float> dur) const
+void ProgressBar::writeTime(std::ostream &out, const std::chrono::duration<float> &dur) const
 {
     using namespace std::chrono_literals;
 

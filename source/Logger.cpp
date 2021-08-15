@@ -9,7 +9,7 @@
 #define COLOR_CODE(COLOR) "\e[" #COLOR "m"
 #define BRACKETS(COLOR, STRING) "[" COLOR_CODE(COLOR) << STRING << COLOR_CODE(0) "] "
 
-Logger::Logger(std::ostream &stream): stream(stream) {}
+Logger::Logger(std::ostream &stream): stream(stream), qBars(0) {}
 
 Logger::~Logger() { this->stop(); }
 

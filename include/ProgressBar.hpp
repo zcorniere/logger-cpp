@@ -34,7 +34,7 @@ public:
     auto operator<=>(const ProgressBar &) const = default;
 
 private:
-    void writeTime(std::ostream &out, std::chrono::duration<float> dur) const;
+    void writeTime(std::ostream &out, const std::chrono::duration<float> &dur) const;
 
 private:
     std::string message;

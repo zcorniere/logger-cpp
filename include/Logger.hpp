@@ -21,7 +21,7 @@ public:
     void flush();
 
     template <class... Args>
-    ProgressBar &newProgressBar(Args &&...args)
+    [[nodiscard]] ProgressBar &newProgressBar(Args &&...args)
     {
         std::unique_lock<std::mutex> lBuffers(mutBars);
         qBars.emplace_back(args...);
@@ -61,24 +61,33 @@ private:
     // Progress Bars
     ThreadedQ<ProgressBar> qBars;
     std::mutex mutBars;
-    std::atomic_int16_t iNewBars = 0;
+    std::atomic<int16_t> iNewBars = 0;
 };
 
-#ifndef LOGGER_NO_GLOBAL_OBJECT
+#if defined(LOGGER_EXTERN_DECLARATION_PTR)
+
+#define LOGGER_ACCESS ->
 extern Logger *logger;
 
+#elif defined(LOGGER_EXTERN_DECLARATION)
+
+#define LOGGER_ACCESS .
+extern Logger logger;
+
+#endif
+
+#ifdef LOGGER_ACCESS
 #ifndef LOGGER_NO_MACROS
 
 #define S1(x) #x
 #define S2(x) S1(x)
 #define LOCATION __FILE__ ":" S2(__LINE__)
 
-#define LOGGER_WARN logger->warn(LOCATION)
-#define LOGGER_ERR logger->err(LOCATION)
-#define LOGGER_INFO logger->info(LOCATION)
-#define LOGGER_DEBUG logger->debug(LOCATION)
-#define LOGGER_ENDL logger->endl();
+#define LOGGER_WARN logger LOGGER_ACCESS warn(LOCATION)
+#define LOGGER_ERR logger LOGGER_ACCESS err(LOCATION)
+#define LOGGER_INFO logger LOGGER_ACCESS info(LOCATION)
+#define LOGGER_DEBUG logger LOGGER_ACCESS debug(LOCATION)
+#define LOGGER_ENDL logger LOGGER_ACCESS endl();
 
 #endif    // LOGGER_NO_MACROS
-
-#endif    // LOGGER_NO_GLOBAL_OBJECT
+#endif

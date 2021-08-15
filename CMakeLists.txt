@@ -11,4 +11,5 @@ if (BUILD_EXAMPLE)
 endif()
 
 add_library(${PROJECT_NAME} source/Logger.cpp source/ProgressBar.cpp)
+target_link_libraries(${PROJECT_NAME} PUBLIC pthread)
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
