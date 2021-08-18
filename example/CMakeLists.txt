@@ -10,6 +10,9 @@ target_link_libraries(example_noglobal PRIVATE logger)
 add_executable(example_ptr example_ptr.cpp)
 target_link_libraries(example_ptr PRIVATE logger)
 
+add_executable(example_level example_level.cpp)
+target_link_libraries(example_level PRIVATE logger)
+
 add_executable(example_simple example_simple.cpp)
 target_link_libraries(example_simple PRIVATE logger)
 
