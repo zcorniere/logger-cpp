@@ -31,7 +31,7 @@ int main(void)
             ++bar2;
             ++bar3;
             if (bar2.isComplete()) {
-                logger.debug("debug") << "this is an debug message";
+                logger.debug("debug") << "this is a debug message";
                 logger.endl();
             }
             if (!bRewind && bar3.getProgress() == total + 1) {
