@@ -29,8 +29,18 @@ void Logger::thread_loop()
 
             // Flush the messages queue
             while (!qMsg.empty()) {
-                auto i = qMsg.pop_front();
-                if (i) stream << "\33[2K" << *i << "\e[0m" << std::endl;
+                auto msg = qMsg.pop_front();
+
+                if (!msg) throw std::runtime_error("Error getting value");
+
+                if (msg->message) {
+                    // If there is a message, print it
+                    if (msg->level >= selectedLevel.load())
+                        stream << "\33[2K" << *(msg->message) << "\e[0m" << std::endl;
+                } else {
+                    // If not, set the level
+                    selectedLevel = msg->level;
+                }
             }
 
             // redraw the progress bars
@@ -43,7 +53,11 @@ void Logger::thread_loop()
     }
 }
 
-void Logger::start() { msgT = std::jthread(&Logger::thread_loop, this); }
+void Logger::start(Logger::Level level)
+{
+    selectedLevel = level;
+    msgT = std::jthread(&Logger::thread_loop, this);
+}
 
 void Logger::stop(bool bFlush)
 {
@@ -51,6 +65,7 @@ void Logger::stop(bool bFlush)
     qMsg.setWaitMode(false);
 
     if (bFlush) this->flush();
+    if (msgT.joinable()) msgT.join();
 }
 
 void Logger::flush()
@@ -58,59 +73,85 @@ void Logger::flush()
     std::unique_lock<std::mutex> lBuffers(mutBuffer);
 
     for (auto &[_, i]: mBuffers) {
-        std::string msg(i.str());
+        std::string msg(i.stream.str());
         if (!msg.empty()) stream << msg << std::endl;
-        i = std::stringstream();
+        i.stream = std::stringstream();
     }
+}
+
+Logger::Level Logger::getLevel() const { return selectedLevel; }
+void Logger::setLevel(Level level)
+{
+    qMsg.push_back({
+        .level = level,
+        .message = std::nullopt,
+    });
 }
 
 void Logger::endl()
 {
-    std::string msg(this->raw().str());
-    qMsg.push_back(msg);
-    mBuffers.at(std::this_thread::get_id()) = std::stringstream();
+    auto &raw = this->raw();
+    qMsg.push_back({
+        .level = raw.level,
+        .message = raw.stream.str(),
+    });
+    mBuffers.at(std::this_thread::get_id()) = {
+        .level = Level::Message,
+        .stream = std::stringstream(),
+    };
 }
 
 std::stringstream &Logger::warn(const std::string &msg)
 {
     auto &buf = this->raw();
-    buf << BRACKETS(33, "WARN") << BRACKETS(33, msg);
-    return buf;
+    buf.level = Logger::Level::Warn;
+    buf.stream << BRACKETS(33, "WARN") << BRACKETS(33, msg);
+    return buf.stream;
 }
 
 std::stringstream &Logger::err(const std::string &msg)
 {
     auto &buf = this->raw();
-    buf << BRACKETS(31, "ERROR") << BRACKETS(31, msg);
-    return buf;
+    buf.level = Logger::Level::Error;
+    buf.stream << BRACKETS(31, "ERROR") << BRACKETS(31, msg);
+    return buf.stream;
 }
 
 std::stringstream &Logger::info(const std::string &msg)
 {
     auto &buf = this->raw();
-    buf << BRACKETS(0, "INFO") << BRACKETS(0, msg);
-    return buf;
+    buf.level = Logger::Level::Info;
+    buf.stream << BRACKETS(36, "INFO") << BRACKETS(36, msg);
+    return buf.stream;
 }
 
 std::stringstream &Logger::debug(const std::string &msg)
 {
     auto &buf = this->raw();
-    buf << BRACKETS(36, "DEBUG") << BRACKETS(36, msg);
-    return buf;
+    buf.level = Logger::Level::Debug;
+    buf.stream << BRACKETS(35, "DEBUG") << BRACKETS(35, msg);
+    return buf.stream;
 }
 
 std::stringstream &Logger::msg(const std::string &msg)
 {
     auto &buf = this->raw();
-    buf << BRACKETS(0, msg);
-    return buf;
+    buf.level = Logger::Level::Message;
+    buf.stream << BRACKETS(0, msg);
+    return buf.stream;
 }
 
-std::stringstream &Logger::raw()
+Logger::MessageBuffer &Logger::raw()
 {
     if (!mBuffers.contains(std::this_thread::get_id())) {
         std::unique_lock<std::mutex> lBuffers(mutBuffer);
-        mBuffers.insert({std::this_thread::get_id(), std::stringstream()});
+        mBuffers[std::this_thread::get_id()] = {
+            .level = Logger::Level::Message,
+            .stream = std::stringstream(),
+        };
     }
     return mBuffers.at(std::this_thread::get_id());
 }
+
+#undef COLOR_CODE
+#undef BRACKETS

@@ -14,11 +14,27 @@
 class Logger
 {
 public:
+    enum class Level : uint8_t { Debug = 0, Info = 1, Warn = 2, Error = 4, Message = 5 };
+
+    struct MessageBuffer {
+        Level level = Level::Message;
+        std::stringstream stream{};
+    };
+
+    struct Message {
+        Level level = Level::Message;
+        std::optional<std::string> message{};
+    };
+
+public:
     Logger(std::ostream &stream);
     ~Logger();
-    void start();
+    void start(Level level = Level::Debug);
     void stop(bool bFlush = true);
     void flush();
+
+    Level getLevel() const;
+    void setLevel(Level level);
 
     template <class... Args>
     [[nodiscard]] ProgressBar &newProgressBar(Args &&...args)
@@ -40,12 +56,12 @@ public:
     }
 
     void endl();
-    std::stringstream &warn(const std::string &msg = "WARNING");
-    std::stringstream &err(const std::string &msg = "ERROR");
-    std::stringstream &info(const std::string &msg = "INFO");
-    std::stringstream &debug(const std::string &msg = "DEBUG");
-    std::stringstream &msg(const std::string &msg = "MESSAGE");
-    std::stringstream &raw();
+    [[nodiscard]] std::stringstream &warn(const std::string &msg = "WARNING");
+    [[nodiscard]] std::stringstream &err(const std::string &msg = "ERROR");
+    [[nodiscard]] std::stringstream &info(const std::string &msg = "INFO");
+    [[nodiscard]] std::stringstream &debug(const std::string &msg = "DEBUG");
+    [[nodiscard]] std::stringstream &msg(const std::string &msg = "MESSAGE");
+    [[nodiscard]] Logger::MessageBuffer &raw();
 
 private:
     void thread_loop();
@@ -55,8 +71,9 @@ private:
     std::mutex mutBuffer;
     std::atomic_bool bExit = false;
     std::jthread msgT;
-    ThreadedQ<std::string> qMsg;
-    std::unordered_map<std::thread::id, std::stringstream> mBuffers;
+    std::atomic<Level> selectedLevel = Level::Debug;
+    ThreadedQ<Message> qMsg;
+    std::unordered_map<std::thread::id, MessageBuffer> mBuffers;
 
     // Progress Bars
     ThreadedQ<ProgressBar> qBars;
