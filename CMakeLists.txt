@@ -4,12 +4,14 @@ project(logger)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(Threads REQUIRED)
+
 option(BUILD_EXAMPLE "Build example application" OFF)
 
-if (BUILD_EXAMPLE) 
+if (BUILD_EXAMPLE)
     add_subdirectory(example/)
 endif()
 
 add_library(${PROJECT_NAME} source/Logger.cpp source/ProgressBar.cpp)
-target_link_libraries(${PROJECT_NAME} PUBLIC pthread)
+target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
