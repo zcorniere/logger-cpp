@@ -14,16 +14,16 @@ public:
 
     void update(std::ostream &out) const;
 
-    constexpr uint64_t getMaximum() const { return uMax; }
-    constexpr void setMaximum(uint64_t value) { uMax = value; }
+    inline uint64_t getMaximum() const { return uMax; }
+    inline void setMaximum(uint64_t value) { uMax = value; }
 
-    constexpr uint64_t getProgress() const { return uProgress; }
-    constexpr void setProgress(uint64_t value) { uProgress = value; }
+    inline uint64_t getProgress() const { return uProgress; }
+    inline void setProgress(uint64_t value) { uProgress = value; }
 
-    constexpr const std::string &getMessage() const { return message; }
-    constexpr void setMessage(const std::string &msg) { message = msg; }
+    inline const std::string &getMessage() const { return message; }
+    inline void setMessage(const std::string &msg) { message = msg; }
 
-    constexpr bool isComplete() const { return uProgress == uMax; }
+    inline bool isComplete() const { return uProgress == uMax; }
 
     inline operator bool() { return this->isComplete(); }
     ProgressBar &operator++();
