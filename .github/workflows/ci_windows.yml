@@ -7,8 +7,9 @@ jobs:
     runs-on: ${{matrix.os}}
     
     strategy:
+      fail-fast: false
       matrix:
-        os: [windows-latest, windows-2016]
+        os: [windows-latest]
         architecture: [Win32, x64]
         build_type: [Debug, Release]
     steps:

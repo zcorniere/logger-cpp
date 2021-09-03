@@ -2,6 +2,8 @@
 #include <Logger.hpp>
 #include <iostream>
 
+#include "logger_example.hpp"
+
 Logger *logger = nullptr;
 
 int main(void)

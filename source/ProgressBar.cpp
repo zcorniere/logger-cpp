@@ -49,7 +49,7 @@ void ProgressBar::update(std::ostream &out) const
 
 ProgressBar &ProgressBar::operator=(const ProgressBar &other)
 {
-    *this = ProgressBar(other);
+    *this = other;
     return *this;
 }
 

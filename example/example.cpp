@@ -2,6 +2,8 @@
 #include <Logger.hpp>
 #include <iostream>
 
+#include "logger_example.hpp"
+
 Logger logger(std::cout);
 
 int main(void)
