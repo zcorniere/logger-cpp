@@ -1,7 +1,6 @@
 #define LOGGER_EXTERN_DECLARATION_PTR
 #include <Logger.hpp>
 #include <iostream>
-#include <unistd.h>
 
 Logger *logger = nullptr;
 

@@ -1,7 +1,6 @@
 #define LOGGER_EXTERN_DECLARATION
 #include <Logger.hpp>
 #include <iostream>
-#include <unistd.h>
 
 Logger logger(std::cout);
 
