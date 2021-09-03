@@ -1,6 +1,8 @@
 #include <Logger.hpp>
 #include <iostream>
 
+#include "logger_example.hpp"
+
 int main(void)
 {
     const auto total = 5;
