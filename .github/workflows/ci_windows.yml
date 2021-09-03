@@ -1,0 +1,23 @@
+name: CI Windows
+
+on: push
+
+jobs:
+  build:
+    runs-on: ${{matrix.os}}
+    
+    strategy:
+      matrix:
+        os: [windows-latest, windows-2016]
+        architecture: [Win32, x64]
+        build_type: [Debug, Release]
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build
+            -A ${{matrix.architecture}}
+            -DBUILD_EXAMPLE=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
