@@ -6,7 +6,14 @@
 #include <optional>
 #include <utility>
 
-#define COLOR_CODE(COLOR) "\e[" #COLOR "m"
+#if defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64
+#define ESCAPE_SEQUENCE "`e"
+#else
+#define ESCAPE_SEQUENCE "\e"
+#endif
+
+#define COLOR_CODE(COLOR) ESCAPE_SEQUENCE "[" #COLOR "m"
+
 #define BRACKETS(COLOR, STRING) "[" COLOR_CODE(COLOR) << STRING << COLOR_CODE(0) "] "
 
 Logger::Logger(std::ostream &stream): stream(stream), qBars(0) {}
@@ -23,7 +30,7 @@ void Logger::thread_loop()
                 qMsg.waitTimeout<100>();
                 // come up some line and clear them to display the messages (see man console_codes)
                 std::unique_lock<std::mutex> ul(mutBars);
-                stream << "\e[" << qBars.size() - iNewBars << "F\e[J";
+                stream << ESCAPE_SEQUENCE "[" << qBars.size() - iNewBars << "F" ESCAPE_SEQUENCE "[J";
                 iNewBars = 0;
             }
 
@@ -36,7 +43,7 @@ void Logger::thread_loop()
                 if (msg->message) {
                     // If there is a message, print it
                     if (msg->level >= selectedLevel.load())
-                        stream << "\33[2K" << *(msg->message) << "\e[0m" << std::endl;
+                        stream << ESCAPE_SEQUENCE "[2K" << *(msg->message) << ESCAPE_SEQUENCE "[0m" << std::endl;
                 } else {
                     // If not, set the level
                     selectedLevel = msg->level;
@@ -155,3 +162,4 @@ Logger::MessageBuffer &Logger::raw()
 
 #undef COLOR_CODE
 #undef BRACKETS
+#undef ESCAPE_SEQUENCE
