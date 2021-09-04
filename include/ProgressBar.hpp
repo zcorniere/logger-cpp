@@ -14,18 +14,22 @@ public:
 
     void update(std::ostream &out) const;
 
-    inline uint64_t getMaximum() const { return uMax; }
+    [[nodiscard]] inline uint64_t getMaximum() const { return uMax; }
     inline void setMaximum(uint64_t value) { uMax = value; }
 
-    inline uint64_t getProgress() const { return uProgress; }
+    [[nodiscard]] inline uint64_t getProgress() const { return uProgress; }
     inline void setProgress(uint64_t value) { uProgress = value; }
 
-    inline const std::string &getMessage() const { return message; }
+    [[nodiscard]] inline bool isShowingTime() const { return bShowTime; }
+    inline void setShowTime(bool b) { bShowTime = b; }
+
+    [[nodiscard]] inline const std::string &getMessage() const { return message; }
     inline void setMessage(const std::string &msg) { message = msg; }
 
-    inline bool isComplete() const { return uProgress == uMax; }
+    [[nodiscard]] inline bool isComplete() const { return uProgress == uMax; }
 
     inline operator bool() { return this->isComplete(); }
+
     ProgressBar &operator++();
     ProgressBar &operator--();
 
@@ -40,6 +44,6 @@ private:
     std::string message;
     std::atomic<uint64_t> uMax = 100;
     std::atomic<uint64_t> uProgress = 0;
-    bool bShowTime = false;
+    std::atomic<bool> bShowTime = false;
     std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
 };

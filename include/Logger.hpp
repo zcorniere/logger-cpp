@@ -11,6 +11,12 @@
 #include "ProgressBar.hpp"
 #include "ThreadedQ.hpp"
 
+template <typename... Args>
+concept isProgressBar = requires
+{
+    std::is_constructible_v<ProgressBar, Args...>;
+};
+
 class Logger
 {
 public:
@@ -36,8 +42,8 @@ public:
     Level getLevel() const;
     void setLevel(Level level);
 
-    template <class... Args>
-    [[nodiscard]] ProgressBar &newProgressBar(Args &&...args)
+    template <isProgressBar... Args>
+    [[nodiscard]] ProgressBar &newProgressBar(Args... args)
     {
         std::unique_lock<std::mutex> lBuffers(mutBars);
         qBars.emplace_back(args...);

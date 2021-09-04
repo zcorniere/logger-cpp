@@ -10,7 +10,8 @@ ProgressBar::ProgressBar(std::string _message, uint64_t max, bool show_time_)
 {
 }
 
-ProgressBar::ProgressBar(const ProgressBar &other): ProgressBar(other.getMessage(), other.getMaximum())
+ProgressBar::ProgressBar(const ProgressBar &other)
+    : ProgressBar(other.getMessage(), other.getMaximum(), other.isShowingTime())
 {
     uProgress = other.getProgress();
 }
