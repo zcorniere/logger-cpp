@@ -9,7 +9,7 @@
 class ProgressBar
 {
 public:
-    ProgressBar(std::string _message = "", uint64_t max = 100, bool show_time_ = true);
+    ProgressBar(std::string _message = "", uint64_t max = 100, bool show_time_ = false);
     ProgressBar(const ProgressBar &other);
 
     void update(std::ostream &out) const;

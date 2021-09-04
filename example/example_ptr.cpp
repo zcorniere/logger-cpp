@@ -19,7 +19,7 @@ int main(void)
     LOGGER_ENDL;    // same as logger->endl();
 
     {
-        auto &bar = logger->newProgressBar("Bar", total);
+        auto &bar = logger->newProgressBar("Bar", total, true);
         for (unsigned i = 0; i < total; i++) {
             ++bar;
             usleep(712345);
