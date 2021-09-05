@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <ratio>
 
+#define ESCAPE_SEQUENCE "\u001b"
+
 ProgressBar::ProgressBar(std::string _message, uint64_t max, bool show_time_)
     : uMax(max), message(_message), bShowTime(show_time_)
 {
@@ -18,7 +20,7 @@ ProgressBar::ProgressBar(const ProgressBar &other): ProgressBar(other.getMessage
 void ProgressBar::update(std::ostream &out) const
 {
     uint64_t uWidth = 40;
-    out << "\33[2K\033[1m" << message << "\033[0m\t[";
+    out << ESCAPE_SEQUENCE "[2K\033[1m" << message << ESCAPE_SEQUENCE "[0m\t[";
     uint64_t fills = (int64_t)((float)uProgress / uMax * uWidth);
     for (uint64_t i = 0; i < uWidth; i++) {
         if (i < fills) {
