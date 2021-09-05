@@ -31,7 +31,8 @@ public:
 
     ProgressBar &operator=(const ProgressBar &);
 
-    auto operator<=>(const ProgressBar &) const = default;
+    std::strong_ordering operator<=>(const ProgressBar &) const = default;
+    bool operator==(const ProgressBar &) const = default;
 
 private:
     void writeTime(std::ostream &out, const std::chrono::duration<float> &dur) const;
