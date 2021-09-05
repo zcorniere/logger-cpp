@@ -6,11 +6,7 @@
 #include <optional>
 #include <utility>
 
-#if defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64
-#define ESCAPE_SEQUENCE "`e"
-#else
-#define ESCAPE_SEQUENCE "\e"
-#endif
+#define ESCAPE_SEQUENCE "\u001b"
 
 #define COLOR_CODE(COLOR) ESCAPE_SEQUENCE "[" #COLOR "m"
 
