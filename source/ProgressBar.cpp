@@ -61,6 +61,7 @@ ProgressBar &ProgressBar::operator++()
     if (!this->isComplete()) uProgress++;
     return *this;
 }
+
 ProgressBar &ProgressBar::operator--()
 {
     uProgress--;

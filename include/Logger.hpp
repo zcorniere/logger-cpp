@@ -56,8 +56,8 @@ public:
     void deleteProgressBar(const deletedBars &...bar)
     {
         std::unique_lock<std::mutex> lBuffers(mutBars);
-        auto e = std::remove_if(qBars.begin(), qBars.end(), [&](const auto &i) { return (((i == bar) || ...)); });
-        iNewBars -= std::distance(e, qBars.end());
+        const auto e = std::remove_if(qBars.begin(), qBars.end(), [&](const auto &i) { return ((i == bar) || ...); });
+        iNewBars -= static_cast<int16_t>(std::distance(e, qBars.end()));
         qBars.erase(e, qBars.end());
     }
 
