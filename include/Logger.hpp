@@ -11,17 +11,12 @@
 #include "ProgressBar.hpp"
 #include "ThreadedQ.hpp"
 
-template <typename... Args>
-concept isProgressBar = requires
-{
-    std::is_constructible_v<ProgressBar, Args...>;
-};
-
 class Logger
 {
 public:
     enum class Level : uint8_t { Debug = 0, Info = 1, Warn = 2, Error = 4, Message = 5 };
 
+private:
     struct MessageBuffer {
         Level level = Level::Message;
         std::stringstream stream{};
@@ -39,10 +34,11 @@ public:
     void stop(bool bFlush = true);
     void flush();
 
-    Level getLevel() const;
+    Level getLevel() const noexcept { return selectedLevel; };
     void setLevel(Level level);
 
-    template <isProgressBar... Args>
+    template <typename... Args>
+    requires std::is_constructible_v<ProgressBar, Args...>
     [[nodiscard]] ProgressBar &newProgressBar(Args... args)
     {
         std::unique_lock<std::mutex> lBuffers(mutBars);

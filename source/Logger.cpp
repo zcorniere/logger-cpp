@@ -82,7 +82,6 @@ void Logger::flush()
     }
 }
 
-Logger::Level Logger::getLevel() const { return selectedLevel; }
 void Logger::setLevel(Level level)
 {
     qMsg.push_back({

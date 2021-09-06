@@ -72,6 +72,7 @@ public:
     }
 
     template <typename... Args>
+    requires std::is_constructible_v<T, Args...>
     inline void emplace_back(Args... args)
     {
         auto t = T(args...);
@@ -79,6 +80,7 @@ public:
     }
 
     template <typename... Args>
+    requires std::is_constructible_v<T, Args...>
     inline void emplace_fron(Args... args)
     {
         auto t = T(args...);
