@@ -8,18 +8,14 @@
 #define ESCAPE_SEQUENCE "\u001b"
 
 ProgressBar::ProgressBar(std::string _message, uint64_t max, bool show_time_)
-    : uMax(max), message(_message), bShowTime(show_time_)
+    : data(std::make_shared<ProgressBar::Data>(_message, max, 0, show_time_))
 {
-}
-
-ProgressBar::ProgressBar(const ProgressBar &other)
-    : ProgressBar(other.getMessage(), other.getMaximum(), other.isShowingTime())
-{
-    uProgress = other.getProgress();
 }
 
 void ProgressBar::update(std::ostream &out) const
 {
+    const auto &[message, uMax, uProgress, bShowTime, start_time] = *data;
+
     uint64_t uWidth = 40;
     out << ESCAPE_SEQUENCE "[2K" ESCAPE_SEQUENCE "[1m" << message << ESCAPE_SEQUENCE "[0m\t[";
     uint64_t fills = (int64_t)((float)uProgress / uMax * uWidth);
@@ -50,21 +46,21 @@ void ProgressBar::update(std::ostream &out) const
     out << std::endl;
 }
 
-ProgressBar &ProgressBar::operator=(const ProgressBar &other)
+ProgressBar &ProgressBar::operator=(const ProgressBar &other) noexcept
 {
     *this = other;
     return *this;
 }
 
-ProgressBar &ProgressBar::operator++()
+ProgressBar &ProgressBar::operator++() noexcept
 {
-    if (!this->isComplete()) uProgress++;
+    if (!this->isComplete()) data->uProgress++;
     return *this;
 }
 
-ProgressBar &ProgressBar::operator--()
+ProgressBar &ProgressBar::operator--() noexcept
 {
-    uProgress--;
+    data->uProgress--;
     return *this;
 }
 

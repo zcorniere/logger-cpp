@@ -2,49 +2,56 @@
 
 #include <atomic>
 #include <chrono>
+#include <memory>
 #include <ostream>
 #include <stdint.h>
 #include <string>
 
 class ProgressBar
 {
+protected:
+    struct Data {
+        std::string message;
+        std::atomic<uint64_t> uMax = 100;
+        std::atomic<uint64_t> uProgress = 0;
+        std::atomic<bool> bShowTime = false;
+        std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+    };
+
 public:
     ProgressBar(std::string _message = "", uint64_t max = 100, bool show_time_ = false);
-    ProgressBar(const ProgressBar &other);
+    ProgressBar(const ProgressBar &other) = default;
+    ~ProgressBar() = default;
 
     void update(std::ostream &out) const;
 
-    [[nodiscard]] inline uint64_t getMaximum() const { return uMax; }
-    inline void setMaximum(uint64_t value) { uMax = value; }
+    [[nodiscard]] inline uint64_t getMaximum() const noexcept { return data->uMax; }
+    inline void setMaximum(uint64_t value) noexcept { data->uMax = value; }
 
-    [[nodiscard]] inline uint64_t getProgress() const { return uProgress; }
-    inline void setProgress(uint64_t value) { uProgress = value; }
+    [[nodiscard]] inline uint64_t getProgress() const noexcept { return data->uProgress; }
+    inline void setProgress(uint64_t value) noexcept { data->uProgress = value; }
 
-    [[nodiscard]] inline bool isShowingTime() const { return bShowTime; }
-    inline void setShowTime(bool b) { bShowTime = b; }
+    [[nodiscard]] inline bool isShowingTime() const noexcept { return data->bShowTime; }
+    inline void setShowTime(bool b) noexcept { data->bShowTime = b; }
 
-    [[nodiscard]] inline const std::string &getMessage() const { return message; }
-    inline void setMessage(const std::string &msg) { message = msg; }
+    [[nodiscard]] inline const std::string &getMessage() const noexcept { return data->message; }
+    inline void setMessage(const std::string &msg) noexcept { data->message = msg; }
 
-    [[nodiscard]] inline bool isComplete() const { return uProgress == uMax; }
+    [[nodiscard]] inline bool isComplete() const noexcept { return data->uProgress == data->uMax; }
 
-    inline operator bool() { return this->isComplete(); }
+    inline operator bool() noexcept { return this->isComplete(); }
 
-    ProgressBar &operator++();
-    ProgressBar &operator--();
+    ProgressBar &operator++() noexcept;
+    ProgressBar &operator--() noexcept;
 
-    ProgressBar &operator=(const ProgressBar &);
+    ProgressBar &operator=(const ProgressBar &) noexcept;
 
-    std::strong_ordering operator<=>(const ProgressBar &) const = default;
-    bool operator==(const ProgressBar &) const = default;
+    std::strong_ordering operator<=>(const ProgressBar &) const noexcept = default;
+    bool operator==(const ProgressBar &) const noexcept = default;
 
 private:
     void writeTime(std::ostream &out, const std::chrono::duration<float> &dur) const;
 
 private:
-    std::string message;
-    std::atomic<uint64_t> uMax = 100;
-    std::atomic<uint64_t> uProgress = 0;
-    std::atomic<bool> bShowTime = false;
-    std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+    std::shared_ptr<ProgressBar::Data> data;
 };
