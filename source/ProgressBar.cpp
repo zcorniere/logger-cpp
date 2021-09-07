@@ -8,7 +8,11 @@
 #define ESCAPE_SEQUENCE "\u001b"
 
 ProgressBar::ProgressBar(std::string _message, uint64_t max, bool show_time_)
-    : data(std::make_shared<ProgressBar::Data>(_message, max, 0, show_time_))
+    : data(new Data{
+          .message = _message,
+          .uMax = max,
+          .bShowTime = show_time_,
+      })
 {
 }
 

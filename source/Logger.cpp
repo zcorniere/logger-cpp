@@ -12,7 +12,7 @@
 
 #define BRACKETS(COLOR, STRING) "[" COLOR_CODE(COLOR) << STRING << COLOR_CODE(0) "] "
 
-Logger::Logger(std::ostream &stream): stream(stream), qBars(0) {}
+Logger::Logger(std::ostream &stream): stream(stream) {}
 
 Logger::~Logger() { this->stop(); }
 
