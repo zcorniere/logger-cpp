@@ -50,12 +50,6 @@ void ProgressBar::update(std::ostream &out) const
     out << std::endl;
 }
 
-ProgressBar &ProgressBar::operator=(const ProgressBar &other) noexcept
-{
-    *this = other;
-    return *this;
-}
-
 ProgressBar &ProgressBar::operator++() noexcept
 {
     if (!this->isComplete()) data->uProgress++;

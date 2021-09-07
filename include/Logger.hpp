@@ -24,7 +24,7 @@ private:
 
     struct Message {
         Level level = Level::Message;
-        std::optional<std::string> message{};
+        std::optional<std::string> message = std::nullopt;
     };
 
 public:
@@ -41,20 +41,16 @@ public:
     requires std::is_constructible_v<ProgressBar, Args...>
     [[nodiscard]] ProgressBar &newProgressBar(Args... args)
     {
-        std::unique_lock<std::mutex> lBuffers(mutBars);
-        qBars.emplace_back(args...);
-        iNewBars += 1;
-        qMsg.notify();
-        return qBars.back();
+        qBars.emplace_back(std::make_pair(ProgressBar::New, ProgressBar(args...)));
+        return qBars.back().second;
     }
 
     template <class... deletedBars>
     void deleteProgressBar(const deletedBars &...bar)
     {
-        std::unique_lock<std::mutex> lBuffers(mutBars);
-        const auto e = std::remove_if(qBars.begin(), qBars.end(), [&](const auto &i) { return ((i == bar) || ...); });
-        iNewBars -= static_cast<int16_t>(std::distance(e, qBars.end()));
-        qBars.erase(e, qBars.end());
+        for (auto &[e, i]: qBars) {
+            if (((i == bar) || ...)) { e = ProgressBar::Delete; }
+        }
     }
 
     void endl();
@@ -78,8 +74,7 @@ private:
     std::unordered_map<std::thread::id, MessageBuffer> mBuffers;
 
     // Progress Bars
-    ThreadedQ<ProgressBar> qBars;
-    std::mutex mutBars;
+    ThreadedQ<std::pair<ProgressBar::Status, ProgressBar>> qBars;
     std::atomic<int16_t> iNewBars = 0;
 };
 

@@ -9,6 +9,13 @@
 
 class ProgressBar
 {
+public:
+    enum Status {
+        New,
+        Ok,
+        Delete,
+    };
+
 protected:
     struct Data {
         std::string message;
@@ -20,7 +27,6 @@ protected:
 
 public:
     ProgressBar(std::string _message = "", uint64_t max = 100, bool show_time_ = false);
-    ProgressBar(const ProgressBar &other) = default;
     ~ProgressBar() = default;
 
     void update(std::ostream &out) const;
@@ -43,8 +49,6 @@ public:
 
     ProgressBar &operator++() noexcept;
     ProgressBar &operator--() noexcept;
-
-    ProgressBar &operator=(const ProgressBar &) noexcept;
 
     std::strong_ordering operator<=>(const ProgressBar &) const noexcept = default;
     bool operator==(const ProgressBar &) const noexcept = default;

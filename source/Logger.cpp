@@ -3,6 +3,7 @@
 #include <deque>
 #include <exception>
 #include <iostream>
+#include <numeric>
 #include <optional>
 #include <utility>
 
@@ -20,15 +21,19 @@ void Logger::thread_loop()
 {
     while (!bExit) {
         try {
-            if (qBars.empty())
-                qMsg.wait();
-            else {
-                qMsg.waitTimeout<100>();
+            qMsg.waitTimeout<100>();
+
+            int16_t barsModifier = 0;
+            std::for_each(qBars.begin(), qBars.end(), [&](const auto &i) {
+                switch (i.first) {
+                    case ProgressBar::New: break;
+                    case ProgressBar::Ok:
+                    case ProgressBar::Delete: barsModifier += 1; break;
+                }
+            });
+            if (barsModifier)
                 // come up some line and clear them to display the messages (see man console_codes)
-                std::unique_lock<std::mutex> ul(mutBars);
-                stream << ESCAPE_SEQUENCE "[" << qBars.size() - iNewBars << "F" ESCAPE_SEQUENCE "[J";
-                iNewBars = 0;
-            }
+                stream << ESCAPE_SEQUENCE "[" << barsModifier << "F" ESCAPE_SEQUENCE "[J";
 
             // Flush the messages queue
             while (!qMsg.empty()) {
@@ -46,8 +51,15 @@ void Logger::thread_loop()
                 }
             }
 
+            const auto e = std::remove_if(qBars.begin(), qBars.end(),
+                                          [](const auto &i) { return i.first == ProgressBar::Delete; });
+            qBars.erase(e, qBars.end());
+
             // redraw the progress bars
-            for (const auto &bar: qBars) bar.update(stream);
+            for (auto &[e, bar]: qBars) {
+                if (e == ProgressBar::New) e = ProgressBar::Ok;
+                bar.update(stream);
+            }
 
             stream.flush();
         } catch (const std::exception &e) {
