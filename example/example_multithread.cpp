@@ -9,7 +9,7 @@ Logger logger(std::cout);
 
 int main(void)
 {
-    const auto total = 5;
+    const unsigned total = 5;
 
     logger.start();
 
@@ -19,7 +19,7 @@ int main(void)
     LOGGER_WARN << "This is a warning, that will print the current position";
     LOGGER_ENDL;    // same as logger.endl();
 
-    std::jthread([&] {
+    auto thread1 = std::jthread([&] {
         logger.info("Thread 1") << "Started";
         LOGGER_ENDL;
 
@@ -36,7 +36,7 @@ int main(void)
     });
 
     auto &bar2 = logger.newProgressBar("Bar2", total * 3);
-    std::jthread([&] {
+    auto thread2 = std::jthread([&] {
         logger.info("Thread 2") << "Started";
         LOGGER_ENDL;
 

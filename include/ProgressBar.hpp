@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <compare>
 #include <memory>
 #include <ostream>
 #include <stdint.h>

@@ -3,21 +3,63 @@
 #include <atomic>
 #include <condition_variable>
 #include <deque>
+#include <functional>
 #include <mutex>
 #include <optional>
 
-template <typename T>
-class ThreadedQ
+template <class T, class A = std::allocator<T>>
+class ThreadSafeStorage
 {
+    using size_t = typename A::size_type;
+
+    class iterator
+    {
+    public:
+        using iterator_category = std::input_iterator_tag;
+        using value_type = T;
+        using difference_type = size_t;
+        using pointer = T *;
+        using reference = T &;
+
+    public:
+        iterator(ThreadSafeStorage &s, const size_t start = 0): to(s.size()), from(0), s(s), index(start){};
+
+        constexpr std::strong_ordering operator<=>(const iterator &) const noexcept = default;
+        constexpr auto operator==(const iterator &other) const noexcept { return index == other.index; };
+        constexpr auto operator!=(const iterator &other) const noexcept { return index != other.index; };
+        constexpr iterator &operator++() noexcept
+        {
+            index++;
+            return *this;
+        }
+        constexpr iterator operator++(int) noexcept
+        {
+            iterator tmp = *tmp;
+            ++(*this);
+            return tmp;
+        }
+
+        constexpr T &operator*() const { return s.at(index); }
+        constexpr T *operator->() const { return s.at(index); }
+
+    private:
+        const size_t to;
+        const size_t from;
+        size_t index;
+        ThreadSafeStorage &s;
+    };
+    // Disable because of defect P2325R3
+    // static_assert(std::input_iterator<typename ThreadSafeStorage<T>::iterator>);
+
 public:
-    ThreadedQ() = default;
-    ThreadedQ(const size_t size): q(size) {}
+    ThreadSafeStorage() = default;
+    ThreadSafeStorage(const size_t size): q(size) {}
 
-    ThreadedQ(const ThreadedQ<T> &) = delete;
-    ThreadedQ(const ThreadedQ<T> &&) = delete;
-    ThreadedQ &operator=(const ThreadedQ &) = delete;
+    ThreadSafeStorage(const ThreadSafeStorage<T> &) = delete;
+    ThreadSafeStorage(const ThreadSafeStorage<T> &&) = delete;
+    ThreadSafeStorage &operator=(const ThreadSafeStorage &) = delete;
 
-    virtual ~ThreadedQ() { this->clear(); }
+    virtual ~ThreadSafeStorage() { this->clear(); }
 
     inline bool empty() const
     {
@@ -25,17 +67,9 @@ public:
         return q.empty();
     }
 
-    inline auto begin()
-    {
-        std::scoped_lock lock(q_mut);
-        return q.begin();
-    }
+    inline auto begin() { return iterator(*this, 0); }
 
-    inline auto end()
-    {
-        std::scoped_lock lock(q_mut);
-        return q.end();
-    }
+    inline auto end() { return iterator(*this, this->size()); }
 
     inline auto size() const
     {
@@ -43,10 +77,11 @@ public:
         return q.size();
     }
 
-    inline auto erase(auto i, auto e = {})
+    void erase(std::function<bool(const T &i)> &&t)
     {
         std::scoped_lock lock(q_mut);
-        q.erase(i, e);
+        auto e = std::remove_if(q.begin(), q.end(), t);
+        q.erase(e, q.end());
     }
 
     inline void clear()
@@ -54,7 +89,20 @@ public:
         std::scoped_lock lock(q_mut);
         q.clear();
     }
-    inline std::optional<T> pop_front()
+
+    inline const T &at(const size_t &index) const
+    {
+        std::scoped_lock lock(q_mut);
+        return q.at(index);
+    }
+
+    inline T &at(const size_t &index)
+    {
+        std::scoped_lock lock(q_mut);
+        return q.at(index);
+    }
+
+    std::optional<T> pop_front()
     {
         std::scoped_lock lock(q_mut);
         if (q.size() == 0) return std::nullopt;
@@ -62,7 +110,7 @@ public:
         q.pop_front();
         return t;
     }
-    inline std::optional<T> pop_back()
+    std::optional<T> pop_back()
     {
         std::scoped_lock lock(q_mut);
         if (q.size() == 0) return std::nullopt;
@@ -149,7 +197,7 @@ public:
 
 private:
     mutable std::mutex q_mut;
-    std::deque<T> q;
+    std::deque<T, A> q;
 
     std::atomic_bool bWait = true;
     std::mutex mutBlocking;

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <numeric>
 #include <optional>
+#include <stdexcept>
 #include <utility>
 
 #define ESCAPE_SEQUENCE "\u001b"
@@ -23,14 +24,13 @@ void Logger::thread_loop()
         try {
             qMsg.waitTimeout<100>();
 
-            int16_t barsModifier = 0;
-            std::for_each(qBars.begin(), qBars.end(), [&](const auto &i) {
-                switch (i.first) {
-                    case ProgressBar::New: break;
-                    case ProgressBar::Ok:
-                    case ProgressBar::Delete: barsModifier += 1; break;
-                }
+            int barsModifier = std::accumulate(qBars.begin(), qBars.end(), 0, [](const int prev, const auto &ser) {
+                if (ser.first == ProgressBar::Ok || ser.first == ProgressBar::Delete)
+                    return prev + 1;
+                else
+                    return prev;
             });
+
             if (barsModifier)
                 // come up some line and clear them to display the messages (see man console_codes)
                 stream << ESCAPE_SEQUENCE "[" << barsModifier << "F" ESCAPE_SEQUENCE "[J";
@@ -51,16 +51,13 @@ void Logger::thread_loop()
                 }
             }
 
-            const auto e = std::remove_if(qBars.begin(), qBars.end(),
-                                          [](const auto &i) { return i.first == ProgressBar::Delete; });
-            qBars.erase(e, qBars.end());
+            qBars.erase([](const auto &i) { return i.first == ProgressBar::Delete; });
 
             // redraw the progress bars
             for (auto &[e, bar]: qBars) {
                 if (e == ProgressBar::New) e = ProgressBar::Ok;
                 bar.update(stream);
             }
-
             stream.flush();
         } catch (const std::exception &e) {
             std::cerr << "LOGGER ERROR:" << e.what() << std::endl;

@@ -22,7 +22,7 @@ void ProgressBar::update(std::ostream &out) const
 
     uint64_t uWidth = 40;
     out << ESCAPE_SEQUENCE "[2K" ESCAPE_SEQUENCE "[1m" << message << ESCAPE_SEQUENCE "[0m\t[";
-    uint64_t fills = (int64_t)((float)uProgress / uMax * uWidth);
+    uint64_t fills = static_cast<uint64_t>(static_cast<float>(uProgress) / uMax * uWidth);
     for (uint64_t i = 0; i < uWidth; i++) {
         if (i < fills) {
             out << '=';

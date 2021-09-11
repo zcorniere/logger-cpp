@@ -1,15 +1,17 @@
 #pragma once
 
 #include <atomic>
-#include <iterator>
 #include <mutex>
+#include <optional>
 #include <sstream>
+#include <stdint.h>
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <utility>
 
 #include "ProgressBar.hpp"
-#include "ThreadedQ.hpp"
+#include "ThreadSafeStorage.hpp"
 
 class Logger
 {
@@ -34,7 +36,7 @@ public:
     void stop(bool bFlush = true);
     void flush();
 
-    Level getLevel() const noexcept { return selectedLevel; };
+    inline Level getLevel() const noexcept { return selectedLevel; };
     void setLevel(Level level);
 
     template <typename... Args>
@@ -70,11 +72,11 @@ private:
     std::atomic_bool bExit = false;
     std::jthread msgT;
     std::atomic<Level> selectedLevel = Level::Debug;
-    ThreadedQ<Message> qMsg;
+    ThreadSafeStorage<Message> qMsg;
     std::unordered_map<std::thread::id, MessageBuffer> mBuffers;
 
     // Progress Bars
-    ThreadedQ<std::pair<ProgressBar::Status, ProgressBar>> qBars;
+    ThreadSafeStorage<std::pair<ProgressBar::Status, ProgressBar>> qBars;
     std::atomic<int16_t> iNewBars = 0;
 };
 
