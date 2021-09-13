@@ -20,7 +20,7 @@ Logger::~Logger() { this->stop(); }
 
 void Logger::thread_loop()
 {
-    while (!bExit) {
+    while (!bExit || !qMsg.empty()) {
         try {
             qMsg.waitTimeout<100>();
 
