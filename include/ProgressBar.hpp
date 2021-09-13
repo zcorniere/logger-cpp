@@ -44,7 +44,7 @@ public:
     [[nodiscard]] inline const std::string &getMessage() const noexcept { return data->message; }
     inline void setMessage(const std::string &msg) noexcept { data->message = msg; }
 
-    [[nodiscard]] inline bool isComplete() const noexcept { return data->uProgress == data->uMax; }
+    [[nodiscard]] inline bool isComplete() const noexcept { return data->uProgress >= data->uMax; }
 
     inline operator bool() noexcept { return this->isComplete(); }
 
