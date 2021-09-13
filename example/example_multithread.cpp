@@ -23,7 +23,7 @@ int main(void)
         logger.info("Thread 1") << "Started";
         LOGGER_ENDL;
 
-        auto &bar = logger.newProgressBar("Bar", total, true);
+        auto bar = logger.newProgressBar("Thread 1 Bar", total, true);
         for (unsigned i = 0; i < total; i++) {
             ++bar;
             usleep(712345);
@@ -35,13 +35,13 @@ int main(void)
         LOGGER_ENDL;
     });
 
-    auto &bar2 = logger.newProgressBar("Bar2", total * 3);
+    auto bar2 = logger.newProgressBar("Shared Bar", total * 3);
     auto thread2 = std::jthread([&] {
         logger.info("Thread 2") << "Started";
         LOGGER_ENDL;
 
         bool bRewind = false;
-        auto &bar3 = logger.newProgressBar("Bar3", total + 3);
+        auto bar3 = logger.newProgressBar("Thread 2 Bar", total + 3);
         while (!bar3.isComplete()) {
             ++bar2;
             ++bar3;
@@ -57,7 +57,7 @@ int main(void)
         logger.info("Thread 2") << "Ended";
         LOGGER_ENDL;
     });
-    for (unsigned i = 0; i < total; i++) {
+    while (!bar2.isComplete()) {
         ++bar2;
         usleep(712345);
     }

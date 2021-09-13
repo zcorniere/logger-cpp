@@ -41,7 +41,7 @@ public:
 
     template <typename... Args>
     requires std::is_constructible_v<ProgressBar, Args...>
-    [[nodiscard]] ProgressBar &newProgressBar(Args... args)
+    [[nodiscard]] ProgressBar newProgressBar(Args... args)
     {
         qBars.emplace_back(std::make_pair(ProgressBar::New, ProgressBar(args...)));
         return qBars.back().second;

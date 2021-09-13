@@ -14,7 +14,7 @@ int main(void)
     logger.endl();
 
     {
-        auto &bar = logger.newProgressBar("Bar", total, true);
+        auto bar = logger.newProgressBar("Bar", total, true);
         for (unsigned i = 0; i < total; i++) {
             ++bar;
             usleep(712345);
@@ -26,8 +26,8 @@ int main(void)
 
     {
         bool bRewind = false;
-        auto &bar2 = logger.newProgressBar("Bar2", total);
-        auto &bar3 = logger.newProgressBar("Bar3", total + 3);
+        auto bar2 = logger.newProgressBar("Bar2", total);
+        auto bar3 = logger.newProgressBar("Bar3", total + 3);
         while (!bar2.isComplete() || !bar3.isComplete()) {
             ++bar2;
             ++bar3;
