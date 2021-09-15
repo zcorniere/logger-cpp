@@ -13,16 +13,8 @@ int main(void)
     logger.err("Test") << "this is an error message, will be printed in red";
     logger.endl();
 
-    {
-        auto bar = logger.newProgressBar("Bar", total, true);
-        for (unsigned i = 0; i < total; i++) {
-            ++bar;
-            usleep(712345);
-        }
-        logger.info(bar.getMessage()) << "this is an information message";
-        logger.endl();
-        logger.deleteProgressBar(bar);
-    }
+    LOGGER_WARN(logger) << "This is a warning, that will print the current position";
+    LOGGER_ENDL(logger);    // same as logger.endl();
 
     {
         bool bRewind = false;
