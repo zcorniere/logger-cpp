@@ -46,7 +46,7 @@ public:
 
     [[nodiscard]] inline bool isComplete() const noexcept { return data->uProgress >= data->uMax; }
 
-    inline operator bool() noexcept { return this->isComplete(); }
+    inline operator bool() const noexcept { return this->isComplete(); }
 
     ProgressBar &operator++() noexcept;
     ProgressBar &operator--() noexcept;
