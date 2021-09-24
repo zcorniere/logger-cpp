@@ -1,8 +1,6 @@
 #include <Logger.hpp>
 #include <iostream>
 
-#include "logger_example.hpp"
-
 int main(void)
 {
     const auto total = 5;
@@ -33,7 +31,7 @@ int main(void)
                 bar3.setProgress(total - 1);
                 bRewind = true;
             }
-            usleep(712345);
+            std::this_thread::sleep_for(std::chrono::microseconds(712345));
         }
         logger.deleteProgressBar(bar2, bar3);
     }

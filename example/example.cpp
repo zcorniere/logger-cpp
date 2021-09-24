@@ -2,8 +2,6 @@
 #include <Logger.hpp>
 #include <iostream>
 
-#include "logger_example.hpp"
-
 Logger logger(std::cout);
 
 int main(void)
@@ -22,7 +20,7 @@ int main(void)
         auto bar = logger.newProgressBar("Bar", total, true);
         for (unsigned i = 0; i < total; i++) {
             ++bar;
-            usleep(712345);
+            std::this_thread::sleep_for(std::chrono::microseconds(712345));
         }
         logger.info(bar.getMessage()) << "this is an information message";
         logger.endl();
@@ -46,7 +44,7 @@ int main(void)
                 bar3.setProgress(total - 1);
                 bRewind = true;
             }
-            usleep(712345);
+            std::this_thread::sleep_for(std::chrono::microseconds(712345));
         }
         logger.deleteProgressBar(bar2, bar3);
     }

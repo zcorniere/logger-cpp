@@ -3,8 +3,6 @@
 #include <iostream>
 #include <thread>
 
-#include "logger_example.hpp"
-
 Logger logger(std::cout);
 
 int main(void)
@@ -26,7 +24,7 @@ int main(void)
         auto bar = logger.newProgressBar("Thread 1 Bar", total, true);
         for (unsigned i = 0; i < total; i++) {
             ++bar;
-            usleep(712345);
+            std::this_thread::sleep_for(std::chrono::microseconds(712345));
         }
         logger.info(bar.getMessage()) << "this is an information message";
         logger.endl();
@@ -51,7 +49,7 @@ int main(void)
                 bar3.setProgress(total - 1);
                 bRewind = true;
             }
-            usleep(712345);
+            std::this_thread::sleep_for(std::chrono::microseconds(712345));
         }
         logger.deleteProgressBar(bar3);
         logger.info("Thread 2") << "Ended";
@@ -59,7 +57,7 @@ int main(void)
     });
     while (!bar2.isComplete()) {
         ++bar2;
-        usleep(712345);
+        std::this_thread::sleep_for(std::chrono::microseconds(712345));
     }
     logger.deleteProgressBar(bar2);
 }

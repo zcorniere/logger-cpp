@@ -2,8 +2,6 @@
 #include <Logger.hpp>
 #include <iostream>
 
-#include "logger_example.hpp"
-
 Logger logger(std::cout);
 
 void printMessage(Logger::Level level)
