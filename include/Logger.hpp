@@ -16,7 +16,7 @@
 class Logger
 {
 public:
-    enum class Level : uint8_t { Debug = 0, Info = 1, Warn = 2, Error = 4, Message = 5 };
+    enum class Level : uint8_t { Debug = 0, Info = 1, Warn = 2, Error = 3, Message = 4 };
 
 private:
     struct MessageBuffer {
