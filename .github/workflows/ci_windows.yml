@@ -5,16 +5,16 @@ on: push
 jobs:
   build:
     runs-on: ${{matrix.os}}
-    
+
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        architecture: [Win32, x64]
+        architecture: [x64]
         build_type: [Debug, Release]
     steps:
     - uses: actions/checkout@v2
-      
+
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build
             -A ${{matrix.architecture}}
