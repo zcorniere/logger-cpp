@@ -77,7 +77,6 @@ void Logger::stop(bool bFlush)
     qMsg.setWaitMode(false);
 
     if (bFlush) this->flush();
-    if (msgT.joinable()) msgT.join();
 }
 
 void Logger::flush()
@@ -116,7 +115,7 @@ std::stringstream &Logger::warn(const std::string &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Warn;
-    buf.stream << BRACKETS(33, "WARN") << BRACKETS(33, msg);
+    buf.stream << BRACKETS(33, "WARN") BRACKETS(33, msg);
     return buf.stream;
 }
 
@@ -124,7 +123,7 @@ std::stringstream &Logger::err(const std::string &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Error;
-    buf.stream << BRACKETS(31, "ERROR") << BRACKETS(31, msg);
+    buf.stream << BRACKETS(31, "ERROR") BRACKETS(31, msg);
     return buf.stream;
 }
 
@@ -132,7 +131,7 @@ std::stringstream &Logger::info(const std::string &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Info;
-    buf.stream << BRACKETS(36, "INFO") << BRACKETS(36, msg);
+    buf.stream << BRACKETS(36, "INFO") BRACKETS(36, msg);
     return buf.stream;
 }
 
@@ -140,7 +139,7 @@ std::stringstream &Logger::debug(const std::string &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Debug;
-    buf.stream << BRACKETS(35, "DEBUG") << BRACKETS(35, msg);
+    buf.stream << BRACKETS(35, "DEBUG") BRACKETS(35, msg);
     return buf.stream;
 }
 
