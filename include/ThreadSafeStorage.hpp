@@ -129,7 +129,7 @@ public:
 
     template <typename... Args>
     requires std::is_constructible_v<T, Args...>
-    inline void emplace_fron(Args... args)
+    inline void emplace_from(Args... args)
     {
         auto t = T(args...);
         this->push_front(t);
@@ -140,7 +140,6 @@ public:
         std::scoped_lock lock(q_mut);
         q.emplace_back(std::move(i));
 
-        std::unique_lock<std::mutex> ul(mutBlocking);
         vBlocking.notify_one();
     }
     inline void push_front(const T &i)
@@ -148,7 +147,6 @@ public:
         std::scoped_lock lock(q_mut);
         q.emplace_front(std::move(i));
 
-        std::unique_lock<std::mutex> ul(mutBlocking);
         vBlocking.notify_one();
     }
 
@@ -183,11 +181,7 @@ public:
         vBlocking.wait_for(ul, std::chrono::milliseconds(d));
     }
 
-    inline void notify()
-    {
-        std::unique_lock<std::mutex> ul(mutBlocking);
-        vBlocking.notify_all();
-    }
+    inline void notify() { vBlocking.notify_all(); }
 
     inline void setWaitMode(bool mode)
     {
