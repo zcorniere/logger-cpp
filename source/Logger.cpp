@@ -68,7 +68,7 @@ void Logger::thread_loop()
 void Logger::start(Logger::Level level)
 {
     selectedLevel = level;
-    msgT = std::jthread(&Logger::thread_loop, this);
+    msgT = std::thread(&Logger::thread_loop, this);
 }
 
 void Logger::stop(bool bFlush)
@@ -77,6 +77,7 @@ void Logger::stop(bool bFlush)
     qMsg.setWaitMode(false);
 
     if (bFlush) this->flush();
+    if (msgT.joinable()) msgT.join();
 }
 
 void Logger::flush()

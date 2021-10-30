@@ -70,7 +70,7 @@ private:
     std::ostream &stream;
     std::mutex mutBuffer;
     std::atomic_bool bExit = false;
-    std::jthread msgT;
+    std::thread msgT;
     std::atomic<Level> selectedLevel = Level::Debug;
     ThreadSafeStorage<Message> qMsg;
     std::unordered_map<std::thread::id, MessageBuffer> mBuffers;
