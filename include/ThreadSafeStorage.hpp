@@ -22,7 +22,7 @@ class ThreadSafeStorage
         using reference = T &;
 
     public:
-        iterator(ThreadSafeStorage &s, const size_t start = 0): to(s.size()), from(0), s(s), index(start){};
+        iterator(ThreadSafeStorage &s, const size_t start = 0): to(s.size()), from(0), index(start), s(s){};
 
         constexpr std::strong_ordering operator<=>(const iterator &) const noexcept = default;
         constexpr auto operator==(const iterator &other) const noexcept { return index == other.index; };
