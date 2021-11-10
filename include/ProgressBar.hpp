@@ -11,32 +11,26 @@
 class ProgressBar
 {
 public:
-    enum Status {
-        New,
-        Ok,
-        Delete,
-    };
-
 protected:
     struct Data {
         std::string message;
-        std::atomic<uint64_t> uMax = 100;
-        std::atomic<uint64_t> uProgress = 0;
+        std::atomic<unsigned> uMax = 100;
+        std::atomic<unsigned> uProgress = 0;
         std::atomic<bool> bShowTime = false;
         std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
     };
 
 public:
-    ProgressBar(std::string _message = "", uint64_t max = 100, bool show_time_ = false);
+    ProgressBar(std::string _message = "", unsigned max = 100, bool show_time_ = false);
     ~ProgressBar() = default;
 
     void update(std::ostream &out) const;
 
-    [[nodiscard]] inline uint64_t getMaximum() const noexcept { return data->uMax; }
-    inline void setMaximum(uint64_t value) noexcept { data->uMax = value; }
+    [[nodiscard]] inline unsigned getMaximum() const noexcept { return data->uMax; }
+    inline void setMaximum(unsigned value) noexcept { data->uMax = value; }
 
-    [[nodiscard]] inline uint64_t getProgress() const noexcept { return data->uProgress; }
-    inline void setProgress(uint64_t value) noexcept { data->uProgress = value; }
+    [[nodiscard]] inline unsigned getProgress() const noexcept { return data->uProgress; }
+    inline void setProgress(unsigned value) noexcept { data->uProgress = value; }
 
     [[nodiscard]] inline bool isShowingTime() const noexcept { return data->bShowTime; }
     inline void setShowTime(bool b) noexcept { data->bShowTime = b; }

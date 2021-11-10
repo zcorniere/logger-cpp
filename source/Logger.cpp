@@ -20,20 +20,16 @@ Logger::~Logger() { this->stop(); }
 
 void Logger::thread_loop()
 {
+    int barsModifier = 0;
     while (!bExit || !qMsg.empty()) {
         try {
             qMsg.waitTimeout<100>();
 
-            int barsModifier = std::accumulate(qBars.begin(), qBars.end(), 0, [](const int prev, const auto &ser) {
-                if (ser.first == ProgressBar::Ok || ser.first == ProgressBar::Delete)
-                    return prev + 1;
-                else
-                    return prev;
-            });
-
-            if (barsModifier)
+            if (barsModifier) {
                 // come up some line and clear them to display the messages (see man console_codes)
                 stream << ESCAPE_SEQUENCE "[" << barsModifier << "F" ESCAPE_SEQUENCE "[J";
+                barsModifier = 0;
+            }
 
             // Flush the messages queue
             while (!qMsg.empty()) {
@@ -51,12 +47,12 @@ void Logger::thread_loop()
                 }
             }
 
-            qBars.erase([](const auto &i) { return i.first == ProgressBar::Delete; });
+            qBars.erase([](const auto &i) { return i.first; });
 
             // redraw the progress bars
             for (auto &[e, bar]: qBars) {
-                if (e == ProgressBar::New) e = ProgressBar::Ok;
                 bar.update(stream);
+                barsModifier++;
             }
             stream.flush();
         } catch (const std::exception &e) {

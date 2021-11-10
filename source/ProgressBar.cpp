@@ -5,9 +5,49 @@
 #include <cstdint>
 #include <ratio>
 
+struct TerminalSize {
+    int columns = 0;
+    int lines = 0;
+
+    static TerminalSize get() noexcept;
+};
+
+#ifdef _WIN64
+#include <windows.h>
+
+TerminalSize TerminalSize::get() noexcept
+{
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    TerminalSize ret;
+
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    ret.columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    ret.lines = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+    return ret;
+}
+
+#elif __linux__
+
+#include <stdio.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+
+TerminalSize TerminalSize::get() noexcept
+{
+    TerminalSize ret;
+    struct winsize w;
+
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    ret.columns = w.ws_col;
+    ret.lines = w.ws_row;
+    return ret;
+}
+
+#endif
+
 #define ESCAPE_SEQUENCE "\u001b"
 
-ProgressBar::ProgressBar(std::string _message, uint64_t max, bool show_time_)
+ProgressBar::ProgressBar(std::string _message, unsigned max, bool show_time_)
     : data(new Data{
           .message = _message,
           .uMax = max,
@@ -18,12 +58,13 @@ ProgressBar::ProgressBar(std::string _message, uint64_t max, bool show_time_)
 
 void ProgressBar::update(std::ostream &out) const
 {
+    const TerminalSize size = TerminalSize::get();
     const auto &[message, uMax, uProgress, bShowTime, start_time] = *data;
 
-    uint64_t uWidth = 40;
+    unsigned uWidth = size.columns / 2;
     out << ESCAPE_SEQUENCE "[2K" ESCAPE_SEQUENCE "[1m" << message << ESCAPE_SEQUENCE "[0m\t[";
-    uint64_t fills = static_cast<uint64_t>(static_cast<float>(uProgress) / uMax * uWidth);
-    for (uint64_t i = 0; i < uWidth; i++) {
+    unsigned fills = static_cast<float>(uProgress) / uMax * uWidth;
+    for (unsigned i = 0; i < uWidth; i++) {
         if (i < fills) {
             out << '=';
         } else if (i == fills) {
@@ -37,7 +78,7 @@ void ProgressBar::update(std::ostream &out) const
     if (bShowTime) {
         if (uProgress > 0 && uProgress < uMax) {
             out << ' ';
-            auto elapsed = (std::chrono::steady_clock::now() - start_time);
+            auto elapsed = std::chrono::steady_clock::now() - start_time;
             auto estimate = elapsed / uProgress.load() * (uMax - uProgress);
             writeTime(out, estimate);
             out << " remaining; ";

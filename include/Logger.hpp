@@ -43,15 +43,15 @@ public:
     requires std::is_constructible_v<ProgressBar, Args...>
     [[nodiscard]] ProgressBar newProgressBar(Args... args)
     {
-        qBars.emplace_back(std::make_pair(ProgressBar::New, ProgressBar(args...)));
+        qBars.emplace_back(std::make_pair(false, ProgressBar(args...)));
         return qBars.back().second;
     }
 
     template <class... deletedBars>
     void deleteProgressBar(const deletedBars &...bar)
     {
-        for (auto &[e, i]: qBars) {
-            if (((i == bar) || ...)) { e = ProgressBar::Delete; }
+        for (auto &[needDeletion, i]: qBars) {
+            if (((i == bar) || ...)) { needDeletion = true; }
         }
     }
 
@@ -76,7 +76,7 @@ private:
     std::unordered_map<std::thread::id, MessageBuffer> mBuffers;
 
     // Progress Bars
-    ThreadSafeStorage<std::pair<ProgressBar::Status, ProgressBar>> qBars;
+    ThreadSafeStorage<std::pair<bool, ProgressBar>> qBars;
     std::atomic<int16_t> iNewBars = 0;
 };
 
