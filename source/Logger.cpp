@@ -8,11 +8,7 @@
 #include <stdexcept>
 #include <utility>
 
-#define ESCAPE_SEQUENCE "\u001b"
-
-#define COLOR_CODE(COLOR) ESCAPE_SEQUENCE "[" #COLOR "m"
-
-#define BRACKETS(COLOR, STRING) "[" COLOR_CODE(COLOR) << STRING << COLOR_CODE(0) "] "
+#include "macros.h"
 
 Logger::Logger(std::ostream &stream): stream(stream) {}
 
@@ -23,11 +19,14 @@ void Logger::thread_loop()
     int barsModifier = 0;
     while (!bExit || !qMsg.empty()) {
         try {
-            qMsg.waitTimeout<100>();
+            if (qBars.empty())
+                qMsg.wait();
+            else
+                qMsg.waitTimeout<100>();
 
             if (barsModifier) {
                 // come up some line and clear them to display the messages (see man console_codes)
-                stream << ESCAPE_SEQUENCE "[" << barsModifier << "F" ESCAPE_SEQUENCE "[J";
+                stream << ESCAPE_SEQUENCE "[" << barsModifier << "F" ANSI_SEQUENCE(, J);
                 barsModifier = 0;
             }
 
@@ -40,7 +39,7 @@ void Logger::thread_loop()
                 if (msg->message) {
                     // If there is a message, print it
                     if (msg->level >= selectedLevel.load())
-                        stream << ESCAPE_SEQUENCE "[2K" << *(msg->message) << ESCAPE_SEQUENCE "[0m" << std::endl;
+                        stream << ANSI_SEQUENCE(2, K) << *(msg->message) << RESET_SEQUENCE << std::endl;
                 } else {
                     // If not, set the level
                     selectedLevel = msg->level;
@@ -50,7 +49,7 @@ void Logger::thread_loop()
             qBars.erase([](const auto &i) { return i.first; });
 
             // redraw the progress bars
-            for (auto &[e, bar]: qBars) {
+            for (auto &[_, bar]: qBars) {
                 bar.update(stream);
                 barsModifier++;
             }
@@ -108,39 +107,39 @@ void Logger::endl()
     };
 }
 
-std::stringstream &Logger::warn(const std::string &msg)
+std::stringstream &Logger::warn(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Warn;
-    buf.stream << BRACKETS(33, "WARN") BRACKETS(33, msg);
+    buf.stream << BRACKETS(YELLOW, "WARN") BRACKETS(YELLOW, msg);
     return buf.stream;
 }
 
-std::stringstream &Logger::err(const std::string &msg)
+std::stringstream &Logger::err(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Error;
-    buf.stream << BRACKETS(31, "ERROR") BRACKETS(31, msg);
+    buf.stream << BRACKETS(RED, "ERROR") BRACKETS(RED, msg);
     return buf.stream;
 }
 
-std::stringstream &Logger::info(const std::string &msg)
+std::stringstream &Logger::info(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Info;
-    buf.stream << BRACKETS(36, "INFO") BRACKETS(36, msg);
+    buf.stream << BRACKETS(CYAN, "INFO") BRACKETS(CYAN, msg);
     return buf.stream;
 }
 
-std::stringstream &Logger::debug(const std::string &msg)
+std::stringstream &Logger::debug(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Debug;
-    buf.stream << BRACKETS(35, "DEBUG") BRACKETS(35, msg);
+    buf.stream << BRACKETS(MAGENTA, "DEBUG") BRACKETS(MAGENTA, msg);
     return buf.stream;
 }
 
-std::stringstream &Logger::msg(const std::string &msg)
+std::stringstream &Logger::msg(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Message;
