@@ -56,11 +56,11 @@ public:
     }
 
     void endl();
-    [[nodiscard]] std::stringstream &warn(const std::string &msg = "WARNING");
-    [[nodiscard]] std::stringstream &err(const std::string &msg = "ERROR");
-    [[nodiscard]] std::stringstream &info(const std::string &msg = "INFO");
-    [[nodiscard]] std::stringstream &debug(const std::string &msg = "DEBUG");
-    [[nodiscard]] std::stringstream &msg(const std::string &msg = "MESSAGE");
+    [[nodiscard]] std::stringstream &warn(const std::string_view &msg = "WARNING");
+    [[nodiscard]] std::stringstream &err(const std::string_view &msg = "ERROR");
+    [[nodiscard]] std::stringstream &info(const std::string_view &msg = "INFO");
+    [[nodiscard]] std::stringstream &debug(const std::string_view &msg = "DEBUG");
+    [[nodiscard]] std::stringstream &msg(const std::string_view &msg = "MESSAGE");
     [[nodiscard]] Logger::MessageBuffer &raw();
 
 private:

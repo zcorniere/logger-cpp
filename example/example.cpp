@@ -17,7 +17,7 @@ int main(void)
     LOGGER_ENDL;    // same as logger.endl();
 
     {
-        auto bar = logger.newProgressBar("Bar", total, true);
+        auto bar = logger.newProgressBar("Bar with a really long title", total, true);
         for (unsigned i = 0; i < total; i++) {
             ++bar;
             std::this_thread::sleep_for(std::chrono::microseconds(712345));

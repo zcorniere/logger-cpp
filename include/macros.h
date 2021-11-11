@@ -1,0 +1,18 @@
+#pragma once
+
+#define RED 31
+#define GREEN 32
+#define YELLOW 33
+#define BLUE 34
+#define MAGENTA 35
+#define CYAN 36
+
+#define ESCAPE_SEQUENCE "\u001b"
+
+#define ANSI_SEQUENCE(NUMBER, CODE) ESCAPE_SEQUENCE "[" #NUMBER #CODE
+
+#define COLOR_CODE(COLOR) ESCAPE_SEQUENCE "[" #COLOR "m"
+
+#define BRACKETS(COLOR, STRING) "[" COLOR_CODE(COLOR) << STRING << COLOR_CODE(0) "] "
+
+#define RESET_SEQUENCE COLOR_CODE(0)
