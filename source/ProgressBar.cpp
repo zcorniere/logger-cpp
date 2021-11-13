@@ -28,7 +28,7 @@ void ProgressBar::update(std::ostream &out) const
 
     if (data->bShowTime) time_str = writeTime();
 
-    int uWidth = size.columns - (2 + prefix_str.size() + progress_str.size() + time_str.value_or("").size());
+    const auto uWidth = size.columns - (2 + prefix_str.size() + progress_str.size() + time_str.value_or("").size());
 
     out << prefix_str;
     if (uWidth > 0) { out << " " << drawBar(uWidth); }
@@ -73,8 +73,8 @@ std::string ProgressBar::drawBar(const int uWidth) const
 {
     std::stringstream out;
     out << "[";
-    int fills = double(data->uProgress) / double(data->uMax) * uWidth;
-    if (fills > 0) {
+    const int fills = double(data->uProgress) / double(data->uMax) * uWidth;
+    if (fills >= 0) {
         for (auto i = 0; i < uWidth; i++) {
             if (i < fills) {
                 out << '=';
