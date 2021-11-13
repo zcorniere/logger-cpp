@@ -76,7 +76,7 @@ void ProgressBar::update(std::ostream &out) const
 
     out << ANSI_SEQUENCE(2, K) COLOR_CODE(1) << message << RESET_SEQUENCE << "\t";
 
-    if (uWidth > 5) drawBar(out, uWidth);
+    if (uWidth > 0) drawBar(out, uWidth);
 
     out << "(" << uProgress << '/' << uMax << ")";
 
