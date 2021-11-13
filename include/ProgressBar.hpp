@@ -49,8 +49,10 @@ public:
     bool operator==(const ProgressBar &) const noexcept = default;
 
 private:
-    static std::string writeTime(const std::chrono::duration<float> &dur);
-    void drawBar(std::ostream &out, const int uWidth) const;
+    std::string writeTime() const;
+    std::string drawBar(const int uWidth) const;
+    std::string drawProgress() const;
+    std::string drawPrefix() const;
 
 private:
     std::shared_ptr<ProgressBar::Data> data;

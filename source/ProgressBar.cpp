@@ -3,6 +3,7 @@
 #include <chrono>
 #include <compare>
 #include <cstdint>
+#include <optional>
 #include <ratio>
 #include <sstream>
 
@@ -19,33 +20,20 @@ ProgressBar::ProgressBar(std::string _message, unsigned max, bool show_time_)
 
 void ProgressBar::update(std::ostream &out) const
 {
-    static constexpr const std::string_view remaining_text = " remaining";
-    static constexpr const std::string_view elapsed_text = " elapsed";
-    static constexpr const auto timeSize = 10 + 10 + remaining_text.size() + elapsed_text.size();
-
     const Terminal::Size size = Terminal::Size::get();
-    const auto &[message, uMax, uProgress, bShowTime, start_time] = *data;
+    const auto progress_str = drawProgress();
 
-    const auto elapsed = std::chrono::steady_clock::now() - start_time;
-    const auto elapsed_str = writeTime(elapsed);
-    const auto remaining = elapsed / uProgress.load() * (uMax - uProgress);
-    const auto remaining_str = writeTime(remaining);
+    std::optional<std::string> time_str = std::nullopt;
+    const auto prefix_str = drawPrefix();
 
-    int uWidth = size.columns - message.size() - 12 - ((bShowTime) ? (timeSize) : (0));
+    if (data->bShowTime) time_str = writeTime();
 
-    out << ANSI_SEQUENCE(2, K) << Terminal::style<Terminal::Style::Bold> << message << Terminal::reset << "\t";
+    int uWidth = size.columns - (2 + prefix_str.size() + progress_str.size() + time_str.value_or("").size());
 
-    if (uWidth > 0) drawBar(out, uWidth);
-
-    out << "(" << uProgress << '/' << uMax << ")";
-
-    if (bShowTime) {
-        if (uProgress > 0 && uProgress < uMax) {
-            out << ' ' << remaining_str << remaining_text << " | " << elapsed_str << elapsed_text;
-        } else {
-            out << " done";
-        }
-    }
+    out << prefix_str;
+    if (uWidth > 0) { out << " " << drawBar(uWidth); }
+    out << progress_str;
+    if (time_str) { out << " " << *time_str; }
     out << std::endl;
 }
 
@@ -61,18 +49,31 @@ ProgressBar &ProgressBar::operator--() noexcept
     return *this;
 }
 
-std::string ProgressBar::writeTime(const std::chrono::duration<float> &dur)
+std::string ProgressBar::writeTime() const
 {
+    static constexpr const std::string_view remaining_text = " remaining";
+    static constexpr const std::string_view elapsed_text = " elapsed";
+
+    const auto &[message, uMax, uProgress, bShowTime, start_time] = *data;
+
+    const auto elapsed = std::chrono::steady_clock::now() - start_time;
+    const auto remaining = elapsed / uProgress.load() * (uMax - uProgress);
+
     std::stringstream st;
     st.precision(1);
-
-    st << int(std::chrono::duration<float>(dur).count()) << "s";
+    if (uProgress > 0 && uProgress < uMax) {
+        st << int(std::chrono::duration<float>(elapsed).count()) << "s" << remaining_text << " | "
+           << int(std::chrono::duration<float>(remaining).count()) << "s" << elapsed_text;
+    } else {
+        st << " done";
+    }
     return st.str();
 }
-void ProgressBar::drawBar(std::ostream &out, const int uWidth) const
+std::string ProgressBar::drawBar(const int uWidth) const
 {
+    std::stringstream out;
     out << "[";
-    int fills = static_cast<float>(data->uProgress) / data->uMax * uWidth;
+    int fills = double(data->uProgress) / double(data->uMax) * uWidth;
     if (fills > 0) {
         for (auto i = 0; i < uWidth; i++) {
             if (i < fills) {
@@ -85,4 +86,19 @@ void ProgressBar::drawBar(std::ostream &out, const int uWidth) const
         }
     }
     out << "] ";
+    return out.str();
+}
+
+std::string ProgressBar::drawProgress() const
+{
+    std::stringstream progress;
+    progress << "(" << data->uProgress << "/" << data->uMax << ")";
+    return progress.str();
+}
+
+std::string ProgressBar::drawPrefix() const
+{
+    std::stringstream prefix;
+    prefix << ANSI_SEQUENCE(2, K) << Terminal::style<Terminal::Style::Bold> << data->message << Terminal::reset;
+    return prefix.str();
 }

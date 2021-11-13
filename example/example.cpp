@@ -6,7 +6,7 @@ Logger logger(std::cout);
 
 int main(void)
 {
-    const auto total = 5;
+    const auto total = 100;
 
     logger.start();
 
@@ -20,7 +20,7 @@ int main(void)
         auto bar = logger.newProgressBar("Bar with a really long title", total, true);
         for (unsigned i = 0; i < total; i++) {
             ++bar;
-            std::this_thread::sleep_for(std::chrono::microseconds(712345));
+            std::this_thread::sleep_for(std::chrono::milliseconds(30));
         }
         logger.info(bar.getMessage()) << "this is an information message";
         logger.endl();
@@ -30,7 +30,7 @@ int main(void)
     {
         bool bRewind = false;
         auto bar2 = logger.newProgressBar("Bar2", total);
-        auto bar3 = logger.newProgressBar("Bar3", total + 3);
+        auto bar3 = logger.newProgressBar("Bar3", total + 10);
         while (!bar2.isComplete() || !bar3.isComplete()) {
             ++bar2;
             ++bar3;
@@ -39,12 +39,12 @@ int main(void)
                 logger.endl();
             }
             if (!bRewind && bar3.getProgress() == total + 1) {
-                logger.err(bar3.getMessage()) << "Something went wrong, rewinding to " << total - 1;
+                logger.err(bar3.getMessage()) << "Something went wrong, rewinding to " << total;
                 LOGGER_ENDL;
                 bar3.setProgress(total - 1);
                 bRewind = true;
             }
-            std::this_thread::sleep_for(std::chrono::microseconds(712345));
+            std::this_thread::sleep_for(std::chrono::milliseconds(30));
         }
         logger.deleteProgressBar(bar2, bar3);
     }
