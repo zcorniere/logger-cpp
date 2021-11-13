@@ -140,7 +140,7 @@ namespace __impl
 
 #if defined(TERMINAL_TARGET_POSIX)
         return isatty(fileno(std_stream));
-#elif define(TERMINAL_TARGET_WINDOWS)
+#elif defined(TERMINAL_TARGET_WINDOWS)
         return ::_isatty(_fileno(std_stream));
 #else
         return false;
@@ -178,7 +178,7 @@ inline void setupTerminal(std::ostream &stream)
         hTerminal = GetStdHandle(STD_OUTPUT_HANDLE);
     else if (&stream == &std::cerr)
         hTerminal = GetStdHandle(STD_ERROR_HANDLE);
-    SetConsoleMode(handle, ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    SetConsoleMode(hTerminal, ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 
 #elif defined(TERMINAL_TARGET_POSIX)
     // Nothing to do
