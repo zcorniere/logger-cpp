@@ -31,13 +31,17 @@ namespace Terminal
 
 namespace __impl
 {
-    static auto colorizeIndex = std::ios_base::xalloc();
-
-    constexpr bool isColorized(std::ostream &stream) noexcept;
+    inline int colorizeIndex();
+    inline bool isColorized(std::ostream &stream) noexcept;
     constexpr bool isAtty(std::ostream &stream) noexcept;
     constexpr FILE *getStandardStream(const std::ostream &stream) noexcept;
 
 }    // namespace __impl
+
+inline std::ostream &colorize(std::ostream &stream);
+
+inline std::ostream &nocolorize(std::ostream &stream);
+
 inline void setupTerminal();
 
 struct Size {
@@ -55,7 +59,6 @@ struct Size {
             .lines = csbi.srWindow.Bottom - csbi.srWindow.Top + 1,
         };
     }
-
 #elif defined(TERMINAL_TARGET_POSIX)
     static Size get() noexcept
     {
@@ -67,7 +70,6 @@ struct Size {
             .lines = w.ws_row,
         };
     }
-
 #endif
 };
 
@@ -83,7 +85,7 @@ enum class Style : std::uint8_t {
 };
 
 template <Style ST>
-constexpr std::ostream &style(std::ostream &stream)
+inline std::ostream &style(std::ostream &stream)
 {
     if (__impl::isColorized(stream)) {
         stream << ESCAPE_SEQUENCE "[" << std::to_string(static_cast<std::underlying_type_t<enum Style>>(ST)) << "m";
@@ -103,7 +105,7 @@ enum class Color : std::uint8_t {
 };
 
 template <Color Color = Color::White>
-constexpr std::ostream &color(std::ostream &stream)
+inline std::ostream &color(std::ostream &stream)
 {
     if (__impl::isColorized(stream)) {
         stream << ESCAPE_SEQUENCE "[" << std::to_string(static_cast<std::underlying_type_t<enum Color>>(Color)) << "m";
@@ -111,7 +113,7 @@ constexpr std::ostream &color(std::ostream &stream)
     return stream;
 }
 
-constexpr std::ostream &reset(std::ostream &stream)
+inline std::ostream &reset(std::ostream &stream)
 {
     if (__impl::isColorized(stream)) { stream << ESCAPE_SEQUENCE "[00m"; }
     return stream;
@@ -119,9 +121,15 @@ constexpr std::ostream &reset(std::ostream &stream)
 
 namespace __impl
 {
-    constexpr bool isColorized(std::ostream &stream) noexcept
+    inline int colorizeIndex()
     {
-        return true;    // return isAtty(stream) || stream.iword(colorizeIndex);
+        static int colorize_index = std::ios_base::xalloc();
+        return colorize_index;
+    }
+
+    inline bool isColorized(std::ostream &stream) noexcept
+    {
+        return isAtty(stream) || static_cast<bool>(stream.iword(colorizeIndex()));
     }
 
     constexpr bool isAtty(std::ostream &stream) noexcept
@@ -148,8 +156,19 @@ namespace __impl
 
         return nullptr;
     };
-
 }    // namespace __impl
+
+inline std::ostream &colorize(std::ostream &stream)
+{
+    stream.iword(__impl::colorizeIndex()) = 1L;
+    return stream;
+}
+
+inline std::ostream &nocolorize(std::ostream &stream)
+{
+    stream.iword(__impl::colorizeIndex()) = 0L;
+    return stream;
+}
 
 inline void setupTerminal(std::ostream &stream)
 {
@@ -164,8 +183,8 @@ inline void setupTerminal(std::ostream &stream)
 #elif defined(TERMINAL_TARGET_POSIX)
     // Nothing to do
 #endif
-    // In all case, we assume the terminal can now handele colorised input
-    stream.iword(__impl::colorizeIndex) = 1L;
+    // In all case, we assume the terminal can now handle colorised input
+    colorize(stream);
 }
 
 }    // namespace Terminal
