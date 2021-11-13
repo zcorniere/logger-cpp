@@ -101,10 +101,7 @@ void Logger::endl()
         .level = raw.level,
         .message = raw.stream.str(),
     });
-    mBuffers.at(std::this_thread::get_id()) = {
-        .level = Level::Message,
-        .stream = std::stringstream(),
-    };
+    mBuffers.erase(std::this_thread::get_id());
 }
 
 #define BRACKETS(COLOR, STRING) "[" << Terminal::color<COLOR> << STRING << Terminal::reset << "] "
@@ -152,10 +149,12 @@ std::stringstream &Logger::msg(const std::string_view &msg)
 Logger::MessageBuffer &Logger::raw()
 {
     if (!mBuffers.contains(std::this_thread::get_id())) {
+        std::stringstream str;
+        Terminal::colorize(str);
         std::unique_lock<std::mutex> lBuffers(mutBuffer);
         mBuffers[std::this_thread::get_id()] = {
             .level = Logger::Level::Message,
-            .stream = std::stringstream(),
+            .stream = std::move(str),
         };
     }
     return mBuffers.at(std::this_thread::get_id());
