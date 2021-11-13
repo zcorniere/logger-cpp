@@ -8,9 +8,9 @@
 #include <stdexcept>
 #include <utility>
 
-#include "macros.h"
+#include "Terminal.hpp"
 
-Logger::Logger(std::ostream &stream): stream(stream) {}
+Logger::Logger(std::ostream &stream): stream(stream) { Terminal::setupTerminal(stream); }
 
 Logger::~Logger() { this->stop(); }
 
@@ -26,7 +26,7 @@ void Logger::thread_loop()
 
             if (barsModifier) {
                 // come up some line and clear them to display the messages (see man console_codes)
-                stream << ESCAPE_SEQUENCE "[" << barsModifier << "F" ANSI_SEQUENCE(, J);
+                stream << ESCAPE_SEQUENCE "[" << barsModifier << "F" ESCAPE_SEQUENCE "[0J";
                 barsModifier = 0;
             }
 
@@ -39,7 +39,7 @@ void Logger::thread_loop()
                 if (msg->message) {
                     // If there is a message, print it
                     if (msg->level >= selectedLevel.load())
-                        stream << ANSI_SEQUENCE(2, K) << *(msg->message) << RESET_SEQUENCE << std::endl;
+                        stream << ESCAPE_SEQUENCE "[2K" << *(msg->message) << Terminal::reset << std::endl;
                 } else {
                     // If not, set the level
                     selectedLevel = msg->level;
@@ -107,11 +107,13 @@ void Logger::endl()
     };
 }
 
+#define BRACKETS(COLOR, STRING) "[" << Terminal::color<COLOR> << STRING << Terminal::reset << "] "
+
 std::stringstream &Logger::warn(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Warn;
-    buf.stream << BRACKETS(YELLOW, "WARN") BRACKETS(YELLOW, msg);
+    buf.stream << BRACKETS(Terminal::Color::Yellow, "WARN") BRACKETS(Terminal::Color::Yellow, msg);
     return buf.stream;
 }
 
@@ -119,7 +121,7 @@ std::stringstream &Logger::err(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Error;
-    buf.stream << BRACKETS(RED, "ERROR") BRACKETS(RED, msg);
+    buf.stream << BRACKETS(Terminal::Color::Red, "ERROR") BRACKETS(Terminal::Color::Red, msg);
     return buf.stream;
 }
 
@@ -127,7 +129,7 @@ std::stringstream &Logger::info(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Info;
-    buf.stream << BRACKETS(CYAN, "INFO") BRACKETS(CYAN, msg);
+    buf.stream << BRACKETS(Terminal::Color::Cyan, "INFO") BRACKETS(Terminal::Color::Cyan, msg);
     return buf.stream;
 }
 
@@ -135,7 +137,7 @@ std::stringstream &Logger::debug(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Debug;
-    buf.stream << BRACKETS(MAGENTA, "DEBUG") BRACKETS(MAGENTA, msg);
+    buf.stream << BRACKETS(Terminal::Color::Magenta, "DEBUG") BRACKETS(Terminal::Color::Magenta, msg);
     return buf.stream;
 }
 
@@ -143,7 +145,7 @@ std::stringstream &Logger::msg(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Message;
-    buf.stream << BRACKETS(0, msg);
+    buf.stream << "[" << msg << "] ";
     return buf.stream;
 }
 

@@ -4,50 +4,9 @@
 #include <compare>
 #include <cstdint>
 #include <ratio>
-
-struct TerminalSize {
-    int columns = 0;
-    int lines = 0;
-
-    static TerminalSize get() noexcept;
-};
-
-#ifdef _WIN64
-#include <windows.h>
-
-TerminalSize TerminalSize::get() noexcept
-{
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    TerminalSize ret;
-
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    ret.columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-    ret.lines = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-    return ret;
-}
-
-#elif __linux__
-
-#include <stdio.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-
-TerminalSize TerminalSize::get() noexcept
-{
-    TerminalSize ret;
-    struct winsize w;
-
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    ret.columns = w.ws_col;
-    ret.lines = w.ws_row;
-    return ret;
-}
-
-#endif
-
-#include "macros.h"
-
 #include <sstream>
+
+#include "Terminal.hpp"
 
 ProgressBar::ProgressBar(std::string _message, unsigned max, bool show_time_)
     : data(new Data{
@@ -64,7 +23,7 @@ void ProgressBar::update(std::ostream &out) const
     static constexpr const std::string_view elapsed_text = " elapsed";
     static constexpr const auto timeSize = 10 + 10 + remaining_text.size() + elapsed_text.size();
 
-    const TerminalSize size = TerminalSize::get();
+    const Terminal::Size size = Terminal::Size::get();
     const auto &[message, uMax, uProgress, bShowTime, start_time] = *data;
 
     const auto elapsed = std::chrono::steady_clock::now() - start_time;
@@ -74,7 +33,7 @@ void ProgressBar::update(std::ostream &out) const
 
     int uWidth = size.columns - message.size() - 12 - ((bShowTime) ? (timeSize) : (0));
 
-    out << ANSI_SEQUENCE(2, K) COLOR_CODE(1) << message << RESET_SEQUENCE << "\t";
+    out << ANSI_SEQUENCE(2, K) << Terminal::style<Terminal::Style::Bold> << message << Terminal::reset << "\t";
 
     if (uWidth > 0) drawBar(out, uWidth);
 

@@ -21,7 +21,7 @@ protected:
     };
 
 public:
-    ProgressBar(std::string _message = "", unsigned max = 100, bool show_time_ = false);
+    explicit ProgressBar(std::string _message = "", unsigned max = 100, bool show_time_ = false);
     ~ProgressBar() = default;
 
     void update(std::ostream &out) const;
