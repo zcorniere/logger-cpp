@@ -29,7 +29,12 @@ int main(void)
 
     {
         bool bRewind = false;
-        auto bar2 = logger.newProgressBar("Bar2", total);
+        auto bar2 = logger.newProgressBar("Bar2", total, false,
+                                          ProgressBar::Style{
+                                              .cFill = '#',
+                                              .cEqual = '#',
+                                              .cEmpty = '-',
+                                          });
         auto bar3 = logger.newProgressBar("Bar3", total + 10);
         while (!bar2.isComplete() || !bar3.isComplete()) {
             ++bar2;
@@ -44,7 +49,11 @@ int main(void)
                 bar3.setProgress(total - 1);
                 bRewind = true;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(30));
+            if (!bar2.isComplete()) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(30));
+            } else {
+                std::this_thread::sleep_for(std::chrono::milliseconds(120));
+            }
         }
         logger.deleteProgressBar(bar2, bar3);
     }

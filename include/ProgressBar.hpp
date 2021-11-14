@@ -8,9 +8,22 @@
 #include <stdint.h>
 #include <string>
 
+namespace details
+{
+struct Style {
+    const char cFill = '=';
+    const char cEqual = '>';
+    const char cEmpty = ' ';
+};
+};    // namespace details
+
 class ProgressBar
 {
 public:
+    // Can't have Style as a sub-class, because of this:
+    // https://bugs.llvm.org/show_bug.cgi?id=36684
+    using Style = details::Style;
+
 protected:
     struct Data {
         std::string message;
@@ -18,10 +31,12 @@ protected:
         std::atomic<unsigned> uProgress = 0;
         std::atomic<bool> bShowTime = false;
         std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+        const Style style = {};
     };
 
 public:
-    explicit ProgressBar(std::string _message = "", unsigned max = 100, bool show_time_ = false);
+    explicit ProgressBar(std::string _message = "", unsigned max = 100, bool show_time_ = false,
+                         const Style style = Style());
     ~ProgressBar() = default;
 
     void update(std::ostream &out) const;
