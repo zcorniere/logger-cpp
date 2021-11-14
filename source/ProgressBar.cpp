@@ -9,11 +9,12 @@
 
 #include "Terminal.hpp"
 
-ProgressBar::ProgressBar(std::string _message, unsigned max, bool show_time_)
+ProgressBar::ProgressBar(std::string _message, unsigned max, bool show_time_, Style style)
     : data(new Data{
           .message = std::move(_message),
           .uMax = max,
           .bShowTime = show_time_,
+          .style = std::move(style),
       })
 {
 }
@@ -54,7 +55,7 @@ std::string ProgressBar::writeTime() const
     static constexpr const std::string_view remaining_text = " remaining";
     static constexpr const std::string_view elapsed_text = " elapsed";
 
-    const auto &[message, uMax, uProgress, bShowTime, start_time] = *data;
+    const auto &[message, uMax, uProgress, bShowTime, start_time, _] = *data;
 
     const auto elapsed = std::chrono::steady_clock::now() - start_time;
     const auto remaining = elapsed / uProgress.load() * (uMax - uProgress);
@@ -71,17 +72,18 @@ std::string ProgressBar::writeTime() const
 }
 std::string ProgressBar::drawBar(const int uWidth) const
 {
+    const auto &style = data->style;
     std::stringstream out;
     out << "[";
     const int fills = double(data->uProgress) / double(data->uMax) * uWidth;
     if (fills >= 0) {
         for (auto i = 0; i < uWidth; i++) {
             if (i < fills) {
-                out << '=';
+                out << style.cFill;
             } else if (i == fills) {
-                out << '>';
+                out << style.cEqual;
             } else if (i > fills) {
-                out << ' ';
+                out << style.cEmpty;
             }
         }
     }
