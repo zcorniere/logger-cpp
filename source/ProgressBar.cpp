@@ -70,14 +70,14 @@ std::string ProgressBar::writeTime() const
     }
     return st.str();
 }
-std::string ProgressBar::drawBar(const int uWidth) const
+std::string ProgressBar::drawBar(const size_t uWidth) const
 {
     const auto &style = data->style;
     std::stringstream out;
     out << "[";
-    const int fills = double(data->uProgress) / double(data->uMax) * uWidth;
+    const size_t fills = size_t(double(data->uProgress) / double(data->uMax) * uWidth);
     if (fills >= 0) {
-        for (auto i = 0; i < uWidth; i++) {
+        for (size_t i = 0; i < uWidth; i++) {
             if (i < fills) {
                 out << style.cFill;
             } else if (i == fills) {

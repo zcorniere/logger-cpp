@@ -178,7 +178,7 @@ inline void setupTerminal(std::ostream &stream)
         hTerminal = GetStdHandle(STD_OUTPUT_HANDLE);
     else if (&stream == &std::cerr)
         hTerminal = GetStdHandle(STD_ERROR_HANDLE);
-    SetConsoleMode(hTerminal, ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    SetConsoleMode(hTerminal, ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN);
 
 #elif defined(TERMINAL_TARGET_POSIX)
     // Nothing to do
