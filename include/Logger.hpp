@@ -16,7 +16,25 @@
 class Logger
 {
 public:
-    enum class Level : uint8_t { Debug = 0, Info = 1, Warn = 2, Error = 3, Message = 4 };
+    enum class Level { Trace = -1, Debug = 0, Info = 1, Warn = 2, Error = 3, Message = 4 };
+
+    class Stream
+    {
+    public:
+        constexpr Stream(Logger &log, std::stringstream &ss): s(ss), logger(log) {}
+        ~Stream() { logger.endl(); }
+
+        template <typename T>
+        constexpr Stream &operator<<(const T &u)
+        {
+            s << u;
+            return *this;
+        }
+
+    private:
+        std::stringstream &s;
+        Logger &logger;
+    };
 
 private:
     struct MessageBuffer {
@@ -55,15 +73,16 @@ public:
         }
     }
 
-    void endl();
-    [[nodiscard]] std::stringstream &warn(const std::string_view &msg = "WARNING");
-    [[nodiscard]] std::stringstream &err(const std::string_view &msg = "ERROR");
-    [[nodiscard]] std::stringstream &info(const std::string_view &msg = "INFO");
-    [[nodiscard]] std::stringstream &debug(const std::string_view &msg = "DEBUG");
-    [[nodiscard]] std::stringstream &msg(const std::string_view &msg = "MESSAGE");
-    [[nodiscard]] Logger::MessageBuffer &raw();
+    [[nodiscard]] Stream warn(const std::string_view &msg = "WARNING");
+    [[nodiscard]] Stream err(const std::string_view &msg = "ERROR");
+    [[nodiscard]] Stream info(const std::string_view &msg = "INFO");
+    [[nodiscard]] Stream debug(const std::string_view &msg = "DEBUG");
+    [[nodiscard]] Stream trace(const std::string_view &msg = "DEBUG");
+    [[nodiscard]] Stream msg(const std::string_view &msg = "MESSAGE");
 
 private:
+    void endl();
+    [[nodiscard]] Logger::MessageBuffer &raw();
     void thread_loop();
 
 private:
@@ -81,37 +100,34 @@ private:
 };
 
 #if defined(LOGGER_EXTERN_DECLARATION_PTR)
-
-#define LOGGER_ACCESS ->
+    #define LOGGER_ACCESS ->
 extern Logger *logger;
 
 #elif defined(LOGGER_EXTERN_DECLARATION)
-
-#define LOGGER_ACCESS .
+    #define LOGGER_ACCESS .
 extern Logger logger;
 
 #endif
 
 #ifndef LOGGER_NO_MACROS
 
-#define S1(x) #x
-#define S2(x) S1(x)
-#define LOCATION __FILE__ ":" S2(__LINE__)
+    #define S1(x) #x
+    #define S2(x) S1(x)
+    #define LOCATION __FILE__ ":" S2(__LINE__)
 
-#ifdef LOGGER_ACCESS
-#define LOGGER_WARN logger LOGGER_ACCESS warn(LOCATION)
-#define LOGGER_ERR logger LOGGER_ACCESS err(LOCATION)
-#define LOGGER_INFO logger LOGGER_ACCESS info(LOCATION)
-#define LOGGER_DEBUG logger LOGGER_ACCESS debug(LOCATION)
-#define LOGGER_ENDL logger LOGGER_ACCESS endl();
+    #ifdef LOGGER_ACCESS
+        #define LOGGER_WARN logger LOGGER_ACCESS warn(LOCATION)
+        #define LOGGER_ERR logger LOGGER_ACCESS err(LOCATION)
+        #define LOGGER_INFO logger LOGGER_ACCESS info(LOCATION)
+        #define LOGGER_DEBUG logger LOGGER_ACCESS debug(LOCATION)
 
-#else
+    #else
 
-#define LOGGER_WARN(logger) logger.warn(LOCATION)
-#define LOGGER_ERR(logger) logger.err(LOCATION)
-#define LOGGER_INFO(logger) logger.info(LOCATION)
-#define LOGGER_DEBUG(logger) logger.debug(LOCATION)
-#define LOGGER_ENDL(logger) logger.endl();
+        #define LOGGER_WARN(logger) logger.warn(LOCATION)
+        #define LOGGER_ERR(logger) logger.err(LOCATION)
+        #define LOGGER_INFO(logger) logger.info(LOCATION)
+        #define LOGGER_DEBUG(logger) logger.debug(LOCATION)
 
-#endif    // LOGGER_NO_MACROS
+    #endif    // LOGGER_NO_MACROS
+
 #endif
