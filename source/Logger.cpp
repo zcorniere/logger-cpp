@@ -39,7 +39,7 @@ void Logger::thread_loop()
                 if (msg->message) {
                     // If there is a message, print it
                     if (msg->level >= selectedLevel.load())
-                        stream << ESCAPE_SEQUENCE "[2K" << *(msg->message) << Terminal::reset << std::endl;
+                        stream << ESCAPE_SEQUENCE "[2K" << msg->message.value() << Terminal::reset << std::endl;
                 } else {
                     // If not, set the level
                     selectedLevel = msg->level;
@@ -55,7 +55,7 @@ void Logger::thread_loop()
             }
             stream.flush();
         } catch (const std::exception &e) {
-            std::cerr << "LOGGER ERROR:" << e.what() << std::endl;
+            std::cerr << "LOGGER ERROR: " << e.what() << std::endl;
         }
     }
 }
@@ -79,6 +79,8 @@ void Logger::flush()
 {
     std::unique_lock<std::mutex> lBuffers(mutBuffer);
 
+    for (auto &msg: qMsg)
+        if (msg.message) stream << msg.message.value() << std::endl;
     for (auto &[_, i]: mBuffers) {
         std::string msg(i.stream.str());
         if (!msg.empty()) stream << msg << std::endl;
@@ -106,44 +108,52 @@ void Logger::endl()
 
 #define BRACKETS(COLOR, STRING) "[" << Terminal::color<COLOR> << STRING << Terminal::reset << "] "
 
-std::stringstream &Logger::warn(const std::string_view &msg)
+Logger::Stream Logger::warn(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Warn;
     buf.stream << BRACKETS(Terminal::Color::Yellow, "WARN") BRACKETS(Terminal::Color::Yellow, msg);
-    return buf.stream;
+    return Stream(*this, buf.stream);
 }
 
-std::stringstream &Logger::err(const std::string_view &msg)
+Logger::Stream Logger::err(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Error;
     buf.stream << BRACKETS(Terminal::Color::Red, "ERROR") BRACKETS(Terminal::Color::Red, msg);
-    return buf.stream;
+    return Stream(*this, buf.stream);
 }
 
-std::stringstream &Logger::info(const std::string_view &msg)
+Logger::Stream Logger::info(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Info;
     buf.stream << BRACKETS(Terminal::Color::Cyan, "INFO") BRACKETS(Terminal::Color::Cyan, msg);
-    return buf.stream;
+    return Stream(*this, buf.stream);
 }
 
-std::stringstream &Logger::debug(const std::string_view &msg)
+Logger::Stream Logger::debug(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Debug;
     buf.stream << BRACKETS(Terminal::Color::Magenta, "DEBUG") BRACKETS(Terminal::Color::Magenta, msg);
-    return buf.stream;
+    return Stream(*this, buf.stream);
 }
 
-std::stringstream &Logger::msg(const std::string_view &msg)
+Logger::Stream Logger::msg(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Message;
     buf.stream << "[" << msg << "] ";
-    return buf.stream;
+    return Stream(*this, buf.stream);
+}
+
+Logger::Stream Logger::trace(const std::string_view &msg)
+{
+    auto &buf = this->raw();
+    buf.level = Logger::Level::Trace;
+    buf.stream << "[" << msg << "] ";
+    return Stream(*this, buf.stream);
 }
 
 Logger::MessageBuffer &Logger::raw()

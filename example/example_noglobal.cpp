@@ -9,11 +9,8 @@ int main(void)
     logger.start();
 
     logger.err("Test") << "this is an error message, will be printed in red";
-    logger.endl();
 
     LOGGER_WARN(logger) << "This is a warning, that will print the current position";
-    LOGGER_ENDL(logger);    // same as logger.endl();
-
     {
         bool bRewind = false;
         auto bar2 = logger.newProgressBar("Bar2", total);
@@ -23,11 +20,11 @@ int main(void)
             ++bar3;
             if (bar2.isComplete()) {
                 logger.debug("debug") << "this is a debug message";
-                logger.endl();
+                
             }
             if (!bRewind && bar3.getProgress() == total + 1) {
                 logger.err(bar3.getMessage()) << "Something went wrong, rewinding to " << total - 1;
-                logger.endl();
+
                 bar3.setProgress(total - 1);
                 bRewind = true;
             }

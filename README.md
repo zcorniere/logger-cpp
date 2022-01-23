@@ -16,9 +16,8 @@ int main(void) {
   logger.start();
 
   logger.err("Test") << "this is an error message, will be printed in red";
-  logger.endl();
+  
 
   LOGGER_WARN << "This is a warning, that will print the current position";
-  LOGGER_ENDL; // same as logger->endl();
 }
 ```
