@@ -173,15 +173,7 @@ inline std::ostream &nocolorize(std::ostream &stream)
 inline void setupTerminal(std::ostream &stream)
 {
 #if defined(TERMINAL_TARGET_WINDOWS)
-    HANDLE hTerminal = INVALID_HANDLE_VALUE;
-    if (&stream == &std::cout)
-        hTerminal = GetStdHandle(STD_OUTPUT_HANDLE);
-    else if (&stream == &std::cerr)
-        hTerminal = GetStdHandle(STD_ERROR_HANDLE);
-    SetConsoleMode(hTerminal, ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN);
-
 #elif defined(TERMINAL_TARGET_POSIX)
-    // Nothing to do
 #endif
     // In all case, we assume the terminal can now handle colorised input
     colorize(stream);
