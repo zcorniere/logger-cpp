@@ -9,11 +9,10 @@
 
 #include "Terminal.hpp"
 
-ProgressBar::ProgressBar(std::string _message, unsigned max, bool show_time_, Style style)
+ProgressBar::ProgressBar(std::string _message, unsigned max, Style style)
     : data(new Data{
           .message = std::move(_message),
           .uMax = max,
-          .bShowTime = show_time_,
           .style = std::move(style),
       })
 {
@@ -27,7 +26,7 @@ void ProgressBar::update(std::ostream &out) const
     std::optional<std::string> time_str = std::nullopt;
     const auto prefix_str = drawPrefix();
 
-    if (data->bShowTime) time_str = writeTime();
+    if (data->style.bShowTime) time_str = writeTime();
 
     const auto uWidth = size.columns - (2 + prefix_str.size() + progress_str.size() + time_str.value_or("").size());
 
@@ -55,7 +54,7 @@ std::string ProgressBar::writeTime() const
     static constexpr const std::string_view remaining_text = " remaining";
     static constexpr const std::string_view elapsed_text = " elapsed";
 
-    const auto &[message, uMax, uProgress, bShowTime, start_time, _] = *data;
+    const auto &[message, uMax, uProgress, start_time, _] = *data;
 
     const auto elapsed = std::chrono::steady_clock::now() - start_time;
     const auto remaining = elapsed / uProgress.load() * (uMax - uProgress);

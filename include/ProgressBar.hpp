@@ -14,6 +14,7 @@ struct Style {
     const char cFill = '=';
     const char cEqual = '>';
     const char cEmpty = ' ';
+    const bool bShowTime = false;
 };
 };    // namespace details
 
@@ -29,14 +30,12 @@ protected:
         std::string message;
         std::atomic<unsigned> uMax = 100;
         std::atomic<unsigned> uProgress = 0;
-        std::atomic<bool> bShowTime = false;
         std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
         const Style style = {};
     };
 
 public:
-    explicit ProgressBar(std::string _message = "", unsigned max = 100, bool show_time_ = false,
-                         const Style style = Style());
+    explicit ProgressBar(std::string _message = "", unsigned max = 100, const Style style = Style());
     ~ProgressBar() = default;
 
     void update(std::ostream &out) const;
@@ -46,9 +45,6 @@ public:
 
     [[nodiscard]] inline unsigned getProgress() const noexcept { return data->uProgress; }
     inline void setProgress(unsigned value) noexcept { data->uProgress = value; }
-
-    [[nodiscard]] inline bool isShowingTime() const noexcept { return data->bShowTime; }
-    inline void setShowTime(bool b) noexcept { data->bShowTime = b; }
 
     [[nodiscard]] inline const std::string &getMessage() const noexcept { return data->message; }
     inline void setMessage(const std::string &msg) noexcept { data->message = msg; }
