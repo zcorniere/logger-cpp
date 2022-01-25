@@ -1,5 +1,6 @@
 #include "ProgressBar.hpp"
 
+#include <assert.h>
 #include <chrono>
 #include <compare>
 #include <cstdint>
@@ -16,6 +17,7 @@ ProgressBar::ProgressBar(std::string _message, unsigned max, Style style)
           .style = std::move(style),
       })
 {
+    assert(max > 0);
 }
 
 void ProgressBar::update(std::ostream &out) const
@@ -28,10 +30,10 @@ void ProgressBar::update(std::ostream &out) const
 
     if (data->style.bShowTime) time_str = writeTime();
 
-    const auto uWidth = size.columns - (2 + prefix_str.size() + progress_str.size() + time_str.value_or("").size());
+    const int iWidth = size.columns - int(2 + prefix_str.size() + progress_str.size() + time_str.value_or("").size());
 
     out << prefix_str;
-    if (uWidth > 0) { out << " " << drawBar(uWidth); }
+    if (iWidth > 0) { out << " " << drawBar(iWidth); }
     out << progress_str;
     if (time_str) { out << " " << *time_str; }
     out << std::endl;
@@ -69,14 +71,14 @@ std::string ProgressBar::writeTime() const
     }
     return st.str();
 }
-std::string ProgressBar::drawBar(const size_t uWidth) const
+std::string ProgressBar::drawBar(const int iWidth) const
 {
     const auto &style = data->style;
     std::stringstream out;
     out << "[";
-    const size_t fills = size_t(double(data->uProgress) / double(data->uMax) * uWidth);
+    const int fills = int(double(data->uProgress) / double(data->uMax) * iWidth);
     if (fills >= 0) {
-        for (size_t i = 0; i < uWidth; i++) {
+        for (int i = 0; i < iWidth; i++) {
             if (i < fills) {
                 out << style.cFill;
             } else if (i == fills) {
