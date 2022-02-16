@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <string_view>
 #include <optional>
 #include <sstream>
 #include <stdint.h>

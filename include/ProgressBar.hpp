@@ -5,7 +5,6 @@
 #include <compare>
 #include <memory>
 #include <ostream>
-#include <stdint.h>
 #include <string>
 
 namespace details

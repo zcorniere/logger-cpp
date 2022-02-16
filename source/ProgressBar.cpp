@@ -2,8 +2,6 @@
 
 #include <assert.h>
 #include <chrono>
-#include <compare>
-#include <cstdint>
 #include <optional>
 #include <ratio>
 #include <sstream>
