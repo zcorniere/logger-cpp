@@ -77,7 +77,7 @@ public:
     void stop(bool bFlush = true);
     void flush();
 
-    inline Level getLevel() const noexcept { return selectedLevel; };
+    Level getLevel() const noexcept { return selectedLevel; };
     void setLevel(Level level);
 
     template <typename... Args>
@@ -102,9 +102,9 @@ public:
     [[nodiscard]] Stream debug(const std::string_view &msg = "DEBUG");
     [[nodiscard]] Stream trace(const std::string_view &msg = "DEBUG");
     [[nodiscard]] Stream msg(const std::string_view &msg = "MESSAGE");
+    void endl();
 
 private:
-    void endl();
     [[nodiscard]] Logger::MessageBuffer &raw();
     void thread_loop();
 

@@ -8,14 +8,11 @@ void printMessage(Logger::Level level)
 {
     logger.setLevel(level);
     logger.debug() << "This is a debug message";
-
     logger.info() << "This is an information message";
-
     logger.warn() << "This is a warning message";
-
     logger.err() << "This is an error message";
-
     logger.msg() << "This is a message";
+    logger.endl();
 }
 
 int main(void)
