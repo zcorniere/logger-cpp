@@ -22,27 +22,27 @@
 
 #include <ios>
 #include <iostream>
+#include <string>
 #include <type_traits>
 
-namespace Terminal
-{
 #define ESCAPE_SEQUENCE "\033"
 #define ANSI_SEQUENCE(NUMBER, CODE) ESCAPE_SEQUENCE "[" #NUMBER #CODE
 
+namespace Terminal
+{
+
 namespace __impl
 {
-    inline int colorizeIndex();
-    inline bool isColorized(std::ostream &stream) noexcept;
+    int colorizeIndex();
+    bool isColorized(std::ostream &stream) noexcept;
     constexpr bool isAtty(std::ostream &stream) noexcept;
     constexpr FILE *getStandardStream(const std::ostream &stream) noexcept;
 
 }    // namespace __impl
-
-inline std::ostream &colorize(std::ostream &stream);
-
-inline std::ostream &nocolorize(std::ostream &stream);
-
-inline void setupTerminal();
+std::ostream &reset(std::ostream &stream);
+std::ostream &colorize(std::ostream &stream);
+std::ostream &nocolorize(std::ostream &stream);
+void setupTerminal(std::ostream &stream);
 
 struct Size {
     int columns = 0;
@@ -85,7 +85,7 @@ enum class Style : std::uint8_t {
 };
 
 template <Style ST>
-inline std::ostream &style(std::ostream &stream)
+std::ostream &style(std::ostream &stream)
 {
     if (__impl::isColorized(stream)) {
         stream << ESCAPE_SEQUENCE "[" << std::to_string(static_cast<std::underlying_type_t<enum Style>>(ST)) << "m";
@@ -105,78 +105,12 @@ enum class Color : std::uint8_t {
 };
 
 template <Color Color = Color::White>
-inline std::ostream &color(std::ostream &stream)
+std::ostream &color(std::ostream &stream)
 {
     if (__impl::isColorized(stream)) {
         stream << ESCAPE_SEQUENCE "[" << std::to_string(static_cast<std::underlying_type_t<enum Color>>(Color)) << "m";
     }
     return stream;
-}
-
-inline std::ostream &reset(std::ostream &stream)
-{
-    if (__impl::isColorized(stream)) { stream << ESCAPE_SEQUENCE "[00m"; }
-    return stream;
-}
-
-namespace __impl
-{
-    inline int colorizeIndex()
-    {
-        static int colorize_index = std::ios_base::xalloc();
-        return colorize_index;
-    }
-
-    inline bool isColorized(std::ostream &stream) noexcept
-    {
-        return isAtty(stream) || static_cast<bool>(stream.iword(colorizeIndex()));
-    }
-
-    constexpr bool isAtty(std::ostream &stream) noexcept
-    {
-        auto std_stream = getStandardStream(stream);
-
-        if (!std_stream) return false;
-
-#if defined(TERMINAL_TARGET_POSIX)
-        return isatty(fileno(std_stream));
-#elif defined(TERMINAL_TARGET_WINDOWS)
-        return ::_isatty(_fileno(std_stream));
-#else
-        return false;
-#endif
-    }
-
-    constexpr FILE *getStandardStream(const std::ostream &stream) noexcept
-    {
-        if (&stream == &std::cout)
-            return stdout;
-        else if ((&stream == &std::cerr) || (&stream == &std::clog))
-            return stderr;
-
-        return nullptr;
-    };
-}    // namespace __impl
-
-inline std::ostream &colorize(std::ostream &stream)
-{
-    stream.iword(__impl::colorizeIndex()) = 1L;
-    return stream;
-}
-
-inline std::ostream &nocolorize(std::ostream &stream)
-{
-    stream.iword(__impl::colorizeIndex()) = 0L;
-    return stream;
-}
-
-inline void setupTerminal(std::ostream &stream)
-{
-#if defined(TERMINAL_TARGET_WINDOWS)
-#elif defined(TERMINAL_TARGET_POSIX)
-#endif
-    // In all case, we assume the terminal can now handle colorised input
-    colorize(stream);
 }
 
 }    // namespace Terminal
