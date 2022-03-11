@@ -32,10 +32,10 @@ class ThreadSafeStorage
             index++;
             return *this;
         }
-        constexpr iterator operator++(int) noexcept
+        constexpr iterator operator++(int i) noexcept
         {
             iterator tmp = *tmp;
-            ++(*this);
+            (*this) += i;
             return tmp;
         }
 
@@ -59,7 +59,7 @@ public:
     ThreadSafeStorage(const ThreadSafeStorage<T> &&) = delete;
     ThreadSafeStorage &operator=(const ThreadSafeStorage &) = delete;
 
-    virtual ~ThreadSafeStorage() { this->clear(); }
+    ~ThreadSafeStorage() { this->clear(); }
 
     bool empty() const
     {
