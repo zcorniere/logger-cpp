@@ -70,8 +70,8 @@ void Logger::stop(bool bFlush)
     bExit = true;
     qMsg.setWaitMode(false);
 
-    if (bFlush) this->flush();
     if (msgT.joinable()) msgT.join();
+    if (bFlush) this->flush();
 }
 
 void Logger::flush()
