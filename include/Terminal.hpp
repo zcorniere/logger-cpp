@@ -25,8 +25,7 @@
 #include <string>
 #include <type_traits>
 
-#define ESCAPE_SEQUENCE "\033"
-#define ANSI_SEQUENCE(NUMBER, CODE) ESCAPE_SEQUENCE "[" #NUMBER #CODE
+#define LOGGER_ESCAPE_SEQUENCE "\033"
 
 namespace Terminal
 {
@@ -88,7 +87,8 @@ template <Style ST>
 std::ostream &style(std::ostream &stream)
 {
     if (__impl::isColorized(stream)) {
-        stream << ESCAPE_SEQUENCE "[" << std::to_string(static_cast<std::underlying_type_t<enum Style>>(ST)) << "m";
+        stream << LOGGER_ESCAPE_SEQUENCE "[" << std::to_string(static_cast<std::underlying_type_t<enum Style>>(ST))
+               << "m";
     }
     return stream;
 }
@@ -108,7 +108,8 @@ template <Color Color = Color::White>
 std::ostream &color(std::ostream &stream)
 {
     if (__impl::isColorized(stream)) {
-        stream << ESCAPE_SEQUENCE "[" << std::to_string(static_cast<std::underlying_type_t<enum Color>>(Color)) << "m";
+        stream << LOGGER_ESCAPE_SEQUENCE "[" << std::to_string(static_cast<std::underlying_type_t<enum Color>>(Color))
+               << "m";
     }
     return stream;
 }

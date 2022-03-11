@@ -25,7 +25,7 @@ void Logger::thread_loop()
 
             if (barsModifier) {
                 // come up some line and clear them to display the messages (see man console_codes)
-                stream << ESCAPE_SEQUENCE "[" << barsModifier << "F" ESCAPE_SEQUENCE "[0J";
+                stream << LOGGER_ESCAPE_SEQUENCE "[" << barsModifier << "F" LOGGER_ESCAPE_SEQUENCE "[0J";
                 barsModifier = 0;
             }
 
@@ -38,7 +38,7 @@ void Logger::thread_loop()
                 if (msg->message) {
                     // If there is a message, print it
                     if (msg->level >= selectedLevel.load())
-                        stream << ESCAPE_SEQUENCE "[2K" << msg->message.value() << Terminal::reset << std::endl;
+                        stream << LOGGER_ESCAPE_SEQUENCE "[2K" << msg->message.value() << Terminal::reset << std::endl;
                 } else {
                     // If not, set the level
                     selectedLevel = msg->level;
@@ -169,6 +169,4 @@ Logger::MessageBuffer &Logger::raw()
     return mBuffers.at(std::this_thread::get_id());
 }
 
-#undef COLOR_CODE
 #undef BRACKETS
-#undef ESCAPE_SEQUENCE

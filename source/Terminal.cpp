@@ -44,7 +44,7 @@ namespace __impl
 
 std::ostream &reset(std::ostream &stream)
 {
-    if (__impl::isColorized(stream)) { stream << ESCAPE_SEQUENCE "[00m"; }
+    if (__impl::isColorized(stream)) { stream << LOGGER_ESCAPE_SEQUENCE "[00m"; }
     return stream;
 }
 

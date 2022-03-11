@@ -102,6 +102,7 @@ std::string ProgressBar::drawProgress() const
 std::string ProgressBar::drawPrefix() const
 {
     std::stringstream prefix;
-    prefix << ANSI_SEQUENCE(2, K) << Terminal::style<Terminal::Style::Bold> << data->message << Terminal::reset;
+    prefix << LOGGER_ESCAPE_SEQUENCE "[2K" << Terminal::style<Terminal::Style::Bold> << data->message
+           << Terminal::reset;
     return prefix.str();
 }
