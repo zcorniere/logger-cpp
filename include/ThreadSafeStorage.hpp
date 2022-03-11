@@ -61,17 +61,17 @@ public:
 
     virtual ~ThreadSafeStorage() { this->clear(); }
 
-    inline bool empty() const
+    bool empty() const
     {
         std::scoped_lock lock(q_mut);
         return q.empty();
     }
 
-    inline auto begin() { return iterator(*this, 0); }
+    auto begin() { return iterator(*this, 0); }
 
-    inline auto end() { return iterator(*this, this->size()); }
+    auto end() { return iterator(*this, this->size()); }
 
-    inline auto size() const
+    auto size() const
     {
         std::scoped_lock lock(q_mut);
         return q.size();
@@ -84,19 +84,19 @@ public:
         q.erase(e, q.end());
     }
 
-    inline void clear()
+    void clear()
     {
         std::scoped_lock lock(q_mut);
         q.clear();
     }
 
-    inline const T &at(const size_t &index) const
+    const T &at(const size_t &index) const
     {
         std::scoped_lock lock(q_mut);
         return q.at(index);
     }
 
-    inline T &at(const size_t &index)
+    T &at(const size_t &index)
     {
         std::scoped_lock lock(q_mut);
         return q.at(index);
@@ -121,7 +121,7 @@ public:
 
     template <typename... Args>
     requires std::is_constructible_v<T, Args...>
-    inline void emplace_back(Args... args)
+    void emplace_back(Args... args)
     {
         auto t = T(args...);
         this->push_back(t);
@@ -129,20 +129,20 @@ public:
 
     template <typename... Args>
     requires std::is_constructible_v<T, Args...>
-    inline void emplace_from(Args... args)
+    void emplace_from(Args... args)
     {
         auto t = T(args...);
         this->push_front(t);
     }
 
-    inline void push_back(const T &i)
+    void push_back(const T &i)
     {
         std::scoped_lock lock(q_mut);
         q.emplace_back(std::move(i));
 
         vBlocking.notify_one();
     }
-    inline void push_front(const T &i)
+    void push_front(const T &i)
     {
         std::scoped_lock lock(q_mut);
         q.emplace_front(std::move(i));
@@ -150,18 +150,18 @@ public:
         vBlocking.notify_one();
     }
 
-    inline T &back()
+    T &back()
     {
         std::scoped_lock lock(q_mut);
         return q.back();
     }
-    inline T &front()
+    T &front()
     {
         std::scoped_lock lock(q_mut);
         return q.front();
     }
 
-    inline void wait()
+    void wait()
     {
         while (this->bWait && this->empty()) {
             std::unique_lock<std::mutex> ul(mutBlocking);
@@ -169,21 +169,21 @@ public:
         }
     }
     template <unsigned D = 10>
-    inline void waitTimeout()
+    void waitTimeout()
     {
         std::unique_lock<std::mutex> ul(mutBlocking);
         vBlocking.wait_for(ul, std::chrono::milliseconds(D));
     }
 
-    inline void waitTimeout(unsigned d = 10)
+    void waitTimeout(unsigned d = 10)
     {
         std::unique_lock<std::mutex> ul(mutBlocking);
         vBlocking.wait_for(ul, std::chrono::milliseconds(d));
     }
 
-    inline void notify() { vBlocking.notify_all(); }
+    void notify() { vBlocking.notify_all(); }
 
-    inline void setWaitMode(bool mode)
+    void setWaitMode(bool mode)
     {
         bWait = mode;
         this->notify();

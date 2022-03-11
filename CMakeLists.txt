@@ -7,12 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Threads REQUIRED)
 
 option(BUILD_EXAMPLE "Build example application" OFF)
-
 if (BUILD_EXAMPLE)
     add_subdirectory(example/)
 endif()
 
-add_library(${PROJECT_NAME} STATIC source/Logger.cpp source/ProgressBar.cpp source/lib.cpp)
+add_library(${PROJECT_NAME} STATIC source/Logger.cpp source/ProgressBar.cpp source/lib.cpp source/Terminal.cpp)
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
 

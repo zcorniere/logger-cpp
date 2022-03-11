@@ -39,18 +39,18 @@ public:
 
     void update(std::ostream &out) const;
 
-    [[nodiscard]] inline unsigned getMaximum() const noexcept { return data->uMax; }
-    inline void setMaximum(unsigned value) noexcept { data->uMax = value; }
+    [[nodiscard]] unsigned getMaximum() const noexcept { return data->uMax; }
+    void setMaximum(unsigned value) noexcept { data->uMax = value; }
 
-    [[nodiscard]] inline unsigned getProgress() const noexcept { return data->uProgress; }
-    inline void setProgress(unsigned value) noexcept { data->uProgress = value; }
+    [[nodiscard]] unsigned getProgress() const noexcept { return data->uProgress; }
+    void setProgress(unsigned value) noexcept { data->uProgress = value; }
 
-    [[nodiscard]] inline const std::string &getMessage() const noexcept { return data->message; }
-    inline void setMessage(const std::string &msg) noexcept { data->message = msg; }
+    [[nodiscard]] const std::string &getMessage() const noexcept { return data->message; }
+    void setMessage(const std::string &msg) noexcept { data->message = msg; }
 
-    [[nodiscard]] inline bool isComplete() const noexcept { return data->uProgress >= data->uMax; }
+    [[nodiscard]] bool isComplete() const noexcept { return data->uProgress >= data->uMax; }
 
-    inline operator bool() const noexcept { return this->isComplete(); }
+    operator bool() const noexcept { return this->isComplete(); }
 
     ProgressBar &operator++() noexcept;
     ProgressBar &operator--() noexcept;

@@ -4,6 +4,8 @@
 
 Logger logger(std::cout);
 
+std::vector<std::string> test{"This is a test array", "Only used for testing", "aspaihd"};
+
 int main(void)
 {
     const auto total = 100;
@@ -14,6 +16,7 @@ int main(void)
 
     LOGGER_WARN << "This is a warning, that will print the current position";
 
+    logger.debug("Test vector") << test;
     {
         auto bar = logger.newProgressBar("Bar with a really long title", total,
                                          ProgressBar::Style{

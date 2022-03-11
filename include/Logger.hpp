@@ -1,18 +1,26 @@
 #pragma once
 
 #include <atomic>
+#include <iostream>
 #include <mutex>
-#include <string_view>
 #include <optional>
 #include <sstream>
 #include <stdint.h>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <unordered_map>
 #include <utility>
 
+#include "Container.hpp"
 #include "ProgressBar.hpp"
 #include "ThreadSafeStorage.hpp"
+
+template <typename T>
+concept Printable = requires(T a)
+{
+    std::cout << a;
+};
 
 class Logger
 {
@@ -22,13 +30,27 @@ public:
     class Stream
     {
     public:
-        constexpr Stream(Logger &log, std::stringstream &ss): s(ss), logger(log) {}
+        constexpr explicit Stream(Logger &log, std::stringstream &ss): s(ss), logger(log) {}
         ~Stream() { logger.endl(); }
 
-        template <typename T>
-        constexpr Stream &operator<<(const T &u)
+        template <Printable T>
+        constexpr Stream &operator<<(const T &object)
         {
-            s << u;
+            s << object;
+            return *this;
+        }
+
+        template <Container T>
+        requires(Printable<T> == false) constexpr Stream &operator<<(const T &container)
+        {
+            s << "[";
+            for (const auto &i: container) {
+                s << '\"';
+                (*this) << i;
+                s << '\"';
+                if (i != container.back()) s << ", ";
+            }
+            s << "]";
             return *this;
         }
 

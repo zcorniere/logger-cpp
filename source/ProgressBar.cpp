@@ -5,6 +5,8 @@
 #include <optional>
 #include <ratio>
 #include <sstream>
+#include <string_view>
+#include <utility>
 
 #include "Terminal.hpp"
 
