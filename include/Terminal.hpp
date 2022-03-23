@@ -104,15 +104,16 @@ enum class Color : std::uint8_t {
     White = 37,
 };
 
-template <Color Color = Color::White>
-std::ostream &color(std::ostream &stream)
+inline std::ostream &color(std::ostream &stream, const Color &color)
 {
     if (__impl::isColorized(stream)) {
-        stream << LOGGER_ESCAPE_SEQUENCE "[" << std::to_string(static_cast<std::underlying_type_t<enum Color>>(Color))
+        stream << LOGGER_ESCAPE_SEQUENCE "[" << std::to_string(static_cast<std::underlying_type_t<enum Color>>(color))
                << "m";
     }
     return stream;
 }
+
+inline std::ostream &operator<<(std::ostream &stream, const Color &col) { return color(stream, col); }
 
 }    // namespace Terminal
 

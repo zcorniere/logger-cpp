@@ -111,48 +111,42 @@ Logger::Stream Logger::warn(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Warn;
-    buf.stream << BRACKETS(Terminal::Color::Yellow, "WARN") BRACKETS(Terminal::Color::Yellow, msg);
-    return Stream(*this, buf.stream);
+    return Stream(*this, buf, msg);
 }
 
 Logger::Stream Logger::err(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Error;
-    buf.stream << BRACKETS(Terminal::Color::Red, "ERROR") BRACKETS(Terminal::Color::Red, msg);
-    return Stream(*this, buf.stream);
+    return Stream(*this, buf, msg);
 }
 
 Logger::Stream Logger::info(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Info;
-    buf.stream << BRACKETS(Terminal::Color::Cyan, "INFO") BRACKETS(Terminal::Color::Cyan, msg);
-    return Stream(*this, buf.stream);
+    return Stream(*this, buf, msg);
 }
 
 Logger::Stream Logger::debug(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Debug;
-    buf.stream << BRACKETS(Terminal::Color::Magenta, "DEBUG") BRACKETS(Terminal::Color::Magenta, msg);
-    return Stream(*this, buf.stream);
+    return Stream(*this, buf, msg);
 }
 
 Logger::Stream Logger::msg(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Message;
-    buf.stream << "[" << msg << "] ";
-    return Stream(*this, buf.stream);
+    return Stream(*this, buf, msg);
 }
 
 Logger::Stream Logger::trace(const std::string_view &msg)
 {
     auto &buf = this->raw();
     buf.level = Logger::Level::Trace;
-    buf.stream << "[" << msg << "] ";
-    return Stream(*this, buf.stream);
+    return Stream(*this, buf, msg);
 }
 
 Logger::MessageBuffer &Logger::raw()

@@ -14,6 +14,7 @@
 
 #include "Container.hpp"
 #include "ProgressBar.hpp"
+#include "Terminal.hpp"
 #include "ThreadSafeStorage.hpp"
 
 template <typename T>
@@ -27,44 +28,74 @@ class Logger
 public:
     enum class Level { Trace = -1, Debug = 0, Info = 1, Warn = 2, Error = 3, Message = 4 };
 
+protected:
+    struct MessageBuffer {
+        Level level = Level::Message;
+        std::stringstream stream{};
+        constexpr const char *levelStr() const noexcept
+        {
+            switch (level) {
+                case Level::Trace: return "TRACE";
+                case Level::Debug: return "DEBUG";
+                case Level::Info: return "INFO";
+                case Level::Warn: return "WARN";
+                case Level::Error: return "ERROR";
+                case Level::Message: return "MESSAGE";
+                default: return "UNKNOWN";
+            }
+        }
+        constexpr Terminal::Color levelColor() const noexcept
+        {
+            switch (level) {
+                case Level::Trace: return Terminal::Color::Green;
+                case Level::Debug: return Terminal::Color::Magenta;
+                case Level::Info: return Terminal::Color::Cyan;
+                case Level::Warn: return Terminal::Color::Yellow;
+                case Level::Error: return Terminal::Color::Red;
+                case Level::Message: return Terminal::Color::White;
+                default: return Terminal::Color::White;
+            }
+        }
+    };
     class Stream
     {
     public:
-        constexpr explicit Stream(Logger &log, std::stringstream &ss): s(ss), logger(log) {}
+        inline explicit Stream(Logger &log, MessageBuffer &buffer, const std::string_view &message)
+            : buffer(buffer), logger(log)
+        {
+            buffer.stream << "[" << buffer.levelColor();
+            buffer.stream << buffer.levelStr() << Terminal::reset << "]";
+            buffer.stream << "[" << buffer.levelColor() << message << Terminal::reset << "] ";
+        }
         ~Stream() { logger.endl(); }
 
         template <Printable T>
         constexpr Stream &operator<<(const T &object)
         {
-            s << object;
+            buffer.stream << object;
             return *this;
         }
 
         template <Container T>
         requires(Printable<T> == false) constexpr Stream &operator<<(const T &container)
         {
-            s << "[";
+            buffer.stream << "[";
             for (const auto &i: container) {
-                s << '\"';
+                buffer.stream << '\"';
                 (*this) << i;
-                s << '\"';
-                if (i != container.back()) s << ", ";
+                buffer.stream << '\"';
+                if (i != container.back()) buffer.stream << ", ";
             }
-            s << "]";
+            buffer.stream << "]";
             return *this;
         }
 
     private:
-        std::stringstream &s;
+        MessageBuffer &buffer;
         Logger &logger;
     };
 
 private:
-    struct MessageBuffer {
-        Level level = Level::Message;
-        std::stringstream stream{};
-    };
-
     struct Message {
         Level level = Level::Message;
         std::optional<std::string> message = std::nullopt;
