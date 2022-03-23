@@ -64,6 +64,7 @@ protected:
             : buffer(buffer), logger(log)
         {
             buffer.stream << "[" << buffer.levelColor();
+            if (std::uncaught_exceptions() > 0) buffer.stream << "THROW/";
             buffer.stream << buffer.levelStr() << Terminal::reset << "]";
             buffer.stream << "[" << buffer.levelColor() << message << Terminal::reset << "] ";
         }
