@@ -8,9 +8,24 @@
 #include <utility>
 
 #include "Terminal.hpp"
+static std::once_flag initInstanceFlag;
 
-Logger::Logger(std::ostream &stream): stream(stream) { Terminal::setupTerminal(stream); }
+static unsigned init()
+{
+#if defined(TERMINAL_TARGET_WINDOWS)
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE) return GetLastError();
+    DWORD dwMode = 0;
+    if (!GetConsoleMode(hOut, &dwMode)) return GetLastError();
+    dwMode |= DWORD(ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    if (!SetConsoleMode(hOut, dwMode)) return GetLastError();
+#elif defined(TERMINAL_TARGET_POSIX)
+#endif
+    return 0;
+}
 
+
+Logger::Logger(std::ostream &stream): stream(stream) { std::call_once(initInstanceFlag, init); }
 Logger::~Logger() { this->stop(); }
 
 void Logger::thread_loop()
