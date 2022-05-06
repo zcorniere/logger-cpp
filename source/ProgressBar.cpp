@@ -106,7 +106,7 @@ std::string ProgressBar::drawProgress() const
 std::string ProgressBar::drawPrefix() const
 {
     std::stringstream prefix;
-    prefix << LOGGER_ESCAPE_SEQUENCE "[2K" << style(cpplogger::Style::Bold) << data->message << reset();
+    prefix << clearLine() << style(cpplogger::Style::Bold) << data->message << reset();
     return prefix.str();
 }
 

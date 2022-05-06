@@ -32,12 +32,12 @@ enum class Color {
 
 inline std::string style(const Style &sty)
 {
-    return "\033[" + std::to_string(static_cast<std::underlying_type_t<enum Style>>(sty)) + "m";
+    return LOGGER_ESCAPE_SEQUENCE "[" + std::to_string(static_cast<std::underlying_type_t<enum Style>>(sty)) + "m";
 }
 
 inline std::string color(const Color &color)
 {
-    return "\033[" + std::to_string(static_cast<std::underlying_type_t<enum Color>>(color)) + "m";
+    return LOGGER_ESCAPE_SEQUENCE "[" + std::to_string(static_cast<std::underlying_type_t<enum Color>>(color)) + "m";
 }
 
 inline std::string repeat(unsigned n, const std::string &s)
