@@ -22,34 +22,6 @@ std::ostream &colorize(std::ostream &stream);
 std::ostream &nocolorize(std::ostream &stream);
 void setupTerminal(std::ostream &stream);
 
-struct Size {
-    int columns = 0;
-    int lines = 0;
-
-#if defined(TERMINAL_TARGET_WINDOWS)
-    static Size get() noexcept
-    {
-        CONSOLE_SCREEN_BUFFER_INFO csbi;
-
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-        return {
-            .columns = csbi.srWindow.Right - csbi.srWindow.Left + 1,
-            .lines = csbi.srWindow.Bottom - csbi.srWindow.Top + 1,
-        };
-    }
-#elif defined(TERMINAL_TARGET_POSIX)
-    static Size get() noexcept
-    {
-        struct winsize w;
-
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-        return {
-            .columns = w.ws_col,
-            .lines = w.ws_row,
-        };
-    }
-#endif
-};
 
 enum class Style : std::uint8_t {
     Bold = 1,
