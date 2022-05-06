@@ -123,16 +123,16 @@ public:
     requires std::is_constructible_v<T, Args...>
     void emplace_back(Args... args)
     {
-        auto t = T(args...);
-        this->push_back(t);
+        std::scoped_lock lock(q_mut);
+        q.emplace_back(args...);
     }
 
     template <typename... Args>
     requires std::is_constructible_v<T, Args...>
-    void emplace_from(Args... args)
+    void emplace_front(Args... args)
     {
-        auto t = T(args...);
-        this->push_front(t);
+        std::scoped_lock lock(q_mut);
+        q.emplace_front(args...);
     }
 
     void push_back(const T &i)
