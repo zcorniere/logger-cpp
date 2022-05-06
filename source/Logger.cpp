@@ -7,7 +7,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "Terminal.hpp"
 static std::once_flag initInstanceFlag;
 
 static unsigned init()
@@ -24,8 +23,11 @@ static unsigned init()
     return 0;
 }
 
+namespace cpplogger
+{
 
 Logger::Logger(std::ostream &stream): stream(stream) { std::call_once(initInstanceFlag, init); }
+
 Logger::~Logger() { this->stop(); }
 
 void Logger::thread_loop()
@@ -53,7 +55,7 @@ void Logger::thread_loop()
                 if (msg->message) {
                     // If there is a message, print it
                     if (msg->level >= selectedLevel.load())
-                        stream << LOGGER_ESCAPE_SEQUENCE "[2K" << msg->message.value() << Terminal::reset << std::endl;
+                        stream << LOGGER_ESCAPE_SEQUENCE "[2K" << msg->message.value() << reset() << std::endl;
                 } else {
                     // If not, set the level
                     selectedLevel = msg->level;
@@ -121,54 +123,27 @@ void Logger::endl()
 }
 
 #define BRACKETS(COLOR, STRING) "[" << Terminal::color<COLOR> << STRING << Terminal::reset << "] "
-
-Logger::Stream Logger::warn(const std::string_view &msg)
-{
-    auto &buf = this->raw();
-    buf.level = Logger::Level::Warn;
+#define LOGGER_FUNC(LVL)     \
+    auto &buf = this->raw(); \
+    buf.level = LVL;         \
     return Stream(*this, buf, msg);
-}
 
-Logger::Stream Logger::err(const std::string_view &msg)
-{
-    auto &buf = this->raw();
-    buf.level = Logger::Level::Error;
-    return Stream(*this, buf, msg);
-}
+Logger::Stream Logger::warn(const std::string_view &msg) { LOGGER_FUNC(Logger::Level::Warn); }
 
-Logger::Stream Logger::info(const std::string_view &msg)
-{
-    auto &buf = this->raw();
-    buf.level = Logger::Level::Info;
-    return Stream(*this, buf, msg);
-}
+Logger::Stream Logger::err(const std::string_view &msg) { LOGGER_FUNC(Logger::Level::Error); }
 
-Logger::Stream Logger::debug(const std::string_view &msg)
-{
-    auto &buf = this->raw();
-    buf.level = Logger::Level::Debug;
-    return Stream(*this, buf, msg);
-}
+Logger::Stream Logger::info(const std::string_view &msg) { LOGGER_FUNC(Logger::Level::Info); }
 
-Logger::Stream Logger::msg(const std::string_view &msg)
-{
-    auto &buf = this->raw();
-    buf.level = Logger::Level::Message;
-    return Stream(*this, buf, msg);
-}
+Logger::Stream Logger::debug(const std::string_view &msg) { LOGGER_FUNC(Logger::Level::Debug); }
 
-Logger::Stream Logger::trace(const std::string_view &msg)
-{
-    auto &buf = this->raw();
-    buf.level = Logger::Level::Trace;
-    return Stream(*this, buf, msg);
-}
+Logger::Stream Logger::msg(const std::string_view &msg) { LOGGER_FUNC(Logger::Level::Message); }
+
+Logger::Stream Logger::trace(const std::string_view &msg) { LOGGER_FUNC(Logger::Level::Trace); }
 
 Logger::MessageBuffer &Logger::raw()
 {
     if (!mBuffers.contains(std::this_thread::get_id())) {
         std::stringstream str;
-        Terminal::colorize(str);
         std::unique_lock<std::mutex> lBuffers(mutBuffer);
         mBuffers[std::this_thread::get_id()] = {
             .level = Logger::Level::Message,
@@ -178,4 +153,4 @@ Logger::MessageBuffer &Logger::raw()
     return mBuffers.at(std::this_thread::get_id());
 }
 
-#undef BRACKETS
+}    // namespace cpplogger

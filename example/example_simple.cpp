@@ -1,8 +1,9 @@
 #define LOGGER_EXTERN_DECLARATION
 #include <Logger.hpp>
+
 #include <iostream>
 
-Logger logger(std::cout);
+cpplogger::Logger logger(std::cout);
 
 int main(void)
 {

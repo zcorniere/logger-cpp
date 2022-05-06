@@ -1,8 +1,7 @@
-#define LOGGER_EXTERN_DECLARATION
 #include <Logger.hpp>
 #include <iostream>
 
-Logger logger(std::cout);
+cpplogger::Logger logger(std::cout);
 
 std::vector<std::string> test{"This is a test array", "Only used for testing", "aspaihd"};
 
@@ -28,12 +27,12 @@ int main(void)
 
     logger.err("Test") << "this is an error message, will be printed in red";
 
-    LOGGER_WARN << "This is a warning, that will print the current position";
+    logger.warn() << "This is a warning, that will print the current position";
 
     logger.debug("Test vector") << test;
     {
         auto bar = logger.newProgressBar("Bar with a really long title", total,
-                                         ProgressBar::Style{
+                                         cpplogger::ProgressBar::Style{
                                              .bShowTime = true,
                                          });
         for (unsigned i = 0; i < total; i++) {
@@ -48,7 +47,7 @@ int main(void)
     {
         bool bRewind = false;
         auto bar2 = logger.newProgressBar("Bar2", total,
-                                          ProgressBar::Style{
+                                          cpplogger::ProgressBar::Style{
                                               .cFill = '#',
                                               .cEqual = '#',
                                               .cEmpty = '-',
