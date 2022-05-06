@@ -40,8 +40,8 @@ namespace cpplogger
     protected:
         struct MessageBuffer {
             Level level = Level::Message;
-            std::stringstream stream{};
-            constexpr const char *levelStr() const noexcept
+            std::stringstream stream;
+            constexpr const std::string_view levelStr() const noexcept
             {
                 switch (level) {
                     case Level::Trace: return "TRACE";
