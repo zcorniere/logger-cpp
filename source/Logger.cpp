@@ -40,10 +40,9 @@ void Logger::thread_loop()
             else
                 qMsg.waitTimeout<100>();
 
-            if (barsModifier) {
-                // come up some line and clear them to display the messages (see man console_codes)
-                stream << LOGGER_ESCAPE_SEQUENCE "[" << barsModifier << "F" LOGGER_ESCAPE_SEQUENCE "[0J";
-                barsModifier = 0;
+            while (barsModifier > 0) {
+                stream << moveUp(1) << clearLine();
+                barsModifier -= 1;
             }
 
             // Flush the messages queue
@@ -54,8 +53,7 @@ void Logger::thread_loop()
 
                 if (msg->message) {
                     // If there is a message, print it
-                    if (msg->level >= selectedLevel.load())
-                        stream << LOGGER_ESCAPE_SEQUENCE "[2K" << msg->message.value() << reset() << std::endl;
+                    if (msg->level >= selectedLevel) stream << clearLine() << msg->message.value() << reset() << "\n";
                 } else {
                     // If not, set the level
                     selectedLevel = msg->level;
@@ -122,7 +120,6 @@ void Logger::endl()
     mBuffers.erase(std::this_thread::get_id());
 }
 
-#define BRACKETS(COLOR, STRING) "[" << Terminal::color<COLOR> << STRING << Terminal::reset << "] "
 #define LOGGER_FUNC(LVL)     \
     auto &buf = this->raw(); \
     buf.level = LVL;         \
@@ -143,12 +140,8 @@ Logger::Stream Logger::trace(const std::string_view &msg) { LOGGER_FUNC(Logger::
 Logger::MessageBuffer &Logger::raw()
 {
     if (!mBuffers.contains(std::this_thread::get_id())) {
-        std::stringstream str;
         std::unique_lock<std::mutex> lBuffers(mutBuffer);
-        mBuffers[std::this_thread::get_id()] = {
-            .level = Logger::Level::Message,
-            .stream = std::move(str),
-        };
+        mBuffers[std::this_thread::get_id()] = {};
     }
     return mBuffers.at(std::this_thread::get_id());
 }
