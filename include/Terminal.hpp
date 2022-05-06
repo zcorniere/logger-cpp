@@ -20,7 +20,6 @@ namespace __impl
 std::ostream &reset(std::ostream &stream);
 std::ostream &colorize(std::ostream &stream);
 std::ostream &nocolorize(std::ostream &stream);
-void setupTerminal(std::ostream &stream);
 
 
 enum class Style : std::uint8_t {
