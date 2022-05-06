@@ -8,7 +8,11 @@
 #include <string_view>
 #include <utility>
 
-#include "Terminal.hpp"
+#include "Size.hpp"
+#include "utils.hpp"
+
+namespace cpplogger
+{
 
 ProgressBar::ProgressBar(std::string _message, unsigned max, Style style)
     : data(new Data{
@@ -22,7 +26,7 @@ ProgressBar::ProgressBar(std::string _message, unsigned max, Style style)
 
 void ProgressBar::update(std::ostream &out) const
 {
-    const Terminal::Size size = Terminal::Size::get();
+    const auto size = Size::get();
     const auto progress_str = drawProgress();
 
     std::optional<std::string> time_str = std::nullopt;
@@ -102,7 +106,8 @@ std::string ProgressBar::drawProgress() const
 std::string ProgressBar::drawPrefix() const
 {
     std::stringstream prefix;
-    prefix << LOGGER_ESCAPE_SEQUENCE "[2K" << Terminal::style<Terminal::Style::Bold> << data->message
-           << Terminal::reset;
+    prefix << LOGGER_ESCAPE_SEQUENCE "[2K" << style(cpplogger::Style::Bold) << data->message << reset();
     return prefix.str();
 }
+
+}    // namespace cpplogger

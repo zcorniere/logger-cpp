@@ -14,7 +14,7 @@ endif()
 add_library(${PROJECT_NAME} STATIC source/lib.cpp
                                    source/Logger.cpp
                                    source/ProgressBar.cpp
-                                   source/Terminal.cpp
+                                   source/Size.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)

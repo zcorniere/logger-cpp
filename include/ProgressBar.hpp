@@ -7,14 +7,17 @@
 #include <ostream>
 #include <string>
 
+namespace cpplogger
+{
+
 namespace details
 {
-struct Style {
-    const char cFill = '=';
-    const char cEqual = '>';
-    const char cEmpty = ' ';
-    const bool bShowTime = false;
-};
+    struct Style {
+        const char cFill = '=';
+        const char cEqual = '>';
+        const char cEmpty = ' ';
+        const bool bShowTime = false;
+    };
 };    // namespace details
 
 class ProgressBar
@@ -67,3 +70,5 @@ private:
 private:
     std::shared_ptr<ProgressBar::Data> data;
 };
+
+}    // namespace cpplogger

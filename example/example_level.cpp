@@ -1,10 +1,10 @@
-#define LOGGER_EXTERN_DECLARATION
 #include <Logger.hpp>
+
 #include <iostream>
 
-Logger logger(std::cout);
+cpplogger::Logger logger(std::cout);
 
-void printMessage(Logger::Level level)
+void printMessage(cpplogger::Logger::Level level)
 {
     logger.setLevel(level);
     logger.debug() << "This is a debug message";
@@ -20,17 +20,17 @@ int main(void)
     logger.start();
 
     logger.msg() << "Debug | Info | Warn | Error | Message";
-    printMessage(Logger::Level::Debug);
+    printMessage(cpplogger::Logger::Level::Debug);
 
     logger.msg() << "Info | Warn | Error | Message";
-    printMessage(Logger::Level::Info);
+    printMessage(cpplogger::Logger::Level::Info);
 
     logger.msg() << " Warn | Error | Message";
-    printMessage(Logger::Level::Warn);
+    printMessage(cpplogger::Logger::Level::Warn);
 
     logger.msg() << "Error | Message";
-    printMessage(Logger::Level::Error);
+    printMessage(cpplogger::Logger::Level::Error);
 
     logger.msg() << "Message";
-    printMessage(Logger::Level::Message);
+    printMessage(cpplogger::Logger::Level::Message);
 }
