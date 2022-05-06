@@ -63,6 +63,26 @@ std::ostream &nocolorize(std::ostream &stream)
 void setupTerminal(std::ostream &stream)
 {
 #if defined(TERMINAL_TARGET_WINDOWS)
+    bool fail = false;
+    do {
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (hOut == INVALID_HANDLE_VALUE) {
+            fail = true;
+            break;
+        }
+        DWORD dwMode = 0;
+        if (!GetConsoleMode(hOut, &dwMode)) {
+            fail = true;
+            break;
+        }
+        dwMode |= DWORD(ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        if (!SetConsoleMode(hOut, dwMode)) {
+            fail = true;
+            break;
+        }
+    } while (0);
+    if (fail) stream << "Failed to init terminal ! " << GetLastError();
+
 #elif defined(TERMINAL_TARGET_POSIX)
 #endif
     // In all case, we assume the terminal can now handle colorised input
