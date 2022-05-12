@@ -40,7 +40,7 @@ class ThreadSafeStorage
         }
 
         constexpr T &operator*() const { return s.at(index); }
-        constexpr T *operator->() const { return s.at(index); }
+        constexpr T *operator->() const { return &(s.at(index)); }
 
     private:
         const size_t to;

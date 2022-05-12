@@ -24,6 +24,7 @@ Size Size::get() noexcept
         .lines = w.ws_row,
     };
 #endif
+    return {};
 }
 
 }    // namespace logger
