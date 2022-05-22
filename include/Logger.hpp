@@ -12,7 +12,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include "Container.hpp"
 #include "ProgressBar.hpp"
 #include "ThreadSafeStorage.hpp"
 #include "utils.hpp"
@@ -22,6 +21,24 @@ concept Printable = requires(T a)
 {
     std::cout << a;
 };
+
+template <typename T>
+concept HasIterator = requires(const T a)
+{
+    {
+        a.begin()
+        } -> std::same_as<typename T::const_iterator>;
+    {
+        a.end()
+        } -> std::same_as<typename T::const_iterator>;
+    {
+        a.size()
+        } -> std::convertible_to<std::size_t>;
+};
+
+template <typename T>
+concept PrintableIterator =
+    HasIterator<T> && !Printable<T> && Printable<typename std::iterator_traits<typename T::const_iterator>::value_type>;
 
 namespace cpplogger
 {
@@ -80,22 +97,21 @@ namespace cpplogger
             }
             ~Stream() { logger.endl(); }
 
-            template <Printable T>
-            constexpr Stream &operator<<(const T &object)
+            inline Stream &operator<<(const Printable auto &object)
             {
                 buffer.stream << object;
                 return *this;
             }
 
-            template <Container T>
-            requires(Printable<T> == false) constexpr Stream &operator<<(const T &container)
+            inline Stream &operator<<(const PrintableIterator auto &container)
             {
+                auto size = container.size() - 1;
                 buffer.stream << "[";
                 for (const auto &i: container) {
                     buffer.stream << '\"';
                     (*this) << i;
                     buffer.stream << '\"';
-                    if (i != container.back()) buffer.stream << ", ";
+                    if (size-- > 0) buffer.stream << ", ";
                 }
                 buffer.stream << "]";
                 return *this;
