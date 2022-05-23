@@ -120,6 +120,19 @@ void Logger::endl()
     mBuffers.erase(std::this_thread::get_id());
 }
 
+Logger::Stream Logger::level(Logger::Level level, const std::string_view &msg)
+{
+    switch (level) {
+        case Level::Trace: return trace(msg);
+        case Level::Debug: return debug(msg);
+        case Level::Info: return info(msg);
+        case Level::Warn: return warn(msg);
+        case Level::Error: return err(msg);
+        case Level::Message: return this->msg(msg);
+        default: throw std::runtime_error("Invalid level value");
+    }
+}
+
 #define LOGGER_FUNC(LVL)     \
     auto &buf = this->raw(); \
     buf.level = LVL;         \

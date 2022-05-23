@@ -154,11 +154,12 @@ public:
         }
     }
 
+    [[nodiscard]] Stream level(Level level, const std::string_view &msg);
     [[nodiscard]] Stream warn(const std::string_view &msg = "WARNING");
     [[nodiscard]] Stream err(const std::string_view &msg = "ERROR");
     [[nodiscard]] Stream info(const std::string_view &msg = "INFO");
     [[nodiscard]] Stream debug(const std::string_view &msg = "DEBUG");
-    [[nodiscard]] Stream trace(const std::string_view &msg = "DEBUG");
+    [[nodiscard]] Stream trace(const std::string_view &msg = "TRACE");
     [[nodiscard]] Stream msg(const std::string_view &msg = "MESSAGE");
     void endl();
 
