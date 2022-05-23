@@ -42,143 +42,143 @@ concept PrintableIterator =
 
 namespace cpplogger
 {
-    class Logger
+class Logger
+{
+public:
+    enum class Level {
+        Trace = -1,
+        Debug = 0,
+        Info = 1,
+        Warn = 2,
+        Error = 3,
+        Message = 4,
+    };
+
+protected:
+    struct MessageBuffer {
+        Level level = Level::Message;
+        std::stringstream stream;
+        constexpr const std::string_view levelStr() const noexcept
+        {
+            switch (level) {
+                case Level::Trace: return "TRACE";
+                case Level::Debug: return "DEBUG";
+                case Level::Info: return "INFO";
+                case Level::Warn: return "WARN";
+                case Level::Error: return "ERROR";
+                case Level::Message: return "MESSAGE";
+                default: return "UNKNOWN";
+            }
+        }
+        constexpr Color levelColor() const noexcept
+        {
+            switch (level) {
+                case Level::Trace: return Color::Green;
+                case Level::Debug: return Color::Magenta;
+                case Level::Info: return Color::Cyan;
+                case Level::Warn: return Color::Yellow;
+                case Level::Error: return Color::Red;
+                case Level::Message: return Color::White;
+                default: return Color::White;
+            }
+        }
+    };
+
+    class Stream
     {
     public:
-        enum class Level {
-            Trace = -1,
-            Debug = 0,
-            Info = 1,
-            Warn = 2,
-            Error = 3,
-            Message = 4,
-        };
-
-    protected:
-        struct MessageBuffer {
-            Level level = Level::Message;
-            std::stringstream stream;
-            constexpr const std::string_view levelStr() const noexcept
-            {
-                switch (level) {
-                    case Level::Trace: return "TRACE";
-                    case Level::Debug: return "DEBUG";
-                    case Level::Info: return "INFO";
-                    case Level::Warn: return "WARN";
-                    case Level::Error: return "ERROR";
-                    case Level::Message: return "MESSAGE";
-                    default: return "UNKNOWN";
-                }
-            }
-            constexpr Color levelColor() const noexcept
-            {
-                switch (level) {
-                    case Level::Trace: return Color::Green;
-                    case Level::Debug: return Color::Magenta;
-                    case Level::Info: return Color::Cyan;
-                    case Level::Warn: return Color::Yellow;
-                    case Level::Error: return Color::Red;
-                    case Level::Message: return Color::White;
-                    default: return Color::White;
-                }
-            }
-        };
-
-        class Stream
+        inline explicit Stream(Logger &log, MessageBuffer &buffer, const std::string_view &message)
+            : buffer(buffer), logger(log)
         {
-        public:
-            inline explicit Stream(Logger &log, MessageBuffer &buffer, const std::string_view &message)
-                : buffer(buffer), logger(log)
-            {
-                buffer.stream << "[" << color(buffer.levelColor());
-                if (std::uncaught_exceptions() > 0) buffer.stream << "THROW/";
-                buffer.stream << buffer.levelStr() << reset() << "]";
-                buffer.stream << "[" << color(buffer.levelColor()) << message << reset() << "] ";
-            }
-            ~Stream() { logger.endl(); }
+            buffer.stream << "[" << color(buffer.levelColor());
+            if (std::uncaught_exceptions() > 0) buffer.stream << "THROW/";
+            buffer.stream << buffer.levelStr() << reset() << "]";
+            buffer.stream << "[" << color(buffer.levelColor()) << message << reset() << "] ";
+        }
+        ~Stream() { logger.endl(); }
 
-            inline Stream &operator<<(const Printable auto &object)
-            {
-                buffer.stream << object;
-                return *this;
-            }
-
-            inline Stream &operator<<(const PrintableIterator auto &container)
-            {
-                auto size = container.size() - 1;
-                buffer.stream << "[";
-                for (const auto &i: container) {
-                    buffer.stream << '\"';
-                    (*this) << i;
-                    buffer.stream << '\"';
-                    if (size-- > 0) buffer.stream << ", ";
-                }
-                buffer.stream << "]";
-                return *this;
-            }
-
-        private:
-            MessageBuffer &buffer;
-            Logger &logger;
-        };
-
-    private:
-        struct Message {
-            Level level = Level::Message;
-            std::optional<std::string> message = std::nullopt;
-        };
-
-    public:
-        Logger(std::ostream &stream);
-        ~Logger();
-        void start(Level level = Level::Debug);
-        void stop(bool bFlush = true);
-        void flush();
-
-        Level getLevel() const noexcept { return selectedLevel; };
-        void setLevel(Level level);
-
-        template <typename... Args>
-        requires std::is_constructible_v<ProgressBar, Args...>
-        [[nodiscard]] ProgressBar newProgressBar(Args... args)
+        inline Stream &operator<<(const Printable auto &object)
         {
-            qBars.emplace_back(std::make_pair(false, ProgressBar(args...)));
-            return qBars.back().second;
+            buffer.stream << object;
+            return *this;
         }
 
-        template <class... deletedBars>
-        void deleteProgressBar(const deletedBars &...bar)
+        inline Stream &operator<<(const PrintableIterator auto &container)
         {
-            for (auto &[needDeletion, i]: qBars) {
-                if (((i == bar) || ...)) { needDeletion = true; }
+            auto size = container.size() - 1;
+            buffer.stream << "[";
+            for (const auto &i: container) {
+                buffer.stream << '\"';
+                (*this) << i;
+                buffer.stream << '\"';
+                if (size-- > 0) buffer.stream << ", ";
             }
+            buffer.stream << "]";
+            return *this;
         }
 
-        [[nodiscard]] Stream warn(const std::string_view &msg = "WARNING");
-        [[nodiscard]] Stream err(const std::string_view &msg = "ERROR");
-        [[nodiscard]] Stream info(const std::string_view &msg = "INFO");
-        [[nodiscard]] Stream debug(const std::string_view &msg = "DEBUG");
-        [[nodiscard]] Stream trace(const std::string_view &msg = "DEBUG");
-        [[nodiscard]] Stream msg(const std::string_view &msg = "MESSAGE");
-        void endl();
-
     private:
-        [[nodiscard]] Logger::MessageBuffer &raw();
-        void thread_loop();
-
-    private:
-        std::ostream &stream;
-        std::mutex mutBuffer;
-        std::atomic_bool bExit = false;
-        std::thread msgT;
-        std::atomic<Level> selectedLevel = Level::Debug;
-        ThreadSafeStorage<Message> qMsg;
-        std::unordered_map<std::thread::id, MessageBuffer> mBuffers;
-
-        // Progress Bars
-        ThreadSafeStorage<std::pair<bool, ProgressBar>> qBars;
-        std::atomic<int16_t> iNewBars = 0;
+        MessageBuffer &buffer;
+        Logger &logger;
     };
+
+private:
+    struct Message {
+        Level level = Level::Message;
+        std::optional<std::string> message = std::nullopt;
+    };
+
+public:
+    Logger(std::ostream &stream);
+    ~Logger();
+    void start(Level level = Level::Debug);
+    void stop(bool bFlush = true);
+    void flush();
+
+    Level getLevel() const noexcept { return selectedLevel; };
+    void setLevel(Level level);
+
+    template <typename... Args>
+    requires std::is_constructible_v<ProgressBar, Args...>
+    [[nodiscard]] ProgressBar newProgressBar(Args... args)
+    {
+        qBars.emplace_back(std::make_pair(false, ProgressBar(args...)));
+        return qBars.back().second;
+    }
+
+    template <class... deletedBars>
+    void deleteProgressBar(const deletedBars &...bar)
+    {
+        for (auto &[needDeletion, i]: qBars) {
+            if (((i == bar) || ...)) { needDeletion = true; }
+        }
+    }
+
+    [[nodiscard]] Stream warn(const std::string_view &msg = "WARNING");
+    [[nodiscard]] Stream err(const std::string_view &msg = "ERROR");
+    [[nodiscard]] Stream info(const std::string_view &msg = "INFO");
+    [[nodiscard]] Stream debug(const std::string_view &msg = "DEBUG");
+    [[nodiscard]] Stream trace(const std::string_view &msg = "DEBUG");
+    [[nodiscard]] Stream msg(const std::string_view &msg = "MESSAGE");
+    void endl();
+
+private:
+    [[nodiscard]] Logger::MessageBuffer &raw();
+    void thread_loop();
+
+private:
+    std::ostream &stream;
+    std::mutex mutBuffer;
+    std::atomic_bool bExit = false;
+    std::thread msgT;
+    std::atomic<Level> selectedLevel = Level::Debug;
+    ThreadSafeStorage<Message> qMsg;
+    std::unordered_map<std::thread::id, MessageBuffer> mBuffers;
+
+    // Progress Bars
+    ThreadSafeStorage<std::pair<bool, ProgressBar>> qBars;
+    std::atomic<int16_t> iNewBars = 0;
+};
 
 }    // namespace cpplogger
 

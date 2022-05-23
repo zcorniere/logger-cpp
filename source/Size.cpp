@@ -27,4 +27,4 @@ Size Size::get() noexcept
     return {};
 }
 
-}    // namespace logger
+}    // namespace cpplogger

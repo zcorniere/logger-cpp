@@ -7,21 +7,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Threads REQUIRED)
 
 option(BUILD_EXAMPLE "Build example application" OFF)
-if (BUILD_EXAMPLE)
+if(BUILD_EXAMPLE)
     add_subdirectory(example/)
 endif()
 
-add_library(${PROJECT_NAME} STATIC source/lib.cpp
-                                   source/Logger.cpp
-                                   source/ProgressBar.cpp
-                                   source/Size.cpp
-)
+add_library(${PROJECT_NAME} STATIC source/lib.cpp source/Logger.cpp source/ProgressBar.cpp source/Size.cpp)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
 
-target_compile_options(${PROJECT_NAME} PRIVATE
-     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-          -Wall -Wextra -Werror>
-     $<$<CXX_COMPILER_ID:MSVC>:
-          /W4 /WX>)
+target_compile_options(
+    ${PROJECT_NAME}
+    PRIVATE $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+            -Wall
+            -Wextra
+            -Werror>
+            $<$<CXX_COMPILER_ID:MSVC>:
+            /W4
+            /WX>
+)

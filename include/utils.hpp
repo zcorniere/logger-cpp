@@ -63,4 +63,4 @@ inline std::string clearLines(unsigned n = 1)
            ((n) ? repeat(n, clearLine() + moveUp()) : std::string(""));
 }
 
-}    // namespace logger
+}    // namespace cpplogger
