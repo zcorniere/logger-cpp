@@ -11,6 +11,8 @@
     #include <unistd.h>
 
 #elif defined(TERMINAL_TARGET_WINDOWS)
+    #define NOMINMAX
+
     #include <io.h>
     #include <windows.h>
 #endif
