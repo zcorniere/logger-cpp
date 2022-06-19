@@ -117,7 +117,7 @@ void Logger::endl()
         .level = raw.level,
         .message = raw.stream.str(),
     });
-    mBuffers.erase(std::this_thread::get_id());
+    mBuffers.at(std::this_thread::get_id()) = {};
 }
 
 Logger::Stream Logger::level(Logger::Level level, const std::string_view &msg)
