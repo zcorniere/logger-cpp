@@ -48,8 +48,6 @@ class ThreadSafeStorage
         size_t index;
         ThreadSafeStorage &s;
     };
-    // Disable because of defect P2325R3
-    // static_assert(std::input_iterator<typename ThreadSafeStorage<T>::iterator>);
 
 public:
     ThreadSafeStorage() = default;
@@ -63,7 +61,7 @@ public:
 
     bool empty() const
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         return q.empty();
     }
 
@@ -73,38 +71,38 @@ public:
 
     auto size() const
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         return q.size();
     }
 
     void erase(std::function<bool(const T &i)> &&t)
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         auto e = std::remove_if(q.begin(), q.end(), t);
         q.erase(e, q.end());
     }
 
     void clear()
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         q.clear();
     }
 
     const T &at(const size_t &index) const
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         return q.at(index);
     }
 
     T &at(const size_t &index)
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         return q.at(index);
     }
 
     std::optional<T> pop_front()
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         if (q.size() == 0) return std::nullopt;
         T t = std::move(q.front());
         q.pop_front();
@@ -112,7 +110,7 @@ public:
     }
     std::optional<T> pop_back()
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         if (q.size() == 0) return std::nullopt;
         T t = std::move(q.front());
         q.pop_back();
@@ -123,7 +121,7 @@ public:
     requires std::is_constructible_v<T, Args...>
     void emplace_back(Args... args)
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         q.emplace_back(args...);
     }
 
@@ -131,20 +129,20 @@ public:
     requires std::is_constructible_v<T, Args...>
     void emplace_front(Args... args)
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         q.emplace_front(args...);
     }
 
     void push_back(const T &i)
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         q.emplace_back(std::move(i));
 
         vBlocking.notify_one();
     }
     void push_front(const T &i)
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         q.emplace_front(std::move(i));
 
         vBlocking.notify_one();
@@ -152,33 +150,34 @@ public:
 
     T &back()
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         return q.back();
     }
     T &front()
     {
-        std::scoped_lock lock(q_mut);
+        std::unique_lock<std::mutex> lock(q_mut);
         return q.front();
     }
 
-    void wait()
+    std::unique_lock<std::mutex> wait()
     {
-        while (this->bWait && this->empty()) {
-            std::unique_lock<std::mutex> ul(mutBlocking);
-            vBlocking.wait(ul);
-        }
+        std::unique_lock<std::mutex> ul(mutBlocking);
+        while (this->bWait && this->empty()) vBlocking.wait(ul);
+        return ul;
     }
     template <unsigned D = 10>
-    void waitTimeout()
+    std::unique_lock<std::mutex> waitTimeout()
     {
         std::unique_lock<std::mutex> ul(mutBlocking);
         vBlocking.wait_for(ul, std::chrono::milliseconds(D));
+        return ul;
     }
 
-    void waitTimeout(unsigned d = 10)
+    std::unique_lock<std::mutex> waitTimeout(unsigned d = 10)
     {
         std::unique_lock<std::mutex> ul(mutBlocking);
         vBlocking.wait_for(ul, std::chrono::milliseconds(d));
+        return ul;
     }
 
     void notify() { vBlocking.notify_all(); }
