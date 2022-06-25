@@ -1,5 +1,7 @@
 #include "Logger.hpp"
 
+#include "utils/demangle.hpp"
+
 static cpplogger::Logger *handler_logger = nullptr;
 static const std::terminate_handler static_handler = std::get_terminate();
 static std::terminate_handler previous_handler = nullptr;
@@ -10,9 +12,8 @@ void backstop()
     if (ep && handler_logger) {
         auto stream = handler_logger->err("Terminate");
         try {
-            int status;
-            auto const etype = abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0, 0, &status);
-            stream << "Terminating with uncaught exception of type `" << etype << "`";
+            stream << "Terminating with uncaught exception of type `" << cpplogger::demangle_exception_ptr(ep).value()
+                   << "`";
             std::rethrow_exception(ep);
 
         } catch (const std::exception &e) {

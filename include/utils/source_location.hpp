@@ -3,6 +3,7 @@
 #include "define.hpp"
 
 #include <filesystem>
+#include <string>
 #include <string_view>
 
 #if defined(LOGGER_SOURCE_LOCATION_AVAILABLE)
@@ -27,7 +28,9 @@ inline std::string file_position(const std::source_location &location = std::sou
     #define function_name() __func__
 #endif
 
-#define STR2(x) #x
-#define STR(x) STR2(x)
-#define file_position() \
-    std::string() + std::filesystem::relative(__FILE__, std::filesystem::current_path()).string() + ":" STR(__LINE__)
+inline std::string __file_position(char *const file, char *const line)
+{
+    return std::string() + ::std::filesystem::relative(file, ::std::filesystem::current_path()).string() + +":" + line;
+}
+
+#define file_position() __file_position(__FILE__, __LINE__)

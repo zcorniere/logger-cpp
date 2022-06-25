@@ -9,7 +9,7 @@
 #include <utility>
 
 #include "Size.hpp"
-#include "utils.hpp"
+#include "utils/sequences.hpp"
 
 namespace cpplogger
 {
