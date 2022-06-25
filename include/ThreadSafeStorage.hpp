@@ -7,6 +7,23 @@
 #include <mutex>
 #include <optional>
 
+#define STORAGE_METHOD_IMPL__(ret, name, modifier, impl)  \
+    ret name(std::unique_lock<std::mutex> &lock) modifier \
+    {                                                     \
+        if (!lock.owns_lock()) lock.lock();               \
+        impl                                              \
+    }                                                     \
+    ret name() modifier                                   \
+    {                                                     \
+        std::unique_lock<std::mutex> lock(q_mut);         \
+        return name(lock);                                \
+    }
+
+#define STORAGE_METHOD_IMPL(ret, name, impl) STORAGE_METHOD_IMPL__(ret, name, , impl)
+#define STORAGE_METHOD_IMPL_CONST(ret, name, impl) STORAGE_METHOD_IMPL__(ret, name, const, impl)
+#define STORAGE_METHOD_IMPL_BOTH(ret, name, impl) \
+    STORAGE_METHOD_IMPL__(ret, name, , impl) STORAGE_METHOD_IMPL__(const ret, name, const, impl)
+
 template <class T, class A = std::allocator<T>>
 class ThreadSafeStorage
 {
@@ -59,62 +76,59 @@ public:
 
     ~ThreadSafeStorage() { this->clear(); }
 
-    bool empty() const
-    {
-        std::unique_lock<std::mutex> lock(q_mut);
-        return q.empty();
-    }
-
     auto begin() { return iterator(*this, 0); }
-
     auto end() { return iterator(*this, this->size()); }
 
-    auto size() const
+    void erase(std::unique_lock<std::mutex> &lock, const std::function<bool(const T &i)> &&t)
     {
-        std::unique_lock<std::mutex> lock(q_mut);
-        return q.size();
-    }
-
-    void erase(std::function<bool(const T &i)> &&t)
-    {
-        std::unique_lock<std::mutex> lock(q_mut);
+        if (!lock.owns_lock()) lock.lock();
         auto e = std::remove_if(q.begin(), q.end(), t);
         q.erase(e, q.end());
     }
-
-    void clear()
+    void erase(const std::function<bool(const T &i)> &&t)
     {
         std::unique_lock<std::mutex> lock(q_mut);
-        q.clear();
+        erase(lock, std::move(t));
     }
+    STORAGE_METHOD_IMPL(void, clear, { q.clear(); });
+    STORAGE_METHOD_IMPL(std::optional<T>, pop_front, {
+        if (size(lock) == 0) return std::nullopt;
+        T t = std::move(front(lock));
+        q.pop_front();
+        return t;
+    })
+    STORAGE_METHOD_IMPL(std::optional<T>, pop_back, {
+        if (size(lock) == 0) return std::nullopt;
+        T t = std::move(front(lock));
+        q.pop_back();
+        return t;
+    })
+    STORAGE_METHOD_IMPL_CONST(bool, empty, { return q.empty(); });
+    STORAGE_METHOD_IMPL_CONST(auto, size, { return q.size(); });
 
+    STORAGE_METHOD_IMPL_BOTH(T &, back, { return q.back(); })
+    STORAGE_METHOD_IMPL_BOTH(T &, front, { return q.front(); })
+
+    const T &at(std::unique_lock<std::mutex> &lock, const size_t &index) const
+    {
+        if (!lock.owns_lock()) lock.lock();
+        return q.at(index);
+    }
     const T &at(const size_t &index) const
     {
         std::unique_lock<std::mutex> lock(q_mut);
-        return q.at(index);
+        return at(lock, index);
     }
 
+    T &at(std::unique_lock<std::mutex> &lock, const size_t &index)
+    {
+        if (!lock.owns_lock()) lock.lock();
+        return q.at(index);
+    }
     T &at(const size_t &index)
     {
         std::unique_lock<std::mutex> lock(q_mut);
-        return q.at(index);
-    }
-
-    std::optional<T> pop_front()
-    {
-        std::unique_lock<std::mutex> lock(q_mut);
-        if (q.size() == 0) return std::nullopt;
-        T t = std::move(q.front());
-        q.pop_front();
-        return t;
-    }
-    std::optional<T> pop_back()
-    {
-        std::unique_lock<std::mutex> lock(q_mut);
-        if (q.size() == 0) return std::nullopt;
-        T t = std::move(q.front());
-        q.pop_back();
-        return t;
+        return at(lock, index);
     }
 
     template <typename... Args>
@@ -146,17 +160,6 @@ public:
         q.emplace_front(std::move(i));
 
         vBlocking.notify_one();
-    }
-
-    T &back()
-    {
-        std::unique_lock<std::mutex> lock(q_mut);
-        return q.back();
-    }
-    T &front()
-    {
-        std::unique_lock<std::mutex> lock(q_mut);
-        return q.front();
     }
 
     std::unique_lock<std::mutex> wait()
@@ -196,3 +199,8 @@ private:
     std::mutex mutBlocking;
     std::condition_variable vBlocking;
 };
+
+#undef STORAGE_METHOD_IMPL_BOTH
+#undef STORAGE_METHOD_IMPL
+#undef STORAGE_METHOD_IMPL_CONST
+#undef STORAGE_METHOD_IMPL__
