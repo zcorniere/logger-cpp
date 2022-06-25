@@ -15,6 +15,8 @@
 #include "ProgressBar.hpp"
 #include "ThreadSafeStorage.hpp"
 #include "utils.hpp"
+#include "utils/demangle.hxx"
+#include "utils/source_location.hxx"
 
 template <typename T>
 concept Printable = requires(T a)
@@ -193,25 +195,11 @@ extern cpplogger::Logger logger;
 
 #endif
 
-#ifndef LOGGER_NO_MACROS
+#ifdef LOGGER_ACCESS
 
-    #define S1(x) #x
-    #define S2(x) S1(x)
-    #define LOCATION __FILE__ ":" S2(__LINE__)
-
-    #ifdef LOGGER_ACCESS
-        #define LOGGER_WARN logger LOGGER_ACCESS warn(LOCATION)
-        #define LOGGER_ERR logger LOGGER_ACCESS err(LOCATION)
-        #define LOGGER_INFO logger LOGGER_ACCESS info(LOCATION)
-        #define LOGGER_DEBUG logger LOGGER_ACCESS debug(LOCATION)
-
-    #else
-
-        #define LOGGER_WARN(logger) logger.warn(LOCATION)
-        #define LOGGER_ERR(logger) logger.err(LOCATION)
-        #define LOGGER_INFO(logger) logger.info(LOCATION)
-        #define LOGGER_DEBUG(logger) logger.debug(LOCATION)
-
-    #endif    // LOGGER_NO_MACROS
+    #define LOGGER_WARN(location) logger LOGGER_ACCESS warn(file_position())
+    #define LOGGER_ERR(location) logger LOGGER_ACCESS err(file_position())
+    #define LOGGER_INFO(location) logger LOGGER_ACCESS info(file_position())
+    #define LOGGER_DEBUG(location) logger LOGGER_ACCESS debug(file_position())
 
 #endif

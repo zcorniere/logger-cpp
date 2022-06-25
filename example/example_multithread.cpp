@@ -1,3 +1,4 @@
+#define LOGGER_ACCESS .
 #include <Logger.hpp>
 
 #include <iostream>
@@ -13,7 +14,7 @@ int main(void)
 
     logger.err("Test") << "this is an error message, will be printed in red";
 
-    logger.warn() << "This is a warning, that will print the current position";
+    LOGGER_WARN(main) << "This is a warning, that will print the current position";
 
     auto thread1 = std::jthread([&] {
         logger.info("Thread 1") << "Started";
