@@ -97,6 +97,8 @@ protected:
             buffer.stream << buffer.levelStr() << reset() << "]";
             buffer.stream << "[" << color(buffer.levelColor()) << message << reset() << "] ";
         }
+        Stream(const Stream &) = delete;
+        Stream(const Stream &&) = delete;
         ~Stream() { logger.endl(); }
 
         inline Stream &operator<<(const Printable auto &object)
@@ -132,6 +134,8 @@ private:
 
 public:
     Logger(std::ostream &stream);
+    Logger(const Logger &) = delete;
+    Logger(const Logger &&) = delete;
     ~Logger();
     void start(Level level = Level::Debug);
     void stop(bool bFlush = true);
@@ -171,16 +175,17 @@ private:
 
 private:
     std::ostream &stream;
-    std::mutex mutBuffer;
     std::atomic_bool bExit = false;
+
     std::thread msgT;
     std::atomic<Level> selectedLevel = Level::Debug;
     ThreadSafeStorage<Message> qMsg;
+
+    std::mutex mutBuffer;
     std::unordered_map<std::thread::id, MessageBuffer> mBuffers;
 
     // Progress Bars
     ThreadSafeStorage<std::pair<bool, ProgressBar>> qBars;
-    std::atomic<int16_t> iNewBars = 0;
 };
 
 }    // namespace cpplogger

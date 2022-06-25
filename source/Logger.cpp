@@ -1,5 +1,6 @@
 #include "Logger.hpp"
 
+#include <cassert>
 #include <deque>
 #include <exception>
 #include <iostream>
@@ -8,6 +9,31 @@
 #include <utility>
 
 static std::once_flag initInstanceFlag;
+
+static cpplogger::Logger *handler_logger = nullptr;
+static const std::terminate_handler static_handler = std::get_terminate();
+static std::terminate_handler previous_handler = nullptr;
+
+void backstop()
+{
+    auto const ep = std::current_exception();
+    if (ep && handler_logger) {
+        auto stream = handler_logger->err("Terminate");
+        try {
+            int status;
+            auto const etype = abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0, 0, &status);
+            stream << "Terminating with uncaught exception of type `" << etype << "`";
+            std::rethrow_exception(ep);
+
+        } catch (const std::exception &e) {
+            stream << " with `what()` = \"" << e.what() << "\"";
+        } catch (...) {
+        }
+        handler_logger->stop();
+    }
+    if (previous_handler) previous_handler();
+    std::abort();
+}
 
 static unsigned init()
 {
@@ -20,6 +46,9 @@ static unsigned init()
     if (!SetConsoleMode(hOut, dwMode)) return GetLastError();
 #elif defined(TERMINAL_TARGET_POSIX)
 #endif
+
+    /// previous_handler is normaly the default handler. If set_terminate is called before starting the logger, they
+    /// will be different.
     return 0;
 }
 
@@ -70,18 +99,28 @@ void Logger::thread_loop()
             stream.flush();
         } catch (const std::exception &e) {
             std::cerr << "LOGGER ERROR: " << e.what() << std::endl;
+        } catch (...) {
+            std::cerr << "Unknown erro in the Logger thread. Will exit now..." << std::endl;
+            return;
         }
     }
 }
 
 void Logger::start(Logger::Level level)
 {
+    if (static_handler != std::get_terminate()) { previous_handler = std::get_terminate(); }
+    handler_logger = this;
+    std::set_terminate(backstop);
+
     selectedLevel = level;
     msgT = std::thread(&Logger::thread_loop, this);
 }
 
 void Logger::stop(bool bFlush)
 {
+    std::set_terminate(static_handler);
+    handler_logger = nullptr;
+
     bExit = true;
     qMsg.setWaitMode(false);
 
