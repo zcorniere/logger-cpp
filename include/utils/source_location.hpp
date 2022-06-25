@@ -6,31 +6,37 @@
 #include <string>
 #include <string_view>
 
+namespace
+{
+
+inline std::string __file_position(const char *const file, int line, int col = -1)
+{
+    return std::string() + ::std::filesystem::relative(file, ::std::filesystem::current_path()).string() + ":" +
+           std::to_string(line) + ((col == -1) ? ("") : (":" + std::to_string(col)));
+}
+
+}    // namespace
+
 #if defined(LOGGER_SOURCE_LOCATION_AVAILABLE)
 
-constexpr std::string_view
-function_name(const std::source_location &location = std::source_location::current()) noexcept
+constexpr std::string_view function_name(const std::source_location &location = std::source_location::current())
 {
     return location.function_name();
 }
 
-inline std::string file_position(const std::source_location &location = std::source_location::current()) noexcept
+inline std::string file_position(const std::source_location &location = std::source_location::current())
 {
-    return std::string() + std::filesystem::relative(location.file_name(), std::filesystem::current_path()).string() +
-           ":" + std::to_string(location.line()) + ":" + std::to_string(location.column());
+    return __file_position(location.file_name(), location.line(), location.column());
 }
 
-#endif
-
-#if defined(__PRETTY_FUNCTION__)
-    #define function_name() __PRETTY_FUNCTION_
 #else
-    #define function_name() __func__
+
+    #if defined(__PRETTY_FUNCTION__)
+        #define function_name() std::string(__PRETTY_FUNCTION__)
+    #else
+        #define function_name() std::string(__FUNCTION__)
+    #endif
+
+    #define file_position() __file_position(__FILE__, __LINE__)
+
 #endif
-
-inline std::string __file_position(char *const file, char *const line)
-{
-    return std::string() + ::std::filesystem::relative(file, ::std::filesystem::current_path()).string() + +":" + line;
-}
-
-#define file_position() __file_position(__FILE__, __LINE__)
