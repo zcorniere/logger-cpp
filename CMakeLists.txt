@@ -11,7 +11,14 @@ if(BUILD_EXAMPLE)
     add_subdirectory(example/)
 endif()
 
-add_library(${PROJECT_NAME} STATIC source/lib.cpp source/Logger.cpp source/ProgressBar.cpp source/Size.cpp)
+add_library(
+    ${PROJECT_NAME} STATIC
+    source/lib.cpp
+    source/Logger.cpp
+    source/handlers.cpp
+    source/ProgressBar.cpp
+    source/Size.cpp
+)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 target_include_directories(${PROJECT_NAME} PUBLIC include/)

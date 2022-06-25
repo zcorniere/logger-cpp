@@ -1,5 +1,5 @@
-add_executable(example example.cpp)
-target_link_libraries(example PRIVATE logger)
+add_executable(example_terminate example_terminate.cpp)
+target_link_libraries(example_terminate PRIVATE logger)
 
 add_executable(example_multithread example_multithread.cpp)
 target_link_libraries(example_multithread PRIVATE logger)

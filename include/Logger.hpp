@@ -170,6 +170,8 @@ public:
     void endl();
 
 private:
+    void init();
+    void deinit();
     [[nodiscard]] Logger::MessageBuffer &raw();
     void thread_loop();
 
