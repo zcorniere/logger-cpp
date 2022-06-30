@@ -1,11 +1,13 @@
 #pragma once
 
 #include <atomic>
+#include <condition_variable>
+#include <cstdint>
+#include <deque>
 #include <iostream>
 #include <mutex>
 #include <optional>
 #include <sstream>
-#include <stdint.h>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -13,7 +15,7 @@
 #include <utility>
 
 #include "ProgressBar.hpp"
-#include "ThreadSafeStorage.hpp"
+#include "utils/mutex.hpp"
 #include "utils/sequences.hpp"
 #include "utils/source_location.hpp"
 
@@ -147,14 +149,15 @@ public:
     requires std::is_constructible_v<ProgressBar, Args...>
     [[nodiscard]] ProgressBar newProgressBar(Args... args)
     {
-        qBars.emplace_back(std::make_pair(false, ProgressBar(args...)));
-        return qBars.back().second;
+        auto bar = qBars.lock();
+        bar.get().emplace_back(std::make_pair(false, ProgressBar(args...)));
+        return bar.get().back().second;
     }
 
     template <class... deletedBars>
     void deleteProgressBar(const deletedBars &...bar)
     {
-        for (auto &[needDeletion, i]: qBars) {
+        for (auto &[needDeletion, i]: qBars.lock().get()) {
             if (((i == bar) || ...)) { needDeletion = true; }
         }
     }
@@ -174,19 +177,21 @@ private:
     [[nodiscard]] Logger::MessageBuffer &raw();
     void thread_loop();
 
+    std::pair<std::size_t, std::optional<Message>> getMessage();
+
 private:
     std::ostream &stream;
     std::atomic_bool bExit = false;
 
     std::thread msgT;
     std::atomic<Level> selectedLevel = Level::Debug;
-    ThreadSafeStorage<Message> qMsg;
+    mutex<std::deque<Message>> qMsg;
 
     std::mutex mutBuffer;
     std::unordered_map<std::thread::id, MessageBuffer> mBuffers;
 
     // Progress Bars
-    ThreadSafeStorage<std::pair<bool, ProgressBar>> qBars;
+    mutex<std::deque<std::pair<bool, ProgressBar>>> qBars;
 };
 
 }    // namespace cpplogger

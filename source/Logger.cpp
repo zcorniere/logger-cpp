@@ -1,10 +1,12 @@
 #include "Logger.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <deque>
 #include <exception>
 #include <iostream>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <utility>
 
@@ -20,15 +22,24 @@ Logger::Logger(std::ostream &stream): stream(stream) { std::call_once(initInstan
 
 Logger::~Logger() { this->stop(); }
 
+std::pair<std::size_t, std::optional<Logger::Message>> Logger::getMessage()
+{
+    auto lMsg = qMsg.lock();
+    if (lMsg.get().empty()) return {0, std::nullopt};
+
+    auto msg = std::move(lMsg.get().front());
+    lMsg.get().pop_front();
+    return {lMsg.get().size(), std::move(msg)};
+}
+
 void Logger::thread_loop()
 {
+    using namespace std::literals;
+
     int barsModifier = 0;
-    while (!bExit || !qMsg.empty()) {
+    while (!bExit) {
         try {
-            if (qBars.empty())
-                qMsg.wait();
-            else
-                qMsg.waitTimeout<100>();
+            std::this_thread::sleep_for(100ms);
 
             while (barsModifier > 0) {
                 stream << moveUp(1) << clearLine();
@@ -36,27 +47,36 @@ void Logger::thread_loop()
             }
 
             // Flush the messages queue
-            while (!qMsg.empty()) {
-                auto msg = qMsg.pop_front();
+            while (1) {
+                const auto &[size, msg] = getMessage();
 
-                if (!msg) throw std::runtime_error("Error getting value");
+                if (size == 0 || !msg.has_value()) break;
 
                 if (msg->message) {
                     // If there is a message, print it
-                    if (msg->level >= selectedLevel) stream << clearLine() << msg->message.value() << reset() << "\n";
+                    if (msg->level >= selectedLevel)
+                        stream << clearLine() << msg->message.value() << reset() << std::endl;
                 } else {
                     // If not, set the level
                     selectedLevel = msg->level;
                 }
             }
 
-            qBars.erase([](const auto &i) { return i.first; });
+            {
+                auto lBar = qBars.lock();
+                if (!lBar.get().empty()) {
+                    const auto &[first, last] =
+                        std::ranges::remove_if(lBar.get(), [](const auto &i) { return i.first; });
+                    lBar.get().erase(first, last);
 
-            // redraw the progress bars
-            for (auto &[_, bar]: qBars) {
-                bar.update(stream);
-                barsModifier++;
+                    // redraw the progress bars
+                    for (auto &[_, bar]: lBar.get()) {
+                        bar.update(stream);
+                        barsModifier++;
+                    }
+                }
             }
+
             stream.flush();
         } catch (const std::exception &e) {
             std::cerr << "LOGGER ERROR: " << e.what() << std::endl;
@@ -79,7 +99,6 @@ void Logger::stop(bool bFlush)
     deinit();
 
     bExit = true;
-    qMsg.setWaitMode(false);
 
     if (msgT.joinable()) msgT.join();
     if (bFlush) this->flush();
@@ -89,7 +108,7 @@ void Logger::flush()
 {
     std::unique_lock<std::mutex> lBuffers(mutBuffer);
 
-    for (auto &msg: qMsg)
+    for (auto &msg: qMsg.lock().get())
         if (msg.message) stream << msg.message.value() << std::endl;
     for (auto &[_, i]: mBuffers) {
         std::string msg(i.stream.str());
@@ -100,7 +119,8 @@ void Logger::flush()
 
 void Logger::setLevel(Level level)
 {
-    qMsg.push_back({
+    auto lock = qMsg.lock();
+    lock.get().push_back({
         .level = level,
         .message = std::nullopt,
     });
@@ -109,7 +129,9 @@ void Logger::setLevel(Level level)
 void Logger::endl()
 {
     auto &raw = this->raw();
-    qMsg.push_back({
+    auto lock = qMsg.lock();
+
+    lock.get().push_back({
         .level = raw.level,
         .message = raw.stream.str(),
     });
