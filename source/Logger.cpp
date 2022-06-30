@@ -170,11 +170,8 @@ Logger::Stream Logger::trace(const std::string_view &msg) { LOGGER_FUNC(Logger::
 
 Logger::MessageBuffer &Logger::raw()
 {
-    if (!mBuffers.contains(std::this_thread::get_id())) {
-        std::unique_lock<std::mutex> lBuffers(mutBuffer);
-        mBuffers[std::this_thread::get_id()] = {};
-    }
-    return mBuffers.at(std::this_thread::get_id());
+    std::unique_lock<std::mutex> lBuffers(mutBuffer);
+    return mBuffers[std::this_thread::get_id()];
 }
 
 }    // namespace cpplogger
