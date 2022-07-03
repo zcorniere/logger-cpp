@@ -37,9 +37,6 @@ unsigned init_terminal()
     if (!SetConsoleMode(hOut, dwMode)) return GetLastError();
 #elif defined(TERMINAL_TARGET_POSIX)
 #endif
-
-    /// previous_handler is normaly the default handler. If set_terminate is called before starting the logger, they
-    /// will be different.
     return 0;
 }
 
@@ -49,13 +46,16 @@ namespace cpplogger
 void Logger::init()
 {
     handler_logger = this;
+
+    /// previous_handler is normaly the default handler. If set_terminate is called before starting the logger, they
+    /// will be different.
     if (static_handler != std::get_terminate()) { previous_handler = std::get_terminate(); }
     std::set_terminate(backstop);
 }
 
 void Logger::deinit()
 {
-    std::set_terminate(static_handler);
+    if (backstop == std::get_terminate()) std::set_terminate(static_handler);
     handler_logger = nullptr;
 }
 

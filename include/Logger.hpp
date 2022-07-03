@@ -26,14 +26,8 @@ concept Printable = requires(T a)
 };
 
 template <typename T>
-concept HasIterator = requires(const T a)
+concept HasIterator = std::ranges::range<T> && requires(const T a)
 {
-    {
-        a.begin()
-        } -> std::same_as<typename T::const_iterator>;
-    {
-        a.end()
-        } -> std::same_as<typename T::const_iterator>;
     {
         a.size()
         } -> std::convertible_to<std::size_t>;
@@ -128,9 +122,32 @@ protected:
     };
 
 private:
-    struct Message {
+    class Message
+    {
+    public:
+        Message(const Level level): level(level) {}
+        Message(const MessageBuffer &buffer): level(buffer.level), message(buffer.stream.str()) {}
+
+    public:
         Level level = Level::Message;
         std::optional<std::string> message = std::nullopt;
+    };
+
+    class Context
+    {
+    public:
+        Context(std::ostream &os): stream(os) {}
+        Context(const Context &) = delete;
+
+    public:
+        std::ostream &stream;
+        std::atomic_bool bExit = false;
+        std::atomic<Level> selectedLevel = Level::Debug;
+
+        mutex<std::condition_variable> variable;
+        mutex<std::deque<Message>> qMsg;
+        mutex<std::unordered_map<std::thread::id, MessageBuffer>> mBuffers;
+        mutex<std::deque<std::pair<bool, ProgressBar>>> qBars;
     };
 
 public:
@@ -142,14 +159,13 @@ public:
     void stop(bool bFlush = true);
     void flush();
 
-    Level getLevel() const noexcept { return selectedLevel; };
     void setLevel(Level level);
 
     template <typename... Args>
     requires std::is_constructible_v<ProgressBar, Args...>
     [[nodiscard]] ProgressBar newProgressBar(Args... args)
     {
-        auto bar = qBars.lock();
+        auto bar = context.qBars.lock();
         bar.get().emplace_back(std::make_pair(false, ProgressBar(args...)));
         return bar.get().back().second;
     }
@@ -157,7 +173,7 @@ public:
     template <class... deletedBars>
     void deleteProgressBar(const deletedBars &...bar)
     {
-        for (auto &[needDeletion, i]: qBars.lock().get()) {
+        for (auto &[needDeletion, i]: context.qBars.lock().get()) {
             if (((i == bar) || ...)) { needDeletion = true; }
         }
     }
@@ -175,23 +191,12 @@ private:
     void init();
     void deinit();
     [[nodiscard]] Logger::MessageBuffer &raw();
-    void thread_loop();
 
-    std::pair<std::size_t, std::optional<Message>> getMessage();
+    static void thread_loop(Context &context);
 
 private:
-    std::ostream &stream;
-    std::atomic_bool bExit = false;
-
-    std::thread msgT;
-    std::atomic<Level> selectedLevel = Level::Debug;
-    mutex<std::deque<Message>> qMsg;
-
-    std::mutex mutBuffer;
-    std::unordered_map<std::thread::id, MessageBuffer> mBuffers;
-
-    // Progress Bars
-    mutex<std::deque<std::pair<bool, ProgressBar>>> qBars;
+    Context context;
+    std::jthread msgT;
 };
 
 }    // namespace cpplogger
