@@ -55,11 +55,10 @@ void Logger::thread_loop(Context &context)
 
             context.qBars.lock([&](auto &bars) -> void {
                 if (bars.empty()) return;
-
                 std::erase_if(bars, [](const auto &i) { return i.first; });
 
                 // redraw the progress bars
-                for (auto &[_, bar]: bars) {
+                for (const auto &[_, bar]: bars) {
                     bar.update(barStringLogger);
                     barsModifier++;
                 }

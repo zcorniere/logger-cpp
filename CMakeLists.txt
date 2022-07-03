@@ -33,3 +33,6 @@ target_compile_options(
             /W4
             /WX>
 )
+
+add_executable(benchmark benchmark/main.cpp)
+target_link_libraries(benchmark PUBLIC logger)
