@@ -8,6 +8,7 @@ find_package(Threads REQUIRED)
 
 option(BUILD_EXAMPLE "Build example application" OFF)
 if(BUILD_EXAMPLE)
+    message(STATUS "Building example application")
     add_subdirectory(example/)
 endif()
 
@@ -34,5 +35,9 @@ target_compile_options(
             /WX>
 )
 
-add_executable(benchmark benchmark/main.cpp)
-target_link_libraries(benchmark PUBLIC logger)
+option(BUILD_BENCHMARK "Build benchmark application" OFF)
+if(BUILD_BENCHMARK)
+    message(STATUS "Building benchmark application")
+    add_executable(benchmark benchmark/main.cpp)
+    target_link_libraries(benchmark PUBLIC logger)
+endif()
