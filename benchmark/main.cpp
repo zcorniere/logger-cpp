@@ -13,15 +13,15 @@ cpplogger::Logger logger(std::cout);
 
 #define START_POINT(msg)                                    \
     auto start = std::chrono::high_resolution_clock::now(); \
-    file << msg " : " << start.time_since_epoch() << std::endl;
+    file << msg " : " << start.time_since_epoch().count() << "s" << std::endl;
 
-#define END_POINT(msg)                                        \
-    auto end = std::chrono::high_resolution_clock::now();     \
-    file << msg " : " << end.time_since_epoch() << std::endl; \
-    std::chrono::duration<double> elapsedTime(end - start);   \
-    file << msg " took : " << elapsedTime << std::endl;
+#define END_POINT(msg)                                                       \
+    auto end = std::chrono::high_resolution_clock::now();                    \
+    file << msg " : " << end.time_since_epoch().count() << "s" << std::endl; \
+    std::chrono::duration<double> elapsedTime(end - start);                  \
+    file << msg " took : " << elapsedTime.count() << "s" << std::endl;
 
-void print_bs()
+void print_bs() noexcept
 {
     for (int i = 0; i < 1000000; i++) { logger.debug() << i; }
 }

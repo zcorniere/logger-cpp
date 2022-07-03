@@ -63,7 +63,7 @@ void Logger::thread_loop(Context &context)
                     barsModifier++;
                 }
             });
-            context.stream << barStringLogger.view();
+            context.stream << barStringLogger.str();
         } catch (const std::exception &e) {
             std::cerr << "LOGGER ERROR: " << e.what() << std::endl;
         } catch (...) {
