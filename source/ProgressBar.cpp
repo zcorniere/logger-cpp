@@ -21,7 +21,6 @@ ProgressBar::ProgressBar(std::string _message, unsigned max, Style style)
           .style = std::move(style),
       })
 {
-    assert(max > 0);
 }
 
 void ProgressBar::update(std::ostream &out) const
