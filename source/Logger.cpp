@@ -64,13 +64,14 @@ void Logger::thread_loop()
 
             {
                 auto lBar = qBars.lock();
-                if (!lBar.get().empty()) {
-                    const auto &[first, last] =
-                        std::ranges::remove_if(lBar.get(), [](const auto &i) { return i.first; });
-                    lBar.get().erase(first, last);
+                auto &mBar = lBar.get();
+                if (!mBar.empty()) {
+                    const auto &remove_index =
+                        std::remove_if(mBar.begin(), mBar.end(), [](const auto &i) { return i.first; });
+                    mBar.erase(remove_index);
 
                     // redraw the progress bars
-                    for (auto &[_, bar]: lBar.get()) {
+                    for (auto &[_, bar]: mBar) {
                         bar.update(stream);
                         barsModifier++;
                     }
