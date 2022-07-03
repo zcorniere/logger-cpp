@@ -28,6 +28,7 @@ void Logger::thread_loop(Context &context)
 
     int barsModifier = 0;
     while (!context.bExit) {
+        std::stringstream barStringLogger;
         try {
             {
                 auto var = context.variable.lock();
@@ -35,7 +36,7 @@ void Logger::thread_loop(Context &context)
             }
 
             while (barsModifier > 0) {
-                context.stream << moveUp(1) << clearLine();
+                barStringLogger << moveUp(1) << clearLine();
                 barsModifier--;
             }
 
@@ -45,7 +46,7 @@ void Logger::thread_loop(Context &context)
                     const auto &msg = i.front();
                     if (msg.message) {
                         if (msg.level >= context.selectedLevel)
-                            context.stream << clearLine() << msg.message.value() << reset() << std::endl;
+                            barStringLogger << clearLine() << msg.message.value() << reset() << std::endl;
                     } else {
                         context.selectedLevel = msg.level;
                     }
@@ -59,11 +60,11 @@ void Logger::thread_loop(Context &context)
 
                 // redraw the progress bars
                 for (auto &[_, bar]: bars) {
-                    bar.update(context.stream);
+                    bar.update(barStringLogger);
                     barsModifier++;
                 }
             });
-            context.stream.flush();
+            context.stream << barStringLogger.view();
         } catch (const std::exception &e) {
             std::cerr << "LOGGER ERROR: " << e.what() << std::endl;
         } catch (...) {
