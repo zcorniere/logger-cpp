@@ -61,14 +61,6 @@ public:
         return std::invoke(function, guard.get());
     }
 
-    template <class Fun>
-    requires std::invocable<Fun, const T &>
-    inline auto lock(const Fun &&function) const
-    {
-        const auto guard = lock();
-        return std::invoke(function, guard.get());
-    }
-
     inline std::optional<guard> try_lock()
     {
         std::unique_lock<M> lock(m_mutex, std::try_to_lock);

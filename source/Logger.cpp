@@ -41,7 +41,7 @@ void Logger::thread_loop(Context &context)
             }
 
             // Flush the messages queue
-            context.qMsg.lock([&](auto &i) -> void {
+            context.qMsg.lock([&](auto &i) {
                 for (; !i.empty(); i.pop_front()) {
                     const auto &msg = i.front();
                     if (msg.message) {
@@ -53,7 +53,7 @@ void Logger::thread_loop(Context &context)
                 }
             });
 
-            context.qBars.lock([&](auto &bars) -> void {
+            context.qBars.lock([&](auto &bars) {
                 if (bars.empty()) return;
                 std::erase_if(bars, [](const auto &i) { return i.first; });
 
@@ -91,12 +91,12 @@ void Logger::stop(bool bFlush)
 
 void Logger::flush()
 {
-    context.qMsg.lock([&](auto &mMsg) {
+    context.qMsg.lock([&](const auto &mMsg) {
         for (auto &msg: mMsg)
             if (msg.message) context.stream << msg.message.value() << std::endl;
     });
 
-    context.mBuffers.lock([&](auto &mBuffer) -> void {
+    context.mBuffers.lock([&](auto &mBuffer) {
         for (auto &[_, i]: mBuffer) {
             std::string msg(i.stream.str());
             if (!msg.empty()) context.stream << msg << std::endl;
@@ -107,15 +107,15 @@ void Logger::flush()
 
 void Logger::setLevel(Level level)
 {
-    context.qMsg.lock([level](auto &i) -> void { i.emplace_back(level); });
+    context.qMsg.lock([level](auto &i) { i.emplace_back(level); });
 }
 
 void Logger::endl()
 {
     auto &buf = this->raw();
 
-    context.qMsg.lock([&buf](auto &i) -> void { i.emplace_back(buf); });
-    context.mBuffers.lock([](auto &i) -> void { i.at(std::this_thread::get_id()) = {}; });
+    context.qMsg.lock([&buf](auto &i) { i.emplace_back(buf); });
+    context.mBuffers.lock([](auto &i) { i.at(std::this_thread::get_id()) = {}; });
 }
 
 Logger::Stream Logger::level(Logger::Level level, const std::string_view &msg)
