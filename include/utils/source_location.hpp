@@ -19,7 +19,7 @@ inline std::string __file_position(const char *const file, int line, int col = -
 
 #if defined(LOGGER_SOURCE_LOCATION_AVAILABLE)
 
-constexpr std::string_view function_name(const std::source_location &location = std::source_location::current())
+inline std::string function_name(const std::source_location &location = std::source_location::current())
 {
     return location.function_name();
 }
