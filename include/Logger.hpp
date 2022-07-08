@@ -98,20 +98,7 @@ private:
 }    // namespace cpplogger
 
 #if defined(LOGGER_EXTERN_DECLARATION_PTR)
-    #define LOGGER_ACCESS ->
 extern cpplogger::Logger *logger;
-
 #elif defined(LOGGER_EXTERN_DECLARATION)
-    #define LOGGER_ACCESS .
 extern cpplogger::Logger logger;
-
-#endif
-
-#ifdef LOGGER_ACCESS
-
-    #define LOGGER_WARN(location) logger LOGGER_ACCESS warn(file_position())
-    #define LOGGER_ERR(location) logger LOGGER_ACCESS err(file_position())
-    #define LOGGER_INFO(location) logger LOGGER_ACCESS info(file_position())
-    #define LOGGER_DEBUG(location) logger LOGGER_ACCESS debug(file_position())
-
 #endif
