@@ -24,11 +24,10 @@ Logger::~Logger() { this->stop(false); }
 
 void Logger::thread_loop(Context &context)
 {
-
     int barsModifier = 0;
 
     while (!context.bExit) {
-        std::stringstream barStringLogger;
+        std::stringstream bufferStream;
         try {
             {
                 using namespace std::literals;
@@ -37,19 +36,19 @@ void Logger::thread_loop(Context &context)
                 var.get().wait_for(var.get_lock(), 100ms);
             }
 
-            while (barsModifier > 0) {
-                barStringLogger << moveUp(1) << clearLine();
-                barsModifier--;
+            if (barsModifier > 0) {
+                bufferStream << moveUp(barsModifier) << clearAfterCursor();
+                barsModifier = 0;
             }
 
             // Flush the messages queue
             context.qMsg.lock([&](auto &i) {
                 for (; !i.empty(); i.pop_front()) {
                     const auto &msg = i.front();
-                    if (msg.level >= context.selectedLevel) {
-                        context.stream << msg << std::endl;
-                    } else {
+                    if (!msg.content) {
                         context.selectedLevel = msg.level;
+                    } else if (msg.level >= context.selectedLevel) {
+                        context.stream << msg << std::endl;
                     }
                 }
             });
@@ -60,11 +59,11 @@ void Logger::thread_loop(Context &context)
 
                 // redraw the progress bars
                 for (const auto &[_, bar]: bars) {
-                    bar.update(barStringLogger);
-                    barsModifier++;
+                    bar.update(bufferStream);
+                    barsModifier += 1;
                 }
             });
-            context.stream << barStringLogger.str();
+            context.stream << bufferStream.str();
         } catch (const std::exception &e) {
             std::cerr << "LOGGER ERROR: " << e.what() << std::endl;
         } catch (...) {

@@ -15,7 +15,8 @@ std::ostream &operator<<(std::ostream &os, const MessageBuffer &buffer)
                      std::chrono::duration_cast<std::chrono::milliseconds>(buffer.now.time_since_epoch());
 
         os << "[" << color(levelColor(buffer.level)) << std::put_time(std::localtime(&time), "%OM:%OS") << ":"
-           << ms.count() << ":" << micro.count() << reset() << ']';
+           << std::setfill('0') << std::setw(3) << ms.count() << ":" << std::setfill('0') << std::setw(3)
+           << micro.count() << reset() << ']';
         os << "[" << color(levelColor(buffer.level)) << to_string(buffer.level) << reset() << ']';
         if (!buffer.content->message.empty()) {
             os << "[" << color(levelColor(buffer.level)) << buffer.content->message << reset() << ']';

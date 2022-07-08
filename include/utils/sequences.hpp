@@ -30,12 +30,12 @@ enum class Color {
     White = 37,
 };
 
-inline std::string style(const Style &sty)
+inline auto style(const Style &sty)
 {
     return LOGGER_ESCAPE_SEQUENCE "[" + std::to_string(static_cast<std::underlying_type_t<enum Style>>(sty)) + "m";
 }
 
-inline std::string color(const Color &color)
+inline auto color(const Color &color)
 {
     return LOGGER_ESCAPE_SEQUENCE "[" + std::to_string(static_cast<std::underlying_type_t<enum Color>>(color)) + "m";
 }
@@ -48,18 +48,21 @@ inline std::string repeat(unsigned n, const std::string &s)
     return result;
 }
 
-inline std::string reset() { return LOGGER_ESCAPE_SEQUENCE "[0m"; }
+inline auto reset() { return LOGGER_ESCAPE_SEQUENCE "[0m"; }
 
-inline std::string clearBeforeCursor() { return LOGGER_ESCAPE_SEQUENCE "[0K"; }
+inline auto clearLineBeforeCursor() { return LOGGER_ESCAPE_SEQUENCE "[0K"; }
 
-inline std::string clearAfterCursor() { return LOGGER_ESCAPE_SEQUENCE "[1K"; }
+inline auto clearLineAfterCursor() { return LOGGER_ESCAPE_SEQUENCE "[1K"; }
 
-inline std::string clearLine() { return LOGGER_ESCAPE_SEQUENCE "[2K\r"; }
-inline std::string moveUp(unsigned n = 1) { return LOGGER_ESCAPE_SEQUENCE "[" + std::to_string(n) + "A\r"; }
+inline auto clearWholeScreen() { return LOGGER_ESCAPE_SEQUENCE "[2J"; }
+inline auto clearAfterCursor() { return LOGGER_ESCAPE_SEQUENCE "[J"; }
 
-inline std::string clearLines(unsigned n = 1)
+inline auto clearLine() { return LOGGER_ESCAPE_SEQUENCE "[2K\r"; }
+inline auto moveUp(unsigned n = 1) { return LOGGER_ESCAPE_SEQUENCE "[" + std::to_string(n) + "A\r"; }
+
+inline auto clearLines(unsigned n = 1)
 {
-    return LOGGER_ESCAPE_SEQUENCE "[0m" + clearBeforeCursor() +
+    return std::string(LOGGER_ESCAPE_SEQUENCE "[0m") + clearLineBeforeCursor() +
            ((n) ? repeat(n, clearLine() + moveUp()) : std::string(""));
 }
 

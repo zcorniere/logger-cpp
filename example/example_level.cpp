@@ -12,25 +12,24 @@ void printMessage(cpplogger::Level level)
     logger.warn() << "This is a warning message";
     logger.err() << "This is an error message";
     logger.msg() << "This is a message";
-    logger.endl();
 }
 
 int main(void)
 {
     logger.start();
 
-    logger.msg() << "Debug | Info | Warn | Error | Message";
+    logger.msg("Delimiteur") << "Debug | Info | Warn | Error | Message";
     printMessage(cpplogger::Level::Debug);
 
-    logger.msg() << "Info | Warn | Error | Message";
+    logger.msg("Delimiteur") << "Info | Warn | Error | Message";
     printMessage(cpplogger::Level::Info);
 
-    logger.msg() << " Warn | Error | Message";
+    logger.msg("Delimiteur") << " Warn | Error | Message";
     printMessage(cpplogger::Level::Warn);
 
-    logger.msg() << "Error | Message";
+    logger.msg("Delimiteur") << "Error | Message";
     printMessage(cpplogger::Level::Error);
 
-    logger.msg() << "Message";
+    logger.msg("Delimiteur") << "Message";
     printMessage(cpplogger::Level::Message);
 }
