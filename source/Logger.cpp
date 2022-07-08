@@ -48,7 +48,7 @@ void Logger::thread_loop(Context &context)
                     if (!msg.content) {
                         context.selectedLevel = msg.level;
                     } else if (msg.level >= context.selectedLevel) {
-                        context.stream << msg << std::endl;
+                        bufferStream << msg << std::endl;
                     }
                 }
             });
