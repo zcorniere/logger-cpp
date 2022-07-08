@@ -24,13 +24,15 @@ Logger::~Logger() { this->stop(false); }
 
 void Logger::thread_loop(Context &context)
 {
-    using namespace std::literals;
 
     int barsModifier = 0;
+
     while (!context.bExit) {
         std::stringstream barStringLogger;
         try {
             {
+                using namespace std::literals;
+
                 auto var = context.variable.lock();
                 var.get().wait_for(var.get_lock(), 100ms);
             }
@@ -44,9 +46,8 @@ void Logger::thread_loop(Context &context)
             context.qMsg.lock([&](auto &i) {
                 for (; !i.empty(); i.pop_front()) {
                     const auto &msg = i.front();
-                    if (msg.message) {
-                        if (msg.level >= context.selectedLevel)
-                            barStringLogger << clearLine() << msg.message.value() << reset() << std::endl;
+                    if (msg.level >= context.selectedLevel) {
+                        context.stream << msg << std::endl;
                     } else {
                         context.selectedLevel = msg.level;
                     }
@@ -73,7 +74,7 @@ void Logger::thread_loop(Context &context)
     }
 }
 
-void Logger::start(Logger::Level level)
+void Logger::start(Level level)
 {
     init();
     context.selectedLevel = level;
@@ -92,16 +93,11 @@ void Logger::stop(bool bFlush)
 void Logger::flush()
 {
     context.qMsg.lock([&](const auto &mMsg) {
-        for (auto &msg: mMsg)
-            if (msg.message) context.stream << msg.message.value() << std::endl;
+        for (auto &msg: mMsg) context.stream << msg;
     });
 
     context.mBuffers.lock([&](auto &mBuffer) {
-        for (auto &[_, i]: mBuffer) {
-            std::string msg(i.stream.str());
-            if (!msg.empty()) context.stream << msg << std::endl;
-            i.stream = std::stringstream();
-        }
+        for (auto &[_, msg]: mBuffer) context.stream << msg;
     });
 }
 
@@ -114,11 +110,11 @@ void Logger::endl()
 {
     auto &buf = this->raw();
 
-    context.qMsg.lock([&buf](auto &i) { i.emplace_back(buf); });
-    context.mBuffers.lock([](auto &i) { i.at(std::this_thread::get_id()) = {}; });
+    context.qMsg.lock([&buf](auto &i) { i.push_back(buf); });
+    context.mBuffers.lock([](auto &i) { i[std::this_thread::get_id()] = {}; });
 }
 
-Logger::Stream Logger::level(Logger::Level level, const std::string_view &msg)
+Stream Logger::level(Level level, const std::string &msg)
 {
     switch (level) {
         case Level::Trace: return trace(msg);
@@ -136,18 +132,18 @@ Logger::Stream Logger::level(Logger::Level level, const std::string_view &msg)
     buf.level = LVL;         \
     return Stream(*this, buf, msg);
 
-Logger::Stream Logger::warn(const std::string_view &msg) { LOGGER_FUNC(Logger::Level::Warn); }
+Stream Logger::warn(const std::string &msg) { LOGGER_FUNC(Level::Warn); }
 
-Logger::Stream Logger::err(const std::string_view &msg) { LOGGER_FUNC(Logger::Level::Error); }
+Stream Logger::err(const std::string &msg) { LOGGER_FUNC(Level::Error); }
 
-Logger::Stream Logger::info(const std::string_view &msg) { LOGGER_FUNC(Logger::Level::Info); }
+Stream Logger::info(const std::string &msg) { LOGGER_FUNC(Level::Info); }
 
-Logger::Stream Logger::debug(const std::string_view &msg) { LOGGER_FUNC(Logger::Level::Debug); }
+Stream Logger::debug(const std::string &msg) { LOGGER_FUNC(Level::Debug); }
 
-Logger::Stream Logger::msg(const std::string_view &msg) { LOGGER_FUNC(Logger::Level::Message); }
+Stream Logger::msg(const std::string &msg) { LOGGER_FUNC(Level::Message); }
 
-Logger::Stream Logger::trace(const std::string_view &msg) { LOGGER_FUNC(Logger::Level::Trace); }
+Stream Logger::trace(const std::string &msg) { LOGGER_FUNC(Level::Trace); }
 
-Logger::MessageBuffer &Logger::raw() { return context.mBuffers.lock().get()[std::this_thread::get_id()]; }
+MessageBuffer &Logger::raw() { return context.mBuffers.lock().get()[std::this_thread::get_id()]; }
 
 }    // namespace cpplogger

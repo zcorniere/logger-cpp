@@ -4,7 +4,7 @@
 
 cpplogger::Logger logger(std::cout);
 
-void printMessage(cpplogger::Logger::Level level)
+void printMessage(cpplogger::Level level)
 {
     logger.setLevel(level);
     logger.debug() << "This is a debug message";
@@ -20,17 +20,17 @@ int main(void)
     logger.start();
 
     logger.msg() << "Debug | Info | Warn | Error | Message";
-    printMessage(cpplogger::Logger::Level::Debug);
+    printMessage(cpplogger::Level::Debug);
 
     logger.msg() << "Info | Warn | Error | Message";
-    printMessage(cpplogger::Logger::Level::Info);
+    printMessage(cpplogger::Level::Info);
 
     logger.msg() << " Warn | Error | Message";
-    printMessage(cpplogger::Logger::Level::Warn);
+    printMessage(cpplogger::Level::Warn);
 
     logger.msg() << "Error | Message";
-    printMessage(cpplogger::Logger::Level::Error);
+    printMessage(cpplogger::Level::Error);
 
     logger.msg() << "Message";
-    printMessage(cpplogger::Logger::Level::Message);
+    printMessage(cpplogger::Level::Message);
 }

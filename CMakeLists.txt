@@ -15,10 +15,13 @@ endif()
 add_library(
     ${PROJECT_NAME} STATIC
     source/lib.cpp
+    source/Size.cpp
     source/Logger.cpp
     source/handlers.cpp
-    source/ProgressBar.cpp
-    source/Size.cpp
+    source/types/Level.cpp
+    source/types/Stream.cpp
+    source/types/ProgressBar.cpp
+    source/types/MessageBuffer.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
@@ -28,8 +31,7 @@ target_compile_options(
     ${PROJECT_NAME}
     PRIVATE $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
             -Wall
-            -Wextra
-            -Werror>
+            -Wextra>
             $<$<CXX_COMPILER_ID:MSVC>:
             /W4
             /WX>

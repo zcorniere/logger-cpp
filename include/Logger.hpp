@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <cstdint>
 #include <deque>
@@ -14,125 +15,20 @@
 #include <unordered_map>
 #include <utility>
 
-#include "ProgressBar.hpp"
+#include "types/Level.hpp"
+#include "types/MessageBuffer.hpp"
+#include "types/ProgressBar.hpp"
+#include "types/Stream.hpp"
+#include "utils/concepts.hpp"
 #include "utils/mutex.hpp"
 #include "utils/sequences.hpp"
 #include "utils/source_location.hpp"
-
-template <typename T>
-concept Printable = requires(T a)
-{
-    std::cout << a;
-};
-
-template <typename T>
-concept HasIterator = std::ranges::range<T> && requires(const T a)
-{
-    {
-        a.size()
-        } -> std::convertible_to<std::size_t>;
-};
-
-template <typename T>
-concept PrintableIterator =
-    HasIterator<T> && !Printable<T> && Printable<typename std::iterator_traits<typename T::const_iterator>::value_type>;
 
 namespace cpplogger
 {
 class Logger
 {
-public:
-    enum class Level {
-        Trace = -1,
-        Debug = 0,
-        Info = 1,
-        Warn = 2,
-        Error = 3,
-        Message = 4,
-    };
-
-protected:
-    struct MessageBuffer {
-        Level level = Level::Message;
-        std::stringstream stream;
-        constexpr const std::string_view levelStr() const noexcept
-        {
-            switch (level) {
-                case Level::Trace: return "TRACE";
-                case Level::Debug: return "DEBUG";
-                case Level::Info: return "INFO";
-                case Level::Warn: return "WARN";
-                case Level::Error: return "ERROR";
-                case Level::Message: return "MESSAGE";
-                default: return "UNKNOWN";
-            }
-        }
-        constexpr Color levelColor() const noexcept
-        {
-            switch (level) {
-                case Level::Trace: return Color::Green;
-                case Level::Debug: return Color::Magenta;
-                case Level::Info: return Color::Cyan;
-                case Level::Warn: return Color::Yellow;
-                case Level::Error: return Color::Red;
-                case Level::Message: return Color::White;
-                default: return Color::White;
-            }
-        }
-    };
-
-    class Stream
-    {
-    public:
-        inline explicit Stream(Logger &log, MessageBuffer &buffer, const std::string_view &message)
-            : buffer(buffer), logger(log)
-        {
-            buffer.stream << "[" << color(buffer.levelColor());
-            if (std::uncaught_exceptions() > 0) buffer.stream << "THROW/";
-            buffer.stream << buffer.levelStr() << reset() << "]";
-            buffer.stream << "[" << color(buffer.levelColor()) << message << reset() << "] ";
-        }
-        Stream(const Stream &) = delete;
-        Stream(const Stream &&) = delete;
-        ~Stream() { logger.endl(); }
-
-        inline Stream &operator<<(const Printable auto &object)
-        {
-            buffer.stream << object;
-            return *this;
-        }
-
-        inline Stream &operator<<(const PrintableIterator auto &container)
-        {
-            auto size = container.size() - 1;
-            buffer.stream << "[";
-            for (const auto &i: container) {
-                buffer.stream << '\"';
-                (*this) << i;
-                buffer.stream << '\"';
-                if (size-- > 0) buffer.stream << ", ";
-            }
-            buffer.stream << "]";
-            return *this;
-        }
-
-    private:
-        MessageBuffer &buffer;
-        Logger &logger;
-    };
-
 private:
-    class Message
-    {
-    public:
-        Message(const Level level): level(level) {}
-        Message(const MessageBuffer &buffer): level(buffer.level), message(buffer.stream.str()) {}
-
-    public:
-        Level level = Level::Message;
-        std::optional<std::string> message = std::nullopt;
-    };
-
     class Context
     {
     public:
@@ -145,7 +41,7 @@ private:
         std::atomic<Level> selectedLevel = Level::Debug;
 
         mutex<std::condition_variable> variable;
-        mutex<std::deque<Message>> qMsg;
+        mutex<std::deque<MessageBuffer>> qMsg;
         mutex<std::unordered_map<std::thread::id, MessageBuffer>> mBuffers;
         mutex<std::deque<std::pair<bool, ProgressBar>>> qBars;
     };
@@ -178,19 +74,19 @@ public:
         }
     }
 
-    [[nodiscard]] Stream level(Level level, const std::string_view &msg);
-    [[nodiscard]] Stream warn(const std::string_view &msg = "WARNING");
-    [[nodiscard]] Stream err(const std::string_view &msg = "ERROR");
-    [[nodiscard]] Stream info(const std::string_view &msg = "INFO");
-    [[nodiscard]] Stream debug(const std::string_view &msg = "DEBUG");
-    [[nodiscard]] Stream trace(const std::string_view &msg = "TRACE");
-    [[nodiscard]] Stream msg(const std::string_view &msg = "MESSAGE");
+    [[nodiscard]] Stream level(Level level, const std::string &msg);
+    [[nodiscard]] Stream warn(const std::string &msg = "");
+    [[nodiscard]] Stream err(const std::string &msg = "");
+    [[nodiscard]] Stream info(const std::string &msg = "");
+    [[nodiscard]] Stream debug(const std::string &msg = "");
+    [[nodiscard]] Stream trace(const std::string &msg = "");
+    [[nodiscard]] Stream msg(const std::string &msg = "");
     void endl();
 
 private:
     void init();
     void deinit();
-    [[nodiscard]] Logger::MessageBuffer &raw();
+    [[nodiscard]] MessageBuffer &raw();
 
     static void thread_loop(Context &context);
 
