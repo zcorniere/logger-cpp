@@ -63,6 +63,7 @@ void Logger::thread_loop(Context &context)
                 }
             });
             context.stream << bufferStream.str();
+            context.stream.flush();
         } catch (const std::exception &e) {
             std::cerr << "LOGGER ERROR: " << e.what() << std::endl;
         } catch (...) {

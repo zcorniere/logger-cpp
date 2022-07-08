@@ -10,15 +10,18 @@ void backstop()
 {
     auto const ep = std::current_exception();
     if (ep && handler_logger) {
-        auto stream = handler_logger->err("Terminate");
-        try {
-            stream << "Terminating with uncaught exception of type `" << cpplogger::demangle_exception_ptr(ep).value()
-                   << "`";
-            std::rethrow_exception(ep);
+        {
+            auto stream = handler_logger->err("Terminate");
+            try {
+                stream << "Terminating with uncaught exception of type `"
+                       << cpplogger::demangle_exception_ptr(ep).value() << "`";
+                std::rethrow_exception(ep);
 
-        } catch (const std::exception &e) {
-            stream << " with `what()` = \"" << e.what() << "\"";
-        } catch (...) {
+            } catch (const std::exception &e) {
+                stream << " with `what()` = \"" << e.what() << "\"";
+            } catch (...) {
+                std::abort();
+            }
         }
         handler_logger->stop();
     }

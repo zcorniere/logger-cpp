@@ -63,7 +63,7 @@ public:
 
 private:
     std::string writeTime() const;
-    std::string drawBar(const int uWidth) const;
+    void drawBar(std::ostream &out, const int uWidth) const;
     std::string drawProgress() const;
     std::string drawPrefix() const;
 

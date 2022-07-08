@@ -4,7 +4,7 @@
 
 using namespace cpplogger;
 
-Logger logger(std::cout);
+Logger logger(std::clog);
 
 std::vector<std::string> test{"This is a test array", "Only used for testing", "aspaihd"};
 
