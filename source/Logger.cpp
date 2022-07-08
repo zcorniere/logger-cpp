@@ -55,10 +55,9 @@ void Logger::thread_loop(Context &context)
 
             context.qBars.lock([&](auto &bars) {
                 if (bars.empty()) return;
-                std::erase_if(bars, [](const auto &i) { return i.first; });
 
                 // redraw the progress bars
-                for (const auto &[_, bar]: bars) {
+                for (const auto &bar: bars) {
                     bar.update(bufferStream);
                     barsModifier += 1;
                 }
@@ -110,7 +109,7 @@ void Logger::endl()
     auto &buf = this->raw();
 
     context.qMsg.lock([&buf](auto &i) { i.push_back(buf); });
-    context.mBuffers.lock([](auto &i) { i[std::this_thread::get_id()] = {}; });
+    buf = {};
 }
 
 Stream Logger::level(Level level, const std::string &msg)

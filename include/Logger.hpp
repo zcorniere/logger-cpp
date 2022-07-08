@@ -43,7 +43,7 @@ private:
         mutex<std::condition_variable> variable;
         mutex<std::deque<MessageBuffer>> qMsg;
         mutex<std::unordered_map<std::thread::id, MessageBuffer>> mBuffers;
-        mutex<std::deque<std::pair<bool, ProgressBar>>> qBars;
+        mutex<std::deque<ProgressBar>> qBars;
     };
 
 public:
@@ -61,17 +61,20 @@ public:
     requires std::is_constructible_v<ProgressBar, Args...>
     [[nodiscard]] ProgressBar newProgressBar(Args... args)
     {
-        auto bar = context.qBars.lock();
-        bar.get().emplace_back(std::make_pair(false, ProgressBar(args...)));
-        return bar.get().back().second;
+        return context.qBars.lock([&](auto &i) {
+            i.emplace_back(args...);
+            return i.back();
+        });
     }
 
-    template <class... deletedBars>
-    void deleteProgressBar(const deletedBars &...bar)
+    template <class... DeletedBars>
+    void deleteProgressBar(const DeletedBars &...bars)
     {
-        for (auto &[needDeletion, i]: context.qBars.lock().get()) {
-            if (((i == bar) || ...)) { needDeletion = true; }
-        }
+        context.qBars.lock([... args = std::forward<const DeletedBars>(bars)](auto &i) {
+            std::erase_if(i, [... bars = std::forward<const DeletedBars>(args)](const auto &bar) {
+                return (((bar == bars) || ...));
+            });
+        });
     }
 
     [[nodiscard]] Stream level(Level level, const std::string &msg);
