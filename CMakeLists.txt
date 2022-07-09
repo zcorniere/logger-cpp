@@ -33,8 +33,7 @@ target_compile_options(
             -Wall
             -Wextra>
             $<$<CXX_COMPILER_ID:MSVC>:
-            /W4
-            /WX>
+            /W4>
 )
 
 option(BUILD_BENCHMARK "Build benchmark application" OFF)

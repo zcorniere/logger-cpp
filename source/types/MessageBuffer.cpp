@@ -8,7 +8,7 @@ namespace cpplogger
 std::ostream &operator<<(std::ostream &os, const MessageBuffer &buffer)
 {
     if (buffer.content) {
-        const std::time_t time = std::chrono::high_resolution_clock::to_time_t(buffer.now);
+        const std::time_t time = std::chrono::system_clock::to_time_t(buffer.now);
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(buffer.now.time_since_epoch()) -
                   std::chrono::duration_cast<std::chrono::seconds>(buffer.now.time_since_epoch());
 
