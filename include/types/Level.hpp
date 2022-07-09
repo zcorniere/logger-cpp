@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "utils/sequences.hpp"
 
 namespace cpplogger

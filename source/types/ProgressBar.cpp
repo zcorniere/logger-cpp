@@ -1,12 +1,9 @@
 #include "types/ProgressBar.hpp"
 
-#include <assert.h>
-#include <chrono>
 #include <cmath>
 #include <iomanip>
 #include <optional>
 #include <ratio>
-#include <sstream>
 #include <string_view>
 #include <utility>
 

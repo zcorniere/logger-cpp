@@ -1,14 +1,9 @@
 #include "Logger.hpp"
 
-#include <algorithm>
-#include <cassert>
 #include <deque>
 #include <exception>
 #include <iostream>
-#include <optional>
-#include <ranges>
 #include <stdexcept>
-#include <utility>
 
 static std::once_flag initInstanceFlag;
 

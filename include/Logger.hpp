@@ -1,16 +1,10 @@
 #pragma once
 
 #include <atomic>
-#include <chrono>
 #include <condition_variable>
-#include <cstdint>
 #include <deque>
 #include <iostream>
-#include <mutex>
-#include <optional>
-#include <sstream>
 #include <string>
-#include <string_view>
 #include <thread>
 #include <unordered_map>
 #include <utility>
@@ -19,10 +13,7 @@
 #include "types/MessageBuffer.hpp"
 #include "types/ProgressBar.hpp"
 #include "types/Stream.hpp"
-#include "utils/concepts.hpp"
 #include "utils/mutex.hpp"
-#include "utils/sequences.hpp"
-#include "utils/source_location.hpp"
 
 namespace cpplogger
 {
