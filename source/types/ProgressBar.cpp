@@ -2,6 +2,8 @@
 
 #include <assert.h>
 #include <chrono>
+#include <cmath>
+#include <iomanip>
 #include <optional>
 #include <ratio>
 #include <sstream>
@@ -92,8 +94,9 @@ void ProgressBar::drawBar(std::ostream &out, const int iWidth) const
 
 std::string ProgressBar::drawProgress() const
 {
+    const auto digit = std::floor(std::log10(double(data->uMax)) + 1);
     std::stringstream progress;
-    progress << "(" << data->uProgress << "/" << data->uMax << ")";
+    progress << "(" << std::setfill('0') << std::setw(digit) << data->uProgress << "/" << data->uMax << ")";
     return progress.str();
 }
 
