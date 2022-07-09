@@ -102,7 +102,11 @@ void Logger::flush()
 
 void Logger::setLevel(Level level)
 {
-    context.qMsg.lock([level](auto &i) { i.emplace_back(level); });
+    context.qMsg.lock([level](auto &i) {
+        i.push_back({
+            .level = level,
+        });
+    });
 }
 
 void Logger::endl()
