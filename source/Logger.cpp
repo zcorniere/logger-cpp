@@ -87,12 +87,9 @@ void Logger::stop(bool bFlush)
 void Logger::flush()
 {
     context.qMsg.lock([&](const auto &mMsg) {
-        for (auto &msg: mMsg) context.stream << msg;
+        for (auto &msg: mMsg) context.stream << msg << std::endl;
     });
-
-    context.mBuffers.lock([&](auto &mBuffer) {
-        for (auto &[_, msg]: mBuffer) context.stream << msg;
-    });
+    context.stream.flush();
 }
 
 void Logger::setLevel(Level level)
