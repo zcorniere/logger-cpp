@@ -3,6 +3,8 @@
 #include "types/MessageBuffer.hpp"
 #include "utils/concepts.hpp"
 
+#include <sstream>
+
 namespace cpplogger
 {
 
