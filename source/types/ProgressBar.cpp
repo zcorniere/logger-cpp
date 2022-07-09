@@ -55,8 +55,8 @@ ProgressBar &ProgressBar::operator--() noexcept
 
 std::string ProgressBar::writeTime() const
 {
-    static constexpr const std::string_view remaining_text = " remaining";
-    static constexpr const std::string_view elapsed_text = " elapsed";
+    static constexpr const auto remaining_text = " remaining";
+    static constexpr const auto elapsed_text = " elapsed";
 
     const auto elapsed = std::chrono::steady_clock::now() - data->start_time;
     const auto remaining = elapsed / data->uProgress.load() * (data->uMax - data->uProgress);
@@ -75,14 +75,15 @@ void ProgressBar::drawBar(std::ostream &out, const int iWidth) const
 {
     out << "[";
     const int fills = int(double(data->uProgress) / double(data->uMax) * iWidth);
+    const auto &style = data->style;
     if (fills >= 0) {
         for (int i = 0; i < iWidth; i++) {
             if (i < fills) {
-                out << data->style.cFill;
+                out << style.cFill;
             } else if (i == fills) {
-                out << data->style.cEqual;
+                out << style.cEqual;
             } else if (i > fills) {
-                out << data->style.cEmpty;
+                out << style.cEmpty;
             }
         }
     }
@@ -93,7 +94,7 @@ std::string ProgressBar::drawProgress() const
 {
     const int digit = std::floor(std::log10(double(data->uMax)) + 1);
     std::stringstream progress;
-    progress << "(" << std::setfill('0') << std::setw(digit) << data->uProgress << "/" << data->uMax << ")";
+    progress << "(" << std::setfill(' ') << std::setw(digit) << data->uProgress << "/" << data->uMax << ")";
     return progress.str();
 }
 
