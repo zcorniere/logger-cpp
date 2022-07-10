@@ -21,7 +21,7 @@ void Logger::thread_loop(Context &context)
 {
     int barsModifier = 0;
 
-    while (!context.bExit) {
+    while (!context.bForceExit) {
         std::stringstream bufferStream;
         try {
             {
@@ -46,6 +46,7 @@ void Logger::thread_loop(Context &context)
                         bufferStream << msg << std::endl;
                     }
                 }
+
             });
 
             context.qBars.lock([&](auto &bars) {
@@ -59,6 +60,7 @@ void Logger::thread_loop(Context &context)
             });
             context.stream << bufferStream.str();
             context.stream.flush();
+            if (context.bExit && context.qMsg.lock([&](const auto &i) { return i.empty(); })) { return; }
         } catch (const std::exception &e) {
             std::cerr << "LOGGER ERROR: " << e.what() << std::endl;
         } catch (...) {
@@ -75,17 +77,19 @@ void Logger::start(Level level)
     msgT = std::jthread(Logger::thread_loop, std::ref(context));
 }
 
-void Logger::stop(bool bFlush)
+void Logger::stop(bool bForce, bool bFlush)
 {
     deinit();
 
     context.variable.get_raw().notify_one();
     context.bExit = true;
-    if (bFlush) this->flush();
+    if (bForce) context.bForceExit = true;
+    if (bForce && bFlush) this->flush();
 }
 
 void Logger::flush()
 {
+    context.stream << "[LOGGER] Flushing..." << std::endl;
     context.qMsg.lock([&](const auto &mMsg) {
         for (auto &msg: mMsg) context.stream << msg << std::endl;
     });
