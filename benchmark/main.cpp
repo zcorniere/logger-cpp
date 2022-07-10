@@ -13,13 +13,13 @@ cpplogger::Logger logger(std::clog);
 
 #define START_POINT(msg)                                    \
     auto start = std::chrono::high_resolution_clock::now(); \
-    file << "end " msg " : " << start.time_since_epoch().count() << "s" << std::endl;
+    file << "start " << msg << " : " << start.time_since_epoch().count() << "s" << std::endl;
 
-#define END_POINT(msg)                                                                \
-    auto end = std::chrono::high_resolution_clock::now();                             \
-    file << "start " msg " : " << end.time_since_epoch().count() << "s" << std::endl; \
-    std::chrono::duration<double> elapsedTime(end - start);                           \
-    file << msg " took : " << elapsedTime.count() << "s" << std::endl;
+#define END_POINT(msg)                                                                    \
+    auto end = std::chrono::high_resolution_clock::now();                                 \
+    file << "end " << msg << " : " << end.time_since_epoch().count() << "s" << std::endl; \
+    std::chrono::duration<double> elapsedTime(end - start);                               \
+    file << msg << " took : " << elapsedTime.count() << "s" << std::endl;
 
 #define TEST_SCOPE(msg)   \
     {                     \
@@ -28,9 +28,12 @@ cpplogger::Logger logger(std::clog);
         END_POINT(msg);   \
     }
 
+const auto nbOfWorker = 8;
+const auto nbOfLinePrinted = 100000;
+
 void print_bs(const std::string &msg) noexcept
 {
-    for (int i = 0; i < 1000000; i++) { logger.debug(msg) << i; }
+    for (int i = 0; i <= nbOfLinePrinted; i++) { logger.debug(msg) << i; }
 }
 
 int main(void)
@@ -38,18 +41,22 @@ int main(void)
     std::ofstream file((std::filesystem::path(file_path)));
     logger.start();
 
-    TEST_SCOPE("1000000")
-
+    TEST_SCOPE(std::to_string(nbOfLinePrinted))
+    file << std::endl << std::endl;
     {
-        std::barrier sync_point(8, []() noexcept { print_bs("Multithread 1000000"); });
+        START_POINT("Multithread " + std::to_string(nbOfLinePrinted));
+        std::barrier sync_point(nbOfWorker, [&]() noexcept { start = std::chrono::high_resolution_clock::now(); });
 
-        auto work = [&sync_point]() { sync_point.arrive_and_wait(); };
-
-        START_POINT("Multithread 1000000");
+        auto work = [&](int id) {
+            const auto msg = "Multithread/" + std::to_string(id) + " " + std::to_string(nbOfLinePrinted);
+            sync_point.arrive_and_wait();
+            print_bs(msg);
+            END_POINT(msg);
+        };
 
         std::vector<std::jthread> workers;
-        for (unsigned i = 0; i < 8; i++) { workers.emplace_back(work); }
+        for (unsigned i = 0; i < nbOfWorker; i++) { workers.emplace_back(work, i); }
 
-        END_POINT("Multithread 1000000");
+        END_POINT("Multithread " + std::to_string(nbOfLinePrinted));
     }
 }
