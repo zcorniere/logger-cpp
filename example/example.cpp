@@ -58,6 +58,8 @@ int main(void)
                                                            .cFill = '#',
                                                            .cEqual = '#',
                                                            .cEmpty = '-',
+                                                           .bShowPercentage = true,
+                                                           .bShowProgress = false,
                                                        });
         auto bar3 = logger.add<cpplogger::ProgressBar>("Bar3", total);
         while (!bar2->isComplete()) {

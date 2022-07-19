@@ -18,6 +18,8 @@ namespace details
         const char cEqual = '>';
         const char cEmpty = ' ';
         const bool bShowTime = false;
+        const bool bShowPercentage = false;
+        const bool bShowProgress = true;
         bool operator==(const ProgressBarStyle &) const = default;
     };
 };    // namespace details
@@ -70,6 +72,7 @@ private:
     void drawBar(std::ostream &out, const int uWidth) const;
     std::string drawProgress() const;
     std::string drawPrefix() const;
+    std::string drawPercentage() const;
 
 private:
     ProgressBar::Data data;

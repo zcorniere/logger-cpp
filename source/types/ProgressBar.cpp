@@ -25,19 +25,25 @@ ProgressBar::ProgressBar(std::string _message, unsigned max, Style style)
 void ProgressBar::update(std::ostream &out) const
 {
     const auto size = Size::get();
-    const auto progress_str = drawProgress();
 
-    std::optional<std::string> time_str = std::nullopt;
     const auto prefix_str = drawPrefix();
 
+    std::string progress_str;
+    if (data.style.bShowProgress) progress_str = drawProgress();
+
+    std::string time_str;
     if (data.style.bShowTime) time_str = writeTime();
 
-    const int iWidth = size.columns - int(2 + prefix_str.size() + progress_str.size() + time_str.value_or("").size());
+    std::string percentage;
+    if (data.style.bShowPercentage) percentage = drawPercentage();
 
-    out << prefix_str << " ";
+    const int iWidth = size.columns - int(2 + prefix_str.size() + progress_str.size() + time_str.size());
+
+    out << prefix_str;
     if (iWidth > 0) { drawBar(out, iWidth); }
-    out << progress_str;
-    if (time_str) { out << " " << time_str.value(); }
+    if (!progress_str.empty()) out << " " << progress_str;
+    if (!percentage.empty()) out << " " << percentage;
+    if (!time_str.empty()) out << " " << time_str;
     out << std::endl;
 }
 
@@ -61,7 +67,7 @@ std::string ProgressBar::writeTime() const
 }
 void ProgressBar::drawBar(std::ostream &out, const int iWidth) const
 {
-    out << "[";
+    out << " [";
     const int fills = int(double(data.uProgress) / double(data.uMax) * iWidth);
     const auto &style = data.style;
     if (fills >= 0) {
@@ -75,7 +81,7 @@ void ProgressBar::drawBar(std::ostream &out, const int iWidth) const
             }
         }
     }
-    out << "] ";
+    out << "]";
 }
 
 std::string ProgressBar::drawProgress() const
@@ -91,6 +97,12 @@ std::string ProgressBar::drawPrefix() const
     std::stringstream prefix;
     prefix << clearLine() << style(cpplogger::Style::Bold) << data.message << reset();
     return prefix.str();
+}
+
+std::string ProgressBar::drawPercentage() const
+{
+    const int fills = int((double(data.uProgress) / double(data.uMax)) * 100);
+    return std::to_string(fills) + '%';
 }
 
 }    // namespace cpplogger
