@@ -1,6 +1,6 @@
-#include "Logger.hpp"
+#include "cpplogger/Logger.hpp"
 
-#include "utils/demangle.hpp"
+#include "cpplogger/utils/demangle.hpp"
 
 static cpplogger::Logger *handler_logger = nullptr;
 static const std::terminate_handler static_handler = std::get_terminate();

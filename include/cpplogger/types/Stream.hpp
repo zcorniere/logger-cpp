@@ -1,7 +1,7 @@
 #pragma once
 
-#include "types/MessageBuffer.hpp"
-#include "utils/concepts.hpp"
+#include "cpplogger/types/MessageBuffer.hpp"
+#include "cpplogger/utils/concepts.hpp"
 
 #include <sstream>
 

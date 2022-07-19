@@ -1,4 +1,5 @@
-#include "types/MessageBuffer.hpp"
+#include "cpplogger/types/MessageBuffer.hpp"
+#include "cpplogger/utils/sequences.hpp"
 
 #include <iomanip>
 

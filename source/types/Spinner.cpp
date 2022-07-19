@@ -1,4 +1,4 @@
-#include "types/Spinner.hpp"
+#include "cpplogger/types/Spinner.hpp"
 
 namespace cpplogger
 {

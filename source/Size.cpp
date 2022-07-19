@@ -1,6 +1,6 @@
-#include "Size.hpp"
+#include "cpplogger/utils/Size.hpp"
 
-#include "define.hpp"
+#include "cpplogger/define.hpp"
 
 namespace cpplogger
 {

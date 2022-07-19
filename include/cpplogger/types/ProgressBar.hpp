@@ -6,7 +6,7 @@
 #include <ostream>
 #include <string>
 
-#include "interface/IUpdate.hpp"
+#include "cpplogger/interface/IUpdate.hpp"
 
 namespace cpplogger
 {

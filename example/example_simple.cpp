@@ -1,5 +1,4 @@
-#define LOGGER_EXTERN_DECLARATION
-#include <Logger.hpp>
+#include <cpplogger/Logger.hpp>
 
 #include <iostream>
 

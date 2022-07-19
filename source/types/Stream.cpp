@@ -1,6 +1,5 @@
-#include "types/Stream.hpp"
-
-#include "Logger.hpp"
+#include "cpplogger/types/Stream.hpp"
+#include "cpplogger/Logger.hpp"
 
 namespace cpplogger
 {

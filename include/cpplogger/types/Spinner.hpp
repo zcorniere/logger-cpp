@@ -1,6 +1,6 @@
 #pragma once
 
-#include "interface/IUpdate.hpp"
+#include "cpplogger/interface/IUpdate.hpp"
 
 #include <atomic>
 #include <vector>

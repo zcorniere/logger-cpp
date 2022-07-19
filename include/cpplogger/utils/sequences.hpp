@@ -1,6 +1,6 @@
 #pragma once
 
-#include "define.hpp"
+#include "cpplogger/define.hpp"
 
 #include <string>
 #include <string_view>

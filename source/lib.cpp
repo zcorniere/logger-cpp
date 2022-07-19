@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Logger.hpp"
+#include "cpplogger/Logger.hpp"
 
 #if defined(LOGGER_EXTERN_DECLARATION_PTR)
 cpplogger::Logger *logger = nullptr;

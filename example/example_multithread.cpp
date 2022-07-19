@@ -1,5 +1,5 @@
-#include <Logger.hpp>
-#include <types/ProgressBar.hpp>
+#include <cpplogger/Logger.hpp>
+#include <cpplogger/types/ProgressBar.hpp>
 
 #include <iostream>
 #include <thread>

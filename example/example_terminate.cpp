@@ -1,4 +1,4 @@
-#include <Logger.hpp>
+#include <cpplogger/Logger.hpp>
 #include <iostream>
 
 cpplogger::Logger logger(std::cout);

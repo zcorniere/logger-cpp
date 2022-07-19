@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "utils/sequences.hpp"
+#include "cpplogger/utils/sequences.hpp"
 
 namespace cpplogger
 {

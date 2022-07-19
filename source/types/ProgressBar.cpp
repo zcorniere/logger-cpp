@@ -1,4 +1,4 @@
-#include "types/ProgressBar.hpp"
+#include "cpplogger/types/ProgressBar.hpp"
 
 #include <cmath>
 #include <iomanip>
@@ -7,8 +7,8 @@
 #include <string_view>
 #include <utility>
 
-#include "Size.hpp"
-#include "utils/sequences.hpp"
+#include "cpplogger/utils/Size.hpp"
+#include "cpplogger/utils/sequences.hpp"
 
 namespace cpplogger
 {

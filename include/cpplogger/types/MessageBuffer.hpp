@@ -4,7 +4,7 @@
 #include <optional>
 #include <string>
 
-#include "types/Level.hpp"
+#include "cpplogger/types/Level.hpp"
 
 namespace cpplogger
 {

@@ -1,7 +1,7 @@
 #define LOGGER_EXTERN_DECLARATION
-#include <Logger.hpp>
-#include <types/ProgressBar.hpp>
-#include <types/Spinner.hpp>
+#include <cpplogger/Logger.hpp>
+#include <cpplogger/types/ProgressBar.hpp>
+#include <cpplogger/types/Spinner.hpp>
 
 #include <iostream>
 

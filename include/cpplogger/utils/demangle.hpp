@@ -1,6 +1,6 @@
 #pragma once
 
-#include "define.hpp"
+#include "cpplogger/define.hpp"
 
 #if defined(LOGGER_CXXABI_AVAILABLE)
     #include <cxxabi.h>
