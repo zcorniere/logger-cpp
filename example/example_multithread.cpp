@@ -1,5 +1,5 @@
-#define LOGGER_ACCESS .
 #include <Logger.hpp>
+#include <types/ProgressBar.hpp>
 
 #include <iostream>
 #include <thread>

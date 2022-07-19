@@ -1,5 +1,8 @@
 #define LOGGER_EXTERN_DECLARATION
 #include <Logger.hpp>
+#include <types/ProgressBar.hpp>
+#include <types/Spinner.hpp>
+
 #include <iostream>
 
 using namespace cpplogger;
@@ -49,6 +52,7 @@ int main(void)
 
     {
         const auto total = 100;
+        auto spinner = logger.add<cpplogger::Spinner>("Spin to win, my boy. You shall zoom pass them.");
         auto bar2 = logger.add<cpplogger::ProgressBar>("Bar2", total * 3,
                                                        ProgressBar::Style{
                                                            .cFill = '#',
@@ -65,12 +69,13 @@ int main(void)
             }
             std::this_thread::sleep_for(60ms);
         }
+        spinner->setComplete();
 
         while (!bar3->isComplete()) {
             bar3->addProgress(1);
             if (bar3->getProgress() > 80) { logger.debug() << "this is a debug message"; }
             std::this_thread::sleep_for(30ms);
         }
-        logger.remove(bar2, bar3);
+        logger.remove(bar2, bar3, spinner);
     }
 }

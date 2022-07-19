@@ -13,12 +13,12 @@ namespace cpplogger
 
 namespace details
 {
-    struct Style {
+    struct ProgressBarStyle {
         const char cFill = '=';
         const char cEqual = '>';
         const char cEmpty = ' ';
         const bool bShowTime = false;
-        bool operator==(const Style &) const = default;
+        bool operator==(const ProgressBarStyle &) const = default;
     };
 };    // namespace details
 
@@ -27,7 +27,7 @@ class ProgressBar final : public IUpdate
 public:
     // Can't have Style as a sub-class, because of this:
     // https://bugs.llvm.org/show_bug.cgi?id=36684
-    using Style = details::Style;
+    using Style = details::ProgressBarStyle;
 
 protected:
     struct Data {
@@ -55,7 +55,7 @@ public:
     [[nodiscard]] const std::string &getMessage() const noexcept { return data.message; }
     void setMessage(const std::string &msg) noexcept { data.message = msg; }
 
-    [[nodiscard]] bool isComplete() const noexcept { return data.uProgress >= data.uMax; }
+    bool isComplete() const noexcept override { return data.uProgress >= data.uMax; }
 
     operator bool() const noexcept { return this->isComplete(); }
     bool operator==(const IUpdate &obj) const

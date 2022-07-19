@@ -20,6 +20,7 @@ add_library(
     source/handlers.cpp
     source/types/Level.cpp
     source/types/Stream.cpp
+    source/types/Spinner.cpp
     source/types/ProgressBar.cpp
     source/types/MessageBuffer.cpp
 )
