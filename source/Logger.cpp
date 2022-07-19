@@ -49,12 +49,12 @@ void Logger::thread_loop(Context &context)
 
             });
 
-            context.qBars.lock([&](auto &bars) {
+            context.updateQueue.lock([&](auto &bars) {
                 if (bars.empty()) return;
 
                 // redraw the progress bars
                 for (const auto &bar: bars) {
-                    bar.update(bufferStream);
+                    bar->update(bufferStream);
                     barsModifier += 1;
                 }
             });

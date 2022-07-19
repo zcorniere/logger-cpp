@@ -17,42 +17,42 @@ int main(void)
     auto thread1 = std::jthread([&] {
         logger.info("Thread 1") << "Started";
 
-        auto bar = logger.newProgressBar("Thread 1 Bar", total,
-                                         cpplogger::ProgressBar::Style{
-                                             .bShowTime = true,
-                                         });
+        auto bar = logger.add<cpplogger::ProgressBar>("Thread 1 Bar", total,
+                                                      cpplogger::ProgressBar::Style{
+                                                          .bShowTime = true,
+                                                      });
         for (unsigned i = 0; i < total; i++) {
-            ++bar;
+            bar->addProgress(1);
             std::this_thread::sleep_for(std::chrono::microseconds(712345));
         }
-        logger.info(bar.getMessage()) << "this is an information message";
-        
-        logger.deleteProgressBar(bar);
+        logger.info(bar->getMessage()) << "this is an information message";
+
+        logger.remove(bar);
         logger.info("Thread 1") << "Ended";
     });
 
-    auto bar2 = logger.newProgressBar("Shared Bar", total * 3);
+    auto bar2 = logger.add<cpplogger::ProgressBar>("Shared Bar", total * 3);
     auto thread2 = std::jthread([&] {
         logger.info("Thread 2") << "Started";
 
         bool bRewind = false;
-        auto bar3 = logger.newProgressBar("Thread 2 Bar", total + 3);
-        while (!bar3.isComplete()) {
-            ++bar2;
-            ++bar3;
-            if (!bRewind && bar3.getProgress() == total + 1) {
-                logger.err(bar3.getMessage()) << "Something went wrong, rewinding to " << total - 1;
-                bar3.setProgress(total - 1);
+        auto bar3 = logger.add<cpplogger::ProgressBar>("Thread 2 Bar", total + 3);
+        while (!bar3->isComplete()) {
+            bar2->addProgress(1);
+            bar3->addProgress(1);
+            if (!bRewind && bar3->getProgress() == total + 1) {
+                logger.err(bar3->getMessage()) << "Something went wrong, rewinding to " << total - 1;
+                bar3->setProgress(total - 1);
                 bRewind = true;
             }
             std::this_thread::sleep_for(std::chrono::microseconds(712345));
         }
-        logger.deleteProgressBar(bar3);
+        logger.remove(bar3);
         logger.info("Thread 2") << "Ended";
     });
-    while (!bar2.isComplete()) {
-        ++bar2;
+    while (!bar2->isComplete()) {
+        bar2->addProgress(1);
         std::this_thread::sleep_for(std::chrono::microseconds(712345));
     }
-    logger.deleteProgressBar(bar2);
+    logger.remove(bar2);
 }

@@ -9,9 +9,9 @@
 #include <unordered_map>
 #include <utility>
 
+#include "interface/IUpdate.hpp"
 #include "types/Level.hpp"
 #include "types/MessageBuffer.hpp"
-#include "types/ProgressBar.hpp"
 #include "types/Stream.hpp"
 #include "utils/mutex.hpp"
 
@@ -35,7 +35,7 @@ private:
         mutex<std::condition_variable> variable;
         mutex<std::deque<MessageBuffer>> qMsg;
         mutex<std::unordered_map<std::thread::id, MessageBuffer>> mBuffers;
-        mutex<std::deque<ProgressBar>> qBars;
+        mutex<std::deque<std::shared_ptr<IUpdate>>> updateQueue;
     };
 
 public:
@@ -49,23 +49,20 @@ public:
 
     void setLevel(Level level);
 
-    template <typename... Args>
-    requires std::is_constructible_v<ProgressBar, Args...>
-    [[nodiscard]] ProgressBar newProgressBar(Args... args)
+    template <typename T, typename... Args>
+    requires std::is_base_of_v<IUpdate, T> && std::is_constructible_v<T, Args...>
+    [[nodiscard]] std::shared_ptr<T> add(Args... args)
     {
-        return context.qBars.lock([&](auto &i) {
-            i.emplace_back(args...);
-            return i.back();
-        });
+        auto newBar = std::make_shared<T>(args...);
+        context.updateQueue.lock([&](auto &i) { i.push_back(newBar); });
+        return newBar;
     }
 
-    template <class... DeletedBars>
-    void deleteProgressBar(const DeletedBars &...bars)
+    template <class... T>
+    requires(std::is_base_of_v<IUpdate, T> &&...) void remove(const std::shared_ptr<T> &...bars)
     {
-        context.qBars.lock([... args = std::forward<const DeletedBars>(bars)](auto &i) {
-            std::erase_if(i, [... bars = std::forward<const DeletedBars>(args)](const auto &bar) {
-                return (((bar == bars) || ...));
-            });
+        context.updateQueue.lock([... args = bars](auto &i) {
+            std::erase_if(i, [... bars = args](const auto &bar) { return (((bar == bars) || ...)); });
         });
     }
 

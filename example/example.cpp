@@ -3,6 +3,7 @@
 #include <iostream>
 
 using namespace cpplogger;
+using namespace std::literals;
 
 Logger logger(std::clog);
 
@@ -22,7 +23,6 @@ try {
 
 int main(void)
 {
-    const auto total = 100;
 
     logger.start();
 
@@ -34,43 +34,43 @@ int main(void)
 
     logger.debug("Test vector") << test;
     {
-        auto bar = logger.newProgressBar("Bar with a really long title", total,
-                                         ProgressBar::Style{
-                                             .bShowTime = true,
-                                         });
-        for (unsigned i = 0; i < total; i++) {
-            ++bar;
-            std::this_thread::sleep_for(std::chrono::milliseconds(30));
+        const auto total = 3000;
+        auto bar = logger.add<cpplogger::ProgressBar>("Bar with a really long title", total,
+                                                      ProgressBar::Style{
+                                                          .bShowTime = true,
+                                                      });
+        for (unsigned i = 0; !bar->isComplete(); i++) {
+            bar->addProgress(i);
+            std::this_thread::sleep_for(30ms);
         }
-        logger.info(bar.getMessage()) << "this is an information message";
-
-        logger.deleteProgressBar(bar);
+        logger.info(bar->getMessage()) << "this is an information message";
+        logger.remove(bar);
     }
 
     {
-        bool bRewind = false;
-        auto bar2 = logger.newProgressBar("Bar2", total,
-                                          ProgressBar::Style{
-                                              .cFill = '#',
-                                              .cEqual = '#',
-                                              .cEmpty = '-',
-                                          });
-        auto bar3 = logger.newProgressBar("Bar3", total);
-        while (!bar2.isComplete() || !bar3.isComplete()) {
-            ++bar2;
-            ++bar3;
-            if (bar2.isComplete() && bar3.getProgress() > 80) { logger.debug("debug") << "this is a debug message"; }
-            if (!bRewind && bar3.getProgress() == total - 10) {
-                logger.err(bar3.getMessage()) << "Something went wrong, rewinding to " << total / 2;
-                bar3.setProgress(total / 2);
-                bRewind = true;
+        const auto total = 100;
+        auto bar2 = logger.add<cpplogger::ProgressBar>("Bar2", total * 3,
+                                                       ProgressBar::Style{
+                                                           .cFill = '#',
+                                                           .cEqual = '#',
+                                                           .cEmpty = '-',
+                                                       });
+        auto bar3 = logger.add<cpplogger::ProgressBar>("Bar3", total);
+        while (!bar2->isComplete()) {
+            bar2->addProgress(3);
+            bar3->addProgress(1);
+            if (bar3->getProgress() == total - 10) {
+                logger.err(bar3->getMessage()) << "Something went wrong, rewinding to " << total / 2;
+                bar3->setProgress(total / 2);
             }
-            if (!bar2.isComplete()) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(30));
-            } else {
-                std::this_thread::sleep_for(std::chrono::milliseconds(120));
-            }
+            std::this_thread::sleep_for(60ms);
         }
-        logger.deleteProgressBar(bar2, bar3);
+
+        while (!bar3->isComplete()) {
+            bar3->addProgress(1);
+            if (bar3->getProgress() > 80) { logger.debug() << "this is a debug message"; }
+            std::this_thread::sleep_for(30ms);
+        }
+        logger.remove(bar2, bar3);
     }
 }

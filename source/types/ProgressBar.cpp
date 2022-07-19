@@ -14,11 +14,11 @@ namespace cpplogger
 {
 
 ProgressBar::ProgressBar(std::string _message, unsigned max, Style style)
-    : data(new Data{
+    : data{
           .message = std::move(_message),
           .uMax = max,
           .style = std::move(style),
-      })
+      }
 {
 }
 
@@ -30,7 +30,7 @@ void ProgressBar::update(std::ostream &out) const
     std::optional<std::string> time_str = std::nullopt;
     const auto prefix_str = drawPrefix();
 
-    if (data->style.bShowTime) time_str = writeTime();
+    if (data.style.bShowTime) time_str = writeTime();
 
     const int iWidth = size.columns - int(2 + prefix_str.size() + progress_str.size() + time_str.value_or("").size());
 
@@ -41,29 +41,17 @@ void ProgressBar::update(std::ostream &out) const
     out << std::endl;
 }
 
-ProgressBar &ProgressBar::operator++() noexcept
-{
-    if (!this->isComplete()) data->uProgress++;
-    return *this;
-}
-
-ProgressBar &ProgressBar::operator--() noexcept
-{
-    data->uProgress--;
-    return *this;
-}
-
 std::string ProgressBar::writeTime() const
 {
     static constexpr const auto remaining_text = " remaining";
     static constexpr const auto elapsed_text = " elapsed";
 
-    const auto elapsed = std::chrono::steady_clock::now() - data->start_time;
-    const auto remaining = elapsed / data->uProgress.load() * (data->uMax - data->uProgress);
+    const auto elapsed = std::chrono::steady_clock::now() - data.start_time;
+    const auto remaining = elapsed / data.uProgress.load() * (data.uMax - data.uProgress);
 
     std::stringstream st;
     st.precision(1);
-    if (data->uProgress > 0 && data->uProgress < data->uMax) {
+    if (data.uProgress > 0 && data.uProgress < data.uMax) {
         st << int(std::chrono::duration<float>(elapsed).count()) << "s" << remaining_text << " | "
            << int(std::chrono::duration<float>(remaining).count()) << "s" << elapsed_text;
     } else {
@@ -74,8 +62,8 @@ std::string ProgressBar::writeTime() const
 void ProgressBar::drawBar(std::ostream &out, const int iWidth) const
 {
     out << "[";
-    const int fills = int(double(data->uProgress) / double(data->uMax) * iWidth);
-    const auto &style = data->style;
+    const int fills = int(double(data.uProgress) / double(data.uMax) * iWidth);
+    const auto &style = data.style;
     if (fills >= 0) {
         for (int i = 0; i < iWidth; i++) {
             if (i < fills) {
@@ -92,16 +80,16 @@ void ProgressBar::drawBar(std::ostream &out, const int iWidth) const
 
 std::string ProgressBar::drawProgress() const
 {
-    const int digit = std::floor(std::log10(double(data->uMax)) + 1);
+    const int digit = std::floor(std::log10(double(data.uMax)) + 1);
     std::stringstream progress;
-    progress << "(" << std::setfill(' ') << std::setw(digit) << data->uProgress << "/" << data->uMax << ")";
+    progress << "(" << std::setfill(' ') << std::setw(digit) << data.uProgress << "/" << data.uMax << ")";
     return progress.str();
 }
 
 std::string ProgressBar::drawPrefix() const
 {
     std::stringstream prefix;
-    prefix << clearLine() << style(cpplogger::Style::Bold) << data->message << reset();
+    prefix << clearLine() << style(cpplogger::Style::Bold) << data.message << reset();
     return prefix.str();
 }
 
