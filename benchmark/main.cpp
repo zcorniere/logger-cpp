@@ -1,4 +1,6 @@
 #include <cpplogger/Logger.hpp>
+#include <cpplogger/utils/mutex.hpp>
+#include <cpplogger/utils/source_location.hpp>
 
 #include <barrier>
 #include <chrono>
@@ -8,55 +10,58 @@
 #include <vector>
 
 constexpr auto file_path("file.txt");
+constexpr auto nbOfWorker = 8;
+constexpr auto nbOfLinePrinted = 100000;
 
 cpplogger::Logger logger(std::clog);
+cpplogger::mutex<std::ofstream> file(file_path);
 
-#define START_POINT(msg)                                    \
-    auto start = std::chrono::high_resolution_clock::now(); \
-    file << "start " << msg << " : " << start.time_since_epoch().count() << "s" << std::endl;
+class ScopedTime
+{
+public:
+    ScopedTime(const std::string message) noexcept: message(std::move(message)) { startTimer(); }
+    ~ScopedTime() { endTimer(); }
 
-#define END_POINT(msg)                                                                    \
-    auto end = std::chrono::high_resolution_clock::now();                                 \
-    file << "end " << msg << " : " << end.time_since_epoch().count() << "s" << std::endl; \
-    std::chrono::duration<double> elapsedTime(end - start);                               \
-    file << msg << " took : " << elapsedTime.count() << "s" << std::endl;
-
-#define TEST_SCOPE(msg)   \
-    {                     \
-        START_POINT(msg); \
-        print_bs(msg);    \
-        END_POINT(msg);   \
+    void startTimer() noexcept { start = std::chrono::high_resolution_clock::now(); }
+    void endTimer() const
+    {
+        auto end = std::chrono::high_resolution_clock::now();
+        file.lock([this, &end](auto &i) {
+            std::chrono::duration<double> elapsedTime(end - start);
+            i << message << " => " << elapsedTime.count() << "s" << std::endl;
+        });
     }
 
-const auto nbOfWorker = 8;
-const auto nbOfLinePrinted = 100000;
+private:
+    const std::string message;
+    std::chrono::high_resolution_clock::time_point start;
+};
 
-void print_bs(const std::string &msg) noexcept
+void print_lines(const std::string &msg = {}) noexcept
 {
+    ScopedTime time("Printing " + std::to_string(nbOfLinePrinted) + " lines {" + msg + "}");
     for (int i = 0; i <= nbOfLinePrinted; i++) { logger.debug(msg) << i; }
 }
 
 int main(void)
 {
-    std::ofstream file((std::filesystem::path(file_path)));
+    ScopedTime globalTime(function_name());
     logger.start();
 
-    TEST_SCOPE(std::to_string(nbOfLinePrinted))
-    file << std::endl << std::endl;
+    print_lines();
+
     {
-        START_POINT("Multithread " + std::to_string(nbOfLinePrinted));
-        std::barrier sync_point(nbOfWorker, [&]() noexcept { start = std::chrono::high_resolution_clock::now(); });
+        {
+            ScopedTime time("Multithread");
+            std::barrier sync_point(nbOfWorker, [&time]() noexcept { time.startTimer(); });
 
-        auto work = [&](int id) {
-            const auto msg = "Multithread/" + std::to_string(id) + " " + std::to_string(nbOfLinePrinted);
-            sync_point.arrive_and_wait();
-            print_bs(msg);
-            END_POINT(msg);
-        };
-
-        std::vector<std::jthread> workers;
-        for (unsigned i = 0; i < nbOfWorker; i++) { workers.emplace_back(work, i); }
-
-        END_POINT("Multithread " + std::to_string(nbOfLinePrinted));
+            auto work = [&](int id) {
+                const auto msg = "Multithread/" + std::to_string(id);
+                sync_point.arrive_and_wait();
+                print_lines(msg);
+            };
+            std::vector<std::jthread> workers(nbOfWorker);
+            for (unsigned i = 0; i < nbOfWorker; i++) workers.emplace_back(work, i);
+        }
     }
 }
