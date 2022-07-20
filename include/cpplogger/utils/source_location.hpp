@@ -9,6 +9,8 @@
 namespace
 {
 
+inline std::string __function_name(const char *const function) { return std::string(function); }
+
 inline std::string __file_position(const char *const file, int line, int col = -1)
 {
     return std::string() + ::std::filesystem::relative(file, ::std::filesystem::current_path()).string() + ":" +
@@ -21,7 +23,7 @@ inline std::string __file_position(const char *const file, int line, int col = -
 
 inline std::string function_name(const std::source_location &location = std::source_location::current())
 {
-    return location.function_name();
+    return __function_name(location.function_name());
 }
 
 inline std::string file_position(const std::source_location &location = std::source_location::current())
@@ -31,10 +33,12 @@ inline std::string file_position(const std::source_location &location = std::sou
 
 #else
 
-    #if defined(__PRETTY_FUNCTION__)
-        #define function_name() std::string(__PRETTY_FUNCTION__)
+    #if defined(__GNUC__) || defined(__clang__)
+        #define function_name() __function_name(__PRETTY_FUNCTION__)
+    #elif defined(__FUNCSIG__)
+        #define function_name() __function_name(__FUNCSIG__)
     #else
-        #define function_name() std::string(__FUNCTION__)
+        #define function_name() __function_name(__FUNCTION__)
     #endif
 
     #define file_position() __file_position(__FILE__, __LINE__)
