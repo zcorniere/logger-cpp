@@ -54,7 +54,7 @@ public:
     [[nodiscard]] std::shared_ptr<T> add(Args... args)
     {
         auto newBar = std::make_shared<T>(args...);
-        context.updateQueue.lock([&](auto &i) { i.push_back(newBar); });
+        context.updateQueue.lock([newBar](auto &i) { i.push_back(newBar); });
         return newBar;
     }
 
