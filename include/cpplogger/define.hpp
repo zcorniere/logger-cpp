@@ -29,5 +29,3 @@
     #include <io.h>
     #include <windows.h>
 #endif
-
-#define LOGGER_ESCAPE_SEQUENCE "\033"

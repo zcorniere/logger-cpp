@@ -5,6 +5,8 @@
 #include <string>
 #include <string_view>
 
+#define LOGGER_ESCAPE_SEQUENCE "\033"
+
 namespace cpplogger
 {
 
