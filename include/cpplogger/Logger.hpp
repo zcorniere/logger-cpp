@@ -61,8 +61,10 @@ public:
     template <class... T>
     requires(std::is_base_of_v<IUpdate, T> &&...) void remove(const std::shared_ptr<T> &...bars)
     {
-        context.updateQueue.lock([... args = bars](auto &i) {
-            std::erase_if(i, [... bars = args](const auto &bar) { return (((bar == bars) || ...)); });
+        context.updateQueue.lock([... args = std::forward<const std::shared_ptr<T>>(bars)](auto &i) {
+            std::erase_if(i, [... bars = std::forward<const std::shared_ptr<T>>(args)](const auto &bar) {
+                return (((bar == bars) || ...));
+            });
         });
     }
 
