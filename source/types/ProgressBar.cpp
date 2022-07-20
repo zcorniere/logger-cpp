@@ -58,8 +58,8 @@ std::string ProgressBar::writeTime() const
     std::stringstream st;
     st.precision(1);
     if (data.uProgress > 0 && data.uProgress < data.uMax) {
-        st << int(std::chrono::duration<float>(elapsed).count()) << "s" << remaining_text << " | "
-           << int(std::chrono::duration<float>(remaining).count()) << "s" << elapsed_text;
+        st << int(std::chrono::duration<float>(remaining).count()) << "s" << remaining_text << " | "
+           << int(std::chrono::duration<float>(elapsed).count()) << "s" << elapsed_text;
     } else {
         st << " done";
     }
