@@ -12,6 +12,8 @@ if(BUILD_EXAMPLE)
     add_subdirectory(example/)
 endif()
 
+set(LOGGER_DELAY 100ms)
+
 add_library(
     ${PROJECT_NAME} STATIC
     source/lib.cpp
@@ -25,6 +27,7 @@ add_library(
     source/types/MessageBuffer.cpp
 )
 
+target_compile_definitions(${PROJECT_NAME} PUBLIC LOGGER_DELAY=${LOGGER_DELAY})
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
 

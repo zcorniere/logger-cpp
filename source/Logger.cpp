@@ -5,6 +5,10 @@
 #include <iostream>
 #include <stdexcept>
 
+#ifndef LOGGER_DELAY
+    #define LOGGER_DELAY 100ms
+#endif
+
 static std::once_flag initInstanceFlag;
 
 extern void backstop();
@@ -28,7 +32,7 @@ void Logger::thread_loop(Context &context)
                 using namespace std::literals;
 
                 auto var = context.variable.lock();
-                var.get().wait_for(var.get_lock(), 100ms);
+                var.get().wait_for(var.get_lock(), LOGGER_DELAY);
             }
 
             if (barsModifier > 0) {
@@ -75,10 +79,12 @@ void Logger::start(Level level)
     init();
     context.selectedLevel = level;
     msgT = std::jthread(Logger::thread_loop, std::ref(context));
+    this->debug("LOGGER") << "Logger started !";
 }
 
 void Logger::stop(bool bForce, bool bFlush)
 {
+    this->debug("LOGGER") << "Logger is stopping !";
     deinit();
 
     context.variable.get_raw().notify_one();
