@@ -53,7 +53,8 @@ std::string ProgressBar::writeTime() const
     static constexpr const auto elapsed_text = " elapsed";
 
     const auto elapsed = std::chrono::steady_clock::now() - data.start_time;
-    const auto remaining = elapsed / data.uProgress.load() * (data.uMax - data.uProgress);
+    const unsigned remaining_bar = data.uMax - data.uProgress;
+    const auto remaining = elapsed / std::max(data.uProgress.load() * remaining_bar, 1u);
 
     std::stringstream st;
     st.precision(1);
