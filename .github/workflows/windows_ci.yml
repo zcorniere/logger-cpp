@@ -10,15 +10,17 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-2022, windows-2019]
+        library_type: [STATIC, SHARED]
         architecture: [x64]
         build_type: [Debug, Release]
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build
-            -A ${{matrix.architecture}}
-            -DBUILD_EXAMPLE=ON
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build
+          -A ${{matrix.architecture}}
+          -DLOGGER_LIBRARY_TYPE=${{ matrix.library_type }}
+          -DBUILD_EXAMPLE=ON
 
-    - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}

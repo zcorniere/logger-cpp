@@ -8,10 +8,11 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    
+
     strategy:
       fail-fast: false
       matrix:
+        library_type: [STATIC, SHARED]
         build_type: [Debug, Release]
         cxx_compiler: [g++-10, g++-11, clang++-12, clang++-13, clang++-14]
 
@@ -20,9 +21,10 @@ jobs:
 
       - name: Configure CMake
         run: cmake
-              -B ${{github.workspace}}/build
-              -DCMAKE_CXX_COMPILER=${{matrix.cxx_compiler}}
-              -DBUILD_EXAMPLE=ON
+          -B ${{ github.workspace }}/build
+          -DLOGGER_LIBRARY_TYPE=${{ matrix.library_type }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx_compiler }}
+          -DBUILD_EXAMPLE=ON
 
       - name: Build lib
-        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
+        run: cmake --build ${{ github.workspace }}/build --config ${{ matrix.build_type }}
