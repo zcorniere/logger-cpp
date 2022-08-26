@@ -21,59 +21,6 @@ Logger::Logger(std::ostream &stream): context(stream) { std::call_once(initInsta
 
 Logger::~Logger() { this->stop(false); }
 
-void Logger::thread_loop(Context &context)
-{
-    int barsModifier = 0;
-
-    while (!context.bForceExit) {
-        std::stringstream bufferStream;
-        try {
-            {
-                using namespace std::literals;
-
-                auto var = context.variable.lock();
-                var.get().wait_for(var.get_lock(), LOGGER_DELAY);
-            }
-
-            if (barsModifier > 0) {
-                bufferStream << moveUp(barsModifier) << clearAfterCursor();
-                barsModifier = 0;
-            }
-
-            // Flush the messages queue
-            context.qMsg.lock([&](auto &i) {
-                for (; !i.empty(); i.pop_front()) {
-                    const auto &msg = i.front();
-                    if (!msg.content) {
-                        context.selectedLevel = msg.level;
-                    } else if (msg.level >= context.selectedLevel) {
-                        bufferStream << msg << std::endl;
-                    }
-                }
-
-            });
-
-            context.updateQueue.lock([&](auto &bars) {
-                if (bars.empty()) return;
-
-                // redraw the progress bars
-                for (const auto &bar: bars) {
-                    bar->update(bufferStream);
-                    barsModifier += 1;
-                }
-            });
-            context.stream << bufferStream.str();
-            context.stream.flush();
-            if (context.bExit && context.qMsg.lock([&](const auto &i) { return i.empty(); })) { return; }
-        } catch (const std::exception &e) {
-            std::cerr << "LOGGER ERROR: " << e.what() << std::endl;
-        } catch (...) {
-            std::cerr << "Unknown error in the Logger thread. Will exit now..." << std::endl;
-            return;
-        }
-    }
-}
-
 void Logger::start(Level level)
 {
     init();
@@ -101,6 +48,8 @@ void Logger::flush()
     });
     context.stream.flush();
 }
+
+void Logger::print() { Logger::print(context); }
 
 void Logger::setLevel(Level level)
 {
@@ -150,5 +99,63 @@ Stream Logger::msg(const std::string &msg) { LOGGER_FUNC(Level::Message); }
 Stream Logger::trace(const std::string &msg) { LOGGER_FUNC(Level::Trace); }
 
 MessageBuffer &Logger::raw() { return context.mBuffers.lock().get()[std::this_thread::get_id()]; }
+
+void Logger::thread_loop(Context &context)
+{
+    while (!context.bForceExit) {
+        try {
+            {
+                using namespace std::literals;
+
+                auto var = context.variable.lock();
+                var.get().wait_for(var.get_lock(), LOGGER_DELAY);
+            }
+
+            print(context);
+
+            if (context.bExit && context.qMsg.lock([&](const auto &i) { return i.empty(); })) { return; }
+        } catch (const std::exception &e) {
+            std::cerr << "LOGGER ERROR: " << e.what() << std::endl;
+        } catch (...) {
+            std::cerr << "Unknown error in the Logger thread. Will exit now..." << std::endl;
+            return;
+        }
+    }
+}
+
+void Logger::print(Logger::Context &context)
+{
+    static int barsModifier = 0;
+
+    std::stringstream bufferStream;
+    if (barsModifier > 0) {
+        bufferStream << moveUp(barsModifier) << clearAfterCursor();
+        barsModifier = 0;
+    }
+
+    // Flush the messages queue
+    context.qMsg.lock([&](auto &i) {
+        for (; !i.empty(); i.pop_front()) {
+            const auto &msg = i.front();
+            if (!msg.content) {
+                context.selectedLevel = msg.level;
+            } else if (msg.level >= context.selectedLevel) {
+                bufferStream << msg << std::endl;
+            }
+        }
+    });
+
+    context.updateQueue.lock([&](auto &bars) {
+        if (bars.empty()) return;
+
+        // redraw the progress bars
+        for (const auto &bar: bars) {
+            bar->update(bufferStream);
+            barsModifier += 1;
+        }
+    });
+    context.stream << bufferStream.str();
+    context.stream.flush();
+}
 
 }    // namespace cpplogger

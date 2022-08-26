@@ -46,6 +46,7 @@ public:
     void start(Level level = Level::Debug);
     void stop(bool bForce = true, bool bFlush = true);
     void flush();
+    void print();
 
     void setLevel(Level level);
 
@@ -83,6 +84,7 @@ private:
     [[nodiscard]] MessageBuffer &raw();
 
     static void thread_loop(Context &context);
+    static void print(Context &context);
 
 private:
     Context context;
