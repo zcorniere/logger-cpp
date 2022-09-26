@@ -1,6 +1,5 @@
 #include <cpplogger/Logger.hpp>
 #include <cpplogger/utils/mutex.hpp>
-#include <cpplogger/utils/source_location.hpp>
 
 #include <barrier>
 #include <chrono>
@@ -45,7 +44,7 @@ void print_lines(const std::string &msg = {}) noexcept
 
 int main(void)
 {
-    ScopedTime globalTime(function_name());
+    ScopedTime globalTime(__FUNCTION__);
     logger.start();
 
     print_lines();

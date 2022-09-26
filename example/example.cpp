@@ -2,7 +2,6 @@
 #include <cpplogger/Logger.hpp>
 #include <cpplogger/types/ProgressBar.hpp>
 #include <cpplogger/types/Spinner.hpp>
-#include <cpplogger/utils/source_location.hpp>
 
 #include <iostream>
 
@@ -27,7 +26,7 @@ try {
 
 bool other_function()
 {
-    logger.err(function_name()) << "this is an error message, will be printed in red";
+    logger.err() << "this is an error message, will be printed in red";
     return true;
 }
 
@@ -39,7 +38,7 @@ int main(void)
     throw_catch_a();
     other_function();
 
-    logger.warn(file_position()) << "This is a warning, that will print the current position";
+    logger.warn() << "This is a warning, that will print the current position";
 
     logger.debug("Test vector") << test;
     {
