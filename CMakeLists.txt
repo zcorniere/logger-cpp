@@ -14,15 +14,8 @@ endif()
 
 set(LOGGER_DELAY 100ms)
 
-set(LOGGER_LIBRARY_TYPE
-    "${LOGGER_LIBRARY_TYPE}"
-    CACHE STRING "Library type override for GLFW (SHARED, STATIC, OBJECT, or empty to follow BUILD_SHARED_LIBS)"
-)
-message(STATUS "Build ${PROJECT_NAME} as a ${LOGGER_LIBRARY_TYPE} library")
-
 add_library(
-    ${PROJECT_NAME}
-    ${LOGGER_LIBRARY_TYPE}
+    ${PROJECT_NAME} STATIC
     source/lib.cpp
     source/Size.cpp
     source/Logger.cpp
@@ -33,10 +26,6 @@ add_library(
     source/types/ProgressBar.cpp
     source/types/MessageBuffer.cpp
 )
-
-if(${LOGGER_LIBRARY_TYPE} STREQUAL "SHARED")
-    set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
-endif()
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC LOGGER_DELAY=${LOGGER_DELAY})
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
