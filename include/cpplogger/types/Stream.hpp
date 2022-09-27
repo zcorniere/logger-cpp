@@ -13,18 +13,18 @@ class Logger;
 class Stream
 {
 public:
-    explicit Stream(Logger &log, MessageBuffer &buffer, const std::string message);
+    explicit Stream(Logger &log, Level level, const std::string message);
     Stream(const Stream &) = delete;
     Stream(const Stream &&) = delete;
     ~Stream();
 
-    inline Stream &operator<<(const Printable auto &object)
+    LOGGER_FORCEINLINE Stream &operator<<(const Printable auto &object)
     {
         stream << object;
         return *this;
     }
 
-    inline Stream &operator<<(const PrintableIterator auto &container)
+    Stream &operator<<(const PrintableIterator auto &container)
     {
         auto size = container.size() - 1;
         stream << "[";
@@ -40,7 +40,7 @@ public:
 
 private:
     std::ostringstream stream;
-    MessageBuffer &buffer;
+    MessageBuffer buffer;
     Logger &logger;
 };
 

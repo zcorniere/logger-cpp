@@ -34,7 +34,6 @@ private:
 
         mutex<std::condition_variable> variable;
         mutex<std::deque<MessageBuffer>> qMsg;
-        mutex<std::unordered_map<std::thread::id, MessageBuffer>> mBuffers;
         mutex<std::deque<std::shared_ptr<IUpdate>>> updateQueue;
     };
 
@@ -46,9 +45,17 @@ public:
     void start(Level level = Level::Debug);
     void stop(bool bForce = true, bool bFlush = true);
     void flush();
-    void print();
 
-    void setLevel(Level level);
+    LOGGER_FORCEINLINE void print() { Logger::print(context); }
+
+    LOGGER_FORCEINLINE void setLevel(Level level)
+    {
+        context.qMsg.lock([level](auto &i) {
+            i.push_back({
+                .level = level,
+            });
+        });
+    }
 
     template <typename T, typename... Args>
     requires std::is_base_of_v<IUpdate, T> && std::is_constructible_v<T, Args...>
@@ -69,19 +76,40 @@ public:
         });
     }
 
-    [[nodiscard]] Stream level(Level level, const std::string &msg);
-    [[nodiscard]] Stream warn(const std::string &msg = "");
-    [[nodiscard]] Stream err(const std::string &msg = "");
-    [[nodiscard]] Stream info(const std::string &msg = "");
-    [[nodiscard]] Stream debug(const std::string &msg = "");
-    [[nodiscard]] Stream trace(const std::string &msg = "");
-    [[nodiscard]] Stream msg(const std::string &msg = "");
-    void endl();
+#define LOGGER_METHOD(Name, Level) \
+    [[nodiscard]] LOGGER_FORCEINLINE Stream Name(const std::string &msg = "") { return Stream(*this, Level, msg); }
+
+    LOGGER_METHOD(warn, Level::Warn)
+    LOGGER_METHOD(err, Level::Error)
+    LOGGER_METHOD(info, Level::Info)
+    LOGGER_METHOD(debug, Level::Debug)
+    LOGGER_METHOD(msg, Level::Message)
+    LOGGER_METHOD(trace, Level::Trace)
+
+#undef LOGGER_METHOD
+
+    [[nodiscard]] LOGGER_FORCEINLINE Stream level(Level level, const std::string &message)
+    {
+        switch (level) {
+            case Level::Trace: return trace(message);
+            case Level::Debug: return debug(message);
+            case Level::Info: return info(message);
+            case Level::Warn: return warn(message);
+            case Level::Error: return err(message);
+            case Level::Message: return msg(message);
+            // Should no be executed
+            default: return msg(message);
+        }
+    }
 
 private:
+    LOGGER_FORCEINLINE void endl(MessageBuffer buffer)
+    {
+        context.qMsg.lock([buffer = std::move(buffer)](auto &i) { i.push_back(std::move(buffer)); });
+    }
+
     void init();
     void deinit();
-    [[nodiscard]] MessageBuffer &raw();
 
     static void thread_loop(Context &context);
     static void print(Context &context);
@@ -89,6 +117,8 @@ private:
 private:
     Context context;
     std::jthread msgT;
+
+    friend cpplogger::Stream;
 };
 
 }    // namespace cpplogger

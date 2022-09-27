@@ -49,57 +49,6 @@ void Logger::flush()
     context.stream.flush();
 }
 
-void Logger::print() { Logger::print(context); }
-
-void Logger::setLevel(Level level)
-{
-    context.qMsg.lock([level](auto &i) {
-        i.push_back({
-            .level = level,
-        });
-    });
-}
-
-void Logger::endl()
-{
-    auto &buf = this->raw();
-
-    context.qMsg.lock([&buf](auto &i) { i.push_back(buf); });
-    buf = {};
-}
-
-Stream Logger::level(Level level, const std::string &msg)
-{
-    switch (level) {
-        case Level::Trace: return trace(msg);
-        case Level::Debug: return debug(msg);
-        case Level::Info: return info(msg);
-        case Level::Warn: return warn(msg);
-        case Level::Error: return err(msg);
-        case Level::Message: return this->msg(msg);
-        default: throw std::runtime_error("Invalid level value");
-    }
-}
-
-#define LOGGER_FUNC(LVL)     \
-    auto &buf = this->raw(); \
-    buf.level = LVL;         \
-    return Stream(*this, buf, msg);
-
-Stream Logger::warn(const std::string &msg) { LOGGER_FUNC(Level::Warn); }
-
-Stream Logger::err(const std::string &msg) { LOGGER_FUNC(Level::Error); }
-
-Stream Logger::info(const std::string &msg) { LOGGER_FUNC(Level::Info); }
-
-Stream Logger::debug(const std::string &msg) { LOGGER_FUNC(Level::Debug); }
-
-Stream Logger::msg(const std::string &msg) { LOGGER_FUNC(Level::Message); }
-
-Stream Logger::trace(const std::string &msg) { LOGGER_FUNC(Level::Trace); }
-
-MessageBuffer &Logger::raw() { return context.mBuffers.lock().get()[std::this_thread::get_id()]; }
-
 void Logger::thread_loop(Context &context)
 {
     while (!context.bForceExit) {
