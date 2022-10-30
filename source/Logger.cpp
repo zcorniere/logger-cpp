@@ -29,15 +29,13 @@ void Logger::start(Level level)
     this->debug("LOGGER") << "Logger started !";
 }
 
-void Logger::stop(bool bForce, bool bFlush)
+void Logger::stop(bool bFlush)
 {
     this->debug("LOGGER") << "Logger is stopping !";
     deinit();
 
     context.variable.get_raw().notify_one();
-    context.bExit = true;
-    if (bForce) context.bForceExit = true;
-    if (bForce && bFlush) this->flush();
+    if (bFlush) this->flush();
 }
 
 void Logger::flush()
@@ -49,20 +47,16 @@ void Logger::flush()
     context.stream.flush();
 }
 
-void Logger::thread_loop(Context &context)
+void Logger::thread_loop(std::stop_token token, Context &context)
 {
-    while (!context.bForceExit) {
+    while (!token.stop_requested() || context.qMsg.lock([&](const auto &i) { return !i.empty(); })) {
         try {
             {
-                using namespace std::literals;
-
                 auto var = context.variable.lock();
-                var.get().wait_for(var.get_lock(), LOGGER_DELAY);
+                var.get().wait_for(var.get_lock(), std::chrono::milliseconds(10));
             }
 
             print(context);
-
-            if (context.bExit && context.qMsg.lock([&](const auto &i) { return i.empty(); })) { return; }
         } catch (const std::exception &e) {
             std::cerr << "LOGGER ERROR: " << e.what() << std::endl;
         } catch (...) {

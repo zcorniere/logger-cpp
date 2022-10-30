@@ -28,8 +28,6 @@ private:
 
     public:
         std::ostream &stream;
-        std::atomic_bool bExit = false;
-        std::atomic_bool bForceExit = false;
         std::atomic<Level> selectedLevel = Level::Debug;
 
         mutex<std::condition_variable> variable;
@@ -43,7 +41,7 @@ public:
     Logger(const Logger &&) = delete;
     ~Logger();
     void start(Level level = Level::Debug);
-    void stop(bool bForce = true, bool bFlush = true);
+    void stop(bool bFlush = true);
     void flush();
 
     LOGGER_FORCEINLINE void print() { Logger::print(context); }
@@ -111,7 +109,7 @@ private:
     void init();
     void deinit();
 
-    static void thread_loop(Context &context);
+    static void thread_loop(std::stop_token token, Context &context);
     static void print(Context &context);
 
 private:
