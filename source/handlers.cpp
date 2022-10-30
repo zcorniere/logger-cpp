@@ -6,7 +6,7 @@ static cpplogger::Logger *handler_logger = nullptr;
 static const std::terminate_handler static_handler = std::get_terminate();
 static std::terminate_handler previous_handler = nullptr;
 
-void backstop()
+[[noreturn]] void backstop()
 {
     auto const ep = std::current_exception();
     if (ep && handler_logger) {
