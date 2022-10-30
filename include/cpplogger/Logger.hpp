@@ -100,6 +100,8 @@ public:
         }
     }
 
+    std::jthread &getThreadHandle() noexcept { return msgT; }
+
 private:
     inline void endl(MessageBuffer buffer)
     {
