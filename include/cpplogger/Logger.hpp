@@ -44,9 +44,9 @@ public:
     void stop(bool bFlush = true);
     void flush();
 
-    LOGGER_FORCEINLINE void print() { Logger::print(context); }
+    inline void print() { Logger::print(context); }
 
-    LOGGER_FORCEINLINE void setLevel(Level level)
+    inline void setLevel(Level level)
     {
         context.qMsg.lock([level](auto &i) {
             i.push_back({
@@ -75,7 +75,7 @@ public:
     }
 
 #define LOGGER_METHOD(Name, Level) \
-    [[nodiscard]] LOGGER_FORCEINLINE Stream Name(const std::string &msg = "") { return Stream(*this, Level, msg); }
+    [[nodiscard]] inline Stream Name(const std::string &msg = "") { return Stream(*this, Level, msg); }
 
     LOGGER_METHOD(warn, Level::Warn)
     LOGGER_METHOD(err, Level::Error)
@@ -86,7 +86,7 @@ public:
 
 #undef LOGGER_METHOD
 
-    [[nodiscard]] LOGGER_FORCEINLINE Stream level(Level level, const std::string &message)
+    [[nodiscard]] inline Stream level(Level level, const std::string &message)
     {
         switch (level) {
             case Level::Trace: return trace(message);
@@ -101,7 +101,7 @@ public:
     }
 
 private:
-    LOGGER_FORCEINLINE void endl(MessageBuffer buffer)
+    inline void endl(MessageBuffer buffer)
     {
         context.qMsg.lock([buffer = std::move(buffer)](auto &i) { i.push_back(std::move(buffer)); });
     }

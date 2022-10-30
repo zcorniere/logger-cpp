@@ -20,14 +20,3 @@
     #include <io.h>
     #include <windows.h>
 #endif
-
-#if (defined(__clang__) || defined(__GNUC__))
-    #define LOGGER_FORCEINLINE inline __attribute__((always_inline)) /* Force code to be inline */
-    #define LOGGER_FORCENOINLINE __attribute__((noinline))           /* Force code to NOT be inline */
-#elif defined(_MSC_VER)
-    #define LOGGER_FORCEINLINE inline __forceinline /* Force code to be inline */
-    #define LOGGER_FORCENOINLINE __declspec(noinline)
-#else
-    #define LOGGER_FORCEINLINE inline
-    #define LOGGER_FORCENOINLINE
-#endif

@@ -18,7 +18,7 @@ public:
     Stream(const Stream &&) = delete;
     ~Stream();
 
-    LOGGER_FORCEINLINE Stream &operator<<(const Printable auto &object)
+    inline Stream &operator<<(const Printable auto &object)
     {
         stream << object;
         return *this;
