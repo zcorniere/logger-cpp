@@ -6,28 +6,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Threads REQUIRED)
 
-option(BUILD_EXAMPLE "Build example application" OFF)
-if(BUILD_EXAMPLE)
-    message(STATUS "Building example application")
-    add_subdirectory(example/)
-endif()
-
-set(LOGGER_DELAY 100ms)
-
 add_library(
     ${PROJECT_NAME} STATIC
     source/lib.cpp
-    source/Size.cpp
-    source/Logger.cpp
-    source/handlers.cpp
-    source/types/Level.cpp
-    source/types/Stream.cpp
-    source/types/Spinner.cpp
-    source/types/ProgressBar.cpp
-    source/types/MessageBuffer.cpp
 )
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC LOGGER_DELAY=${LOGGER_DELAY})
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
 
@@ -39,10 +22,3 @@ target_compile_options(
             $<$<CXX_COMPILER_ID:MSVC>:
             /W4>
 )
-
-option(BUILD_BENCHMARK "Build benchmark application" OFF)
-if(BUILD_BENCHMARK)
-    message(STATUS "Building benchmark application")
-    add_executable(benchmark benchmark/main.cpp)
-    target_link_libraries(benchmark PUBLIC logger)
-endif()

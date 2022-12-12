@@ -5,7 +5,7 @@
 #include <mutex>
 #include <optional>
 
-namespace cpplogger
+namespace cpplogger::utils
 {
 
 template <typename T, typename M = std::mutex>
@@ -15,7 +15,7 @@ public:
     class guard
     {
     public:
-        inline guard(std::unique_lock<M> lock, T &ref): m_lock(std::move(lock)), ref(ref) {}
+        constexpr guard(std::unique_lock<M> lock, T &ref): m_lock(std::move(lock)), ref(ref) {}
         inline guard(M &mutex, T &ref): m_lock(mutex), ref(ref) {}
         guard(const guard &) = delete;
         ~guard() = default;
@@ -75,4 +75,4 @@ private:
     T data;
 };
 
-}    // namespace cpplogger
+}    // namespace cpplogger::utils
