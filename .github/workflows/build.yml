@@ -1,0 +1,46 @@
+name: Build
+
+on: push
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build: 
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+        config:
+          - os: windows-2022
+            working_directory: \build\
+            extra_cmake: ' -A "x64"'
+            compiler: "cl"
+
+          - os: ubuntu-22.04
+            working_directory: /build/
+            extra_cmake: ""
+            compiler: "g++-12"
+
+          - os: ubuntu-22.04
+            working_directory: /build/
+            extra_cmake: ""
+            compiler: "clang++-14"
+
+
+    runs-on: ${{matrix.config.os}}
+    name: ${{ matrix.config.os }} - ${{ matrix.config.compiler }} - ${{ matrix.build_type }}
+
+    steps:
+      - uses: actions/checkout@v3.1.0
+
+      - name: Create build directory
+        run: mkdir -p ${{ github.workspace }}${{ matrix.config.working_directory }}
+
+      - name: Configure CMake
+        working-directory: ${{ github.workspace }}${{ matrix.config.working_directory }}
+        run: cmake -D CMAKE_CXX_COMPILER=${{ matrix.config.compiler }} ${{ matrix.config.extra_cmake }} ..
+
+      - name: Build
+        working-directory: ${{ github.workspace }}${{ matrix.config.working_directory }}
+        run: cmake --build . --config ${{ matrix.build_type }}
