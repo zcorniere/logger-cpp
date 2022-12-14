@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
+#include <string_view>
 
-#include "cpplogger/utils/sequences.hpp"
+#include "cpplogger/types/ColorCodes.hpp"
 
 namespace cpplogger
 {

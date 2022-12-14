@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "cpplogger/define.hpp"
+
 unsigned init_terminal()
 {
     static bool initialized = false;
