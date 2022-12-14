@@ -20,3 +20,25 @@
     #include <io.h>
     #include <windows.h>
 #endif
+
+#include <version>
+
+#if defined(CPPLOGGER_USE_STD_FORMAT) && __cpp_lib_format >= 202207L
+
+    #include <format>
+
+namespace cpplogger
+{
+namespace fmt = std::format;
+}
+
+#else
+
+    #include <fmt/core.h>
+
+namespace cpplogger
+{
+namespace fmt = ::fmt::v9;
+}
+
+#endif
