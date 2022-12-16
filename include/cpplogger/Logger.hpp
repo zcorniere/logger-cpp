@@ -45,7 +45,7 @@ public:
     template <typename... Args>
     static void log(Level level, const std::string &patern, Args... args)
     {
-        if (level <= CompileTimeVerbosity) {
+        if (level >= CompileTimeVerbosity) {
             internal::LoggerStorage::getLogger(Logger.value)
                 .log(Message{
                     .LogLevel = level,
@@ -59,4 +59,6 @@ public:
 }    // namespace cpplogger
 
 #define DELARE_LOGGER_CATEGORY(Logger, Name, Verbosity) \
-    using Name = ::cpplogger::LoggerScope<#Logger, #Name, ::cpplogger::Verbosity>;
+    using Name = ::cpplogger::LoggerScope<#Logger, #Name, ::cpplogger::Level::Verbosity>;
+
+#define LOG(Name, Verbosity, Pattern, ...) Name::log(::cpplogger::Level::Verbosity, Pattern __VA_OPT__(, ) __VA_ARGS__)
