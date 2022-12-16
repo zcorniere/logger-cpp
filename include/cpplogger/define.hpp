@@ -34,6 +34,7 @@ namespace fmt = std::format;
 
 #else
 
+    #include <fmt/chrono.h>
     #include <fmt/core.h>
 
 namespace cpplogger
