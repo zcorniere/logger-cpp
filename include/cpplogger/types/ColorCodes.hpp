@@ -3,15 +3,23 @@
 namespace cpplogger
 {
 
-enum Color {
-    Black = 30,
-    Red = 31,
-    Green = 32,
-    Yellow = 33,
-    Blue = 34,
-    Magenta = 35,
-    Cyan = 36,
-    White = 37,
+// add +30 to have the ANSI color code
+// order is important !
+enum class Color : std::uint8_t {
+    Black = 0,
+    Red = 1,
+    Green = 2,
+    Yellow = 3,
+    Blue = 4,
+    Magenta = 5,
+    Cyan = 6,
+    White = 7,
 };
+
+struct ColorPair {
+    Color fg : 4;
+    Color bg : 4;
+};
+static_assert(sizeof(ColorPair) == 1);
 
 }    // namespace cpplogger

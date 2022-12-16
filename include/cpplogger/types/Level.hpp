@@ -29,16 +29,17 @@ constexpr std::string_view to_string(const Level &level) noexcept
     }
 }
 
-Color levelColor(const Level &level) noexcept
+constexpr ColorPair levelColor(const Level &level)
 {
+
     switch (level) {
-        case Level::Trace: return Color::Green;
-        case Level::Debug: return Color::Magenta;
-        case Level::Info: return Color::Cyan;
-        case Level::Warn: return Color::Yellow;
-        case Level::Error: return Color::Red;
-        case Level::Fatal: return Color::Red;
-        default: return Color::White;
+        case Level::Trace: return ColorPair{.fg = Color::Green, .bg = Color::Black};
+        case Level::Debug: return ColorPair{.fg = Color::Magenta, .bg = Color::White};
+        case Level::Info: return ColorPair{.fg = Color::Cyan, .bg = Color::White};
+        case Level::Warn: return ColorPair{.fg = Color::Yellow, .bg = Color::White};
+        case Level::Error: return ColorPair{.fg = Color::Red, .bg = Color::White};
+        case Level::Fatal: return ColorPair{.fg = Color::White, .bg = Color::Red};
+        default: return ColorPair{.fg = Color::White, .bg = Color::Black};
     }
 }
 
