@@ -4,7 +4,7 @@
 
 #include <cstdio>
 
-DELARE_LOGGER_CATEGORY(Example, TestCategory, Level::Error)
+DELARE_LOGGER_CATEGORY(Example, TestCategory, Info)
 
 int main(int ac, char **av)
 {
@@ -12,5 +12,6 @@ int main(int ac, char **av)
 
     logger.addSink(new cpplogger::StdoutSink(stdout), new cpplogger::DefaultFormatter);
 
-    TestCategory::log(cpplogger::Level::Info, "number of args {}", ac);
+    LOG(TestCategory, Info, "Info text {}", ac);
+    LOG(TestCategory, Error, "Error text");
 }
