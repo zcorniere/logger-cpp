@@ -22,7 +22,7 @@ struct ColorPair {
 };
 static_assert(sizeof(ColorPair) == 1);
 
-namespace internals
+namespace internal
 {
 
     constexpr static auto resetSequence = "\033[0m";

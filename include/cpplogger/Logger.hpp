@@ -3,7 +3,7 @@
 #include "cpplogger/define.hpp"
 #include "cpplogger/sinks/ISink.hpp"
 #include "cpplogger/types/Message.hpp"
-#include "cpplogger/utils/StringLiteral.hpp"
+#include "cpplogger/internal/StringLiteral.hpp"
 
 #include <memory>
 #include <string>
