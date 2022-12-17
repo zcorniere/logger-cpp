@@ -1,6 +1,6 @@
 #include "cpplogger/sinks/StdoutSink.hpp"
 #include "cpplogger/define.hpp"
-#include "cpplogger/utils/GlobalMutex.hpp"
+#include "cpplogger/internal/GlobalMutex.hpp"
 
 namespace cpplogger
 {
