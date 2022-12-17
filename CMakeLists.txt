@@ -31,6 +31,15 @@ target_compile_options(
             /W4>
 )
 
+target_compile_options(
+    ${PROJECT_NAME}
+    PUBLIC $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+            >
+            $<$<CXX_COMPILER_ID:MSVC>:
+            /Zc:preprocessor>
+)
+
+
 if(NOT CPPLOGGER_USE_STD_FORMAT)
     fetchcontent_declare(
         fmt
