@@ -9,22 +9,18 @@ namespace cpplogger
 
 Logger::Logger(const std::string &name): m_Name(name) { internal::LoggerStorage::registerLogger(*this); }
 
-Logger::~Logger()
-{
-    internal::LoggerStorage::removeLogger(*this);
-    for (auto sink: loggerSinks) { delete sink; }
-}
+Logger::~Logger() { internal::LoggerStorage::removeLogger(*this); }
 
-void Logger::addSink(ISink *sink, IFormatter *formatter)
+void Logger::addSink(std::unique_ptr<ISink> sink, std::unique_ptr<IFormatter> formatter)
 {
     if (!sink) throw std::runtime_error("Null sink");
-    if (formatter) sink->SetFormatter(formatter);
-    loggerSinks.push_back(sink);
+    if (formatter) sink->SetFormatter(std::move(formatter));
+    loggerSinks.emplace_back(std::move(sink));
 }
 
 void Logger::log(const cpplogger::Message &message)
 {
-    for (auto sink: loggerSinks) { sink->write(message); }
+    for (auto &sink: loggerSinks) { sink->write(message); }
 }
 
 namespace internal

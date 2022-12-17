@@ -5,6 +5,20 @@
 namespace cpplogger
 {
 
+unsigned StdoutSink::initialize_terminal([[maybe_unused]] std::FILE *p_File)
+{
+#if defined(TERMINAL_TARGET_WINDOWS)
+    HANDLE hOut = reinterpret_cast<HANDLE>(::_get_osfhandle(::_fileno(p_File)));
+    if (hOut == INVALID_HANDLE_VALUE) return ::GetLastError();
+    DWORD dwMode = 0;
+    if (!::GetConsoleMode(hOut, &dwMode)) return ::GetLastError();
+    dwMode |= DWORD(ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    if (!::SetConsoleMode(hOut, dwMode)) return ::GetLastError();
+#elif defined(TERMINAL_TARGET_POSIX)
+#endif
+    return 0;
+}
+
 StdoutSink::StdoutSink(std::FILE *file): p_File(file), r_Mutex(internal::ConsoleMutex::mutex()) {}
 
 void StdoutSink::write(const Message &message)
@@ -26,10 +40,6 @@ void StdoutSink::flush()
     std::fflush(p_File);
 }
 
-void StdoutSink::SetFormatter(IFormatter *formatter)
-{
-    if (p_Formatter) { delete p_Formatter; }
-    p_Formatter = formatter;
-}
+void StdoutSink::SetFormatter(std::unique_ptr<IFormatter> formatter) { std::swap(p_Formatter, formatter); }
 
 }    // namespace cpplogger

@@ -1,8 +1,9 @@
 #include <cpplogger/Logger.hpp>
-#include <cpplogger/formatters/DefaultFormatter.hpp>
+#include <cpplogger/formatters/ColorFormatter.hpp>
 #include <cpplogger/sinks/StdoutSink.hpp>
 
 #include <cstdio>
+#include <thread>
 
 DELARE_LOGGER_CATEGORY(Example, TestCategory, Info)
 
@@ -10,8 +11,18 @@ int main(int ac, char **av)
 {
     cpplogger::Logger logger("Example");
 
-    logger.addSink(new cpplogger::StdoutSink(stdout), new cpplogger::DefaultFormatter);
+    logger.addSink(std::make_unique<cpplogger::StdoutSink>(stdout), std::make_unique<cpplogger::ColorFormatter>());
 
-    LOG(TestCategory, Info, "Info text {}", ac);
-    LOG(TestCategory, Error, "Error text");
+    std::vector<std::jthread> threads;
+
+    for (unsigned j = 0; j < 5; j++) {
+
+        threads.push_back(std::jthread([ac]() {
+            for (unsigned i = 0; i < 1000; i++) {
+                LOG(TestCategory, Info, "Info text {}", ac);
+                LOG(TestCategory, Error, "Error text");
+                LOG(TestCategory, Fatal, "LOL");
+            }
+        }));
+    }
 }
