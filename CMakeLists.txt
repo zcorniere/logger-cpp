@@ -9,7 +9,14 @@ option(CPPLOGGER_USE_STD_FORMAT OFF "Should use the standard std::format")
 
 find_package(Threads REQUIRED)
 
-add_library(${PROJECT_NAME} STATIC source/lib.cpp source/Logger.cpp source/sinks/StdoutSink.cpp source/formatters/DefaultFormatter.cpp)
+add_library(
+    ${PROJECT_NAME} STATIC
+    source/lib.cpp
+    source/Logger.cpp
+    source/sinks/StdoutSink.cpp
+    source/formatters/DefaultFormatter.cpp
+    source/formatters/ColorFormatter.cpp
+)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 target_include_directories(${PROJECT_NAME} PUBLIC include/)

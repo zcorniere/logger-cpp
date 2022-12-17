@@ -5,6 +5,7 @@
 #include "cpplogger/types/Message.hpp"
 #include "cpplogger/utils/StringLiteral.hpp"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -17,14 +18,14 @@ public:
     Logger(const std::string &name);
     ~Logger();
 
-    void addSink(ISink *sink, IFormatter *formater = nullptr);
+    void addSink(std::unique_ptr<ISink> sink, std::unique_ptr<IFormatter> formatter = nullptr);
     void log(const Message &message);
 
     const std::string &getName() const { return m_Name; }
 
 private:
     std::string m_Name;
-    std::vector<ISink *> loggerSinks;
+    std::vector<std::unique_ptr<ISink>> loggerSinks;
 };
 
 namespace internal

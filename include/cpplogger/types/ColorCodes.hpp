@@ -17,9 +17,25 @@ enum class Color : std::uint8_t {
 };
 
 struct ColorPair {
-    Color fg : 4;
-    Color bg : 4;
+    Color fg : 4 = Color::White;
+    Color bg : 4 = Color::Black;
 };
 static_assert(sizeof(ColorPair) == 1);
+
+namespace internals
+{
+
+    constexpr static auto resetSequence = "\033[0m";
+
+    constexpr std::string color(const ColorPair &color)
+    {
+        std::string code("\033[30m\033[40m");
+
+        code[3] = char(static_cast<std::uint8_t>(color.fg) + 48);
+        code[8] = char(static_cast<std::uint8_t>(color.bg) + 48);
+        return code;
+    }
+
+}    // namespace internals
 
 }    // namespace cpplogger

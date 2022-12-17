@@ -34,10 +34,10 @@ constexpr ColorPair levelColor(const Level &level)
 
     switch (level) {
         case Level::Trace: return ColorPair{.fg = Color::Green, .bg = Color::Black};
-        case Level::Debug: return ColorPair{.fg = Color::Magenta, .bg = Color::White};
-        case Level::Info: return ColorPair{.fg = Color::Cyan, .bg = Color::White};
-        case Level::Warn: return ColorPair{.fg = Color::Yellow, .bg = Color::White};
-        case Level::Error: return ColorPair{.fg = Color::Red, .bg = Color::White};
+        case Level::Debug: return ColorPair{.fg = Color::Magenta, .bg = Color::Black};
+        case Level::Info: return ColorPair{.fg = Color::Cyan, .bg = Color::Black};
+        case Level::Warn: return ColorPair{.fg = Color::Yellow, .bg = Color::Black};
+        case Level::Error: return ColorPair{.fg = Color::Red, .bg = Color::Black};
         case Level::Fatal: return ColorPair{.fg = Color::White, .bg = Color::Red};
         default: return ColorPair{.fg = Color::White, .bg = Color::Black};
     }
