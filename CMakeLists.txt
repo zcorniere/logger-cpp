@@ -54,4 +54,6 @@ if(NOT CPPLOGGER_USE_STD_FORMAT)
     target_link_libraries(${PROJECT_NAME} PUBLIC fmt)
 endif()
 
-add_subdirectory(examples/)
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    add_subdirectory(examples/)
+endif()
