@@ -5,7 +5,7 @@
 #include <cstdio>
 #include <thread>
 
-DELARE_LOGGER_CATEGORY(Example, TestCategory, Info)
+DECLARE_LOGGER_CATEGORY(Example, TestCategory, Info)
 
 int main(int ac, char **av)
 {
