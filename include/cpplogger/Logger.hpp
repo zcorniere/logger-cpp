@@ -44,7 +44,7 @@ class LoggerScope
 {
 public:
     template <typename... Args>
-    static void log(Level level, const std::string &patern, Args... args)
+    static void log(Level level, const std::string_view &patern, const Args &...args)
     {
         if (level >= CompileTimeVerbosity) {
             internal::LoggerStorage::getLogger(Logger.value)
