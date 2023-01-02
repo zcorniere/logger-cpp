@@ -62,4 +62,5 @@ public:
 #define DECLARE_LOGGER_CATEGORY(Logger, Name, Verbosity) \
     using Name = ::cpplogger::LoggerScope<#Logger, #Name, ::cpplogger::Level::Verbosity>;
 
-#define LOG(Name, Verbosity, Pattern, ...) Name::log(::cpplogger::Level::Verbosity, Pattern __VA_OPT__(, ) __VA_ARGS__)
+#define LOG_V(Name, Verbosity, Pattern, ...) Name::log(Verbosity, Pattern __VA_OPT__(, )  __VA_ARGS__)
+#define LOG(Name, Verbosity, Pattern, ...) LOG_V(Name, ::cpplogger::Level::Verbosity, Pattern __VA_OPT__(, ) __VA_ARGS__)
