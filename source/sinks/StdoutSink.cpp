@@ -24,8 +24,6 @@ StdoutSink::StdoutSink(std::FILE *file): p_File(file), r_Mutex(internal::Console
 void StdoutSink::write(const Message &message)
 {
     if (!p_Formatter) { throw std::runtime_error("Missing formatter in StdoutSink !"); }
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(message.LogTime.time_since_epoch()) -
-              std::chrono::duration_cast<std::chrono::seconds>(message.LogTime.time_since_epoch());
 
     std::string formatter_string = p_Formatter->format(message) + "\n";
 
