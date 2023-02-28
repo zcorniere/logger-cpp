@@ -43,6 +43,19 @@ template <internal::StringLiteral Logger, internal::StringLiteral Name, Level Co
 class LoggerScope
 {
 public:
+    template <Level Loglevel, typename... Args>
+    static void log(const std::string_view &patern, const Args &...args)
+    {
+        if constexpr (Loglevel >= CompileTimeVerbosity) {
+            internal::LoggerStorage::getLogger(Logger.value)
+                .log(Message{
+                    .LogLevel = Loglevel,
+                    .CategoryName = Name.value,
+                    .Message = fmt::format(fmt::runtime(patern), args...),
+                });
+        }
+    }
+
     template <typename... Args>
     static void log(Level level, const std::string_view &patern, const Args &...args)
     {
@@ -63,4 +76,4 @@ public:
     using Name = ::cpplogger::LoggerScope<#Logger, #Name, ::cpplogger::Level::Verbosity>;
 
 #define LOG_V(Name, Verbosity, Pattern, ...) Name::log(Verbosity, Pattern __VA_OPT__(, )  __VA_ARGS__)
-#define LOG(Name, Verbosity, Pattern, ...) LOG_V(Name, ::cpplogger::Level::Verbosity, Pattern __VA_OPT__(, ) __VA_ARGS__)
+#define LOG(Name, Verbosity, Pattern, ...) Name::log<::cpplogger::Level::Verbosity>(Pattern __VA_OPT__(, ) __VA_ARGS__)
