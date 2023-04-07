@@ -23,7 +23,7 @@
 
 #include <version>
 
-#if defined(CPPLOGGER_USE_STD_FORMAT) && __cpp_lib_format >= 202207L
+#if CPPLOGGER_USE_STD_FORMAT == 1 && __cpp_lib_format >= 202207L
 
     #include <format>
 

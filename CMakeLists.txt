@@ -20,7 +20,7 @@ add_library(
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
-target_compile_definitions(${PROJECT_NAME} PUBLIC CPPLOGGER_USE_STD_FORMAT=${CPPLOGGER_USE_STD_FORMAT})
+target_compile_definitions(${PROJECT_NAME} PUBLIC CPPLOGGER_USE_STD_FORMAT=$<BOOL:${CPPLOGGER_USE_STD_FORMAT}>)
 
 target_compile_options(
     ${PROJECT_NAME}
