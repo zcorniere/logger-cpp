@@ -1,6 +1,5 @@
 #include <cpplogger/Logger.hpp>
 #include <cpplogger/formatters/ColorFormatter.hpp>
-#include <cpplogger/formatters/DefaultFormatter.hpp>
 #include <cpplogger/sinks/StdoutSink.hpp>
 
 #include <cstdio>
@@ -18,11 +17,11 @@ int main(int ac, char **av)
 
     for (unsigned j = 0; j < 5; j++) {
 
-        threads.push_back(std::jthread([ac, av]() {
+        threads.push_back(std::jthread([ac]() {
             for (unsigned i = 0; i < 1000; i++) {
-                LOG(TestCategory, Info, "Info text (%s) %i !", av[0], ac);
+                LOG(TestCategory, Info, "Info text {}", ac);
                 LOG(TestCategory, Error, "Error text");
-                LOG(TestCategory, Fatal, "LOL %u %p", 2, &main);
+                LOG(TestCategory, Fatal, "LOL");
             }
         }));
     }
