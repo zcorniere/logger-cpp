@@ -7,14 +7,14 @@ namespace cpplogger
 
 unsigned StdoutSink::initialize_terminal([[maybe_unused]] std::FILE *p_File)
 {
-#if defined(TERMINAL_TARGET_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
     HANDLE hOut = reinterpret_cast<HANDLE>(::_get_osfhandle(::_fileno(p_File)));
     if (hOut == INVALID_HANDLE_VALUE) return ::GetLastError();
     DWORD dwMode = 0;
     if (!::GetConsoleMode(hOut, &dwMode)) return ::GetLastError();
     dwMode |= DWORD(ENABLE_VIRTUAL_TERMINAL_PROCESSING);
     if (!::SetConsoleMode(hOut, dwMode)) return ::GetLastError();
-#elif defined(TERMINAL_TARGET_POSIX)
+#elif defined(PLATFORM_UNIX)
 #endif
     return 0;
 }
