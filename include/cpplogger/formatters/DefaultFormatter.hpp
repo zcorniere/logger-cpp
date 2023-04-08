@@ -14,7 +14,7 @@ public:
     std::string format(const Message &message) override;
 
 private:
-    std::string m_Pattern = "[{LogTime:%F} {LogTime:%T}:{LogTimeMilis:03}][{LogLevel}][{Category}] {Message}";
+    static const char *sPattern;
 };
 
 }    // namespace cpplogger
