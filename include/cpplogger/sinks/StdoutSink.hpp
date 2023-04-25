@@ -40,6 +40,7 @@ private:
         dwMode |= DWORD(ENABLE_VIRTUAL_TERMINAL_PROCESSING);
         if (!::SetConsoleMode(hOut, dwMode)) return ::GetLastError();
 #elif defined(TERMINAL_TARGET_POSIX)
+        (void)p_File;
 #endif
         return 0;
     }
