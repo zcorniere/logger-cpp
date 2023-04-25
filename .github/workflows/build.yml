@@ -25,19 +25,19 @@ jobs:
             compiler: "clang++-15"
 
 
-    runs-on: ${{matrix.config.os}}
+    runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.os }} - ${{ matrix.config.compiler }} - ${{ matrix.build_type }}
 
     steps:
       - name: Set up Clang
-        if: runner.os == "Linux" && ${{ matrix.config.compiler }} == "clang++-15"
+        if: contains('${{ matrix.config.compiler }}', 'clang')
         uses: egor-tensin/setup-clang@v1
         with:
           version: 15
 
       - uses: actions/checkout@v3.1.0
       - name: Configure CMake
-        run: cmake -Bbuild-D CMAKE_CXX_COMPILER=${{ matrix.config.compiler }} ${{ matrix.config.extra_cmake }} ..
+        run: cmake -Bbuild-D CMAKE_CXX_COMPILER=${{ matrix.config.compiler }} ${{ matrix.config.extra_cmake }} .
 
       - name: Build
         run: cmake --build build --config ${{ matrix.build_type }}
