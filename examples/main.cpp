@@ -11,7 +11,7 @@ int main(int ac, char **av)
 {
     cpplogger::Logger logger("Example");
 
-    logger.addSink(std::make_unique<cpplogger::StdoutSink>(stdout), std::make_unique<cpplogger::ColorFormatter>());
+    logger.addSink<cpplogger::StdoutSink, cpplogger::ColorFormatter>(stdout);
 
     std::vector<std::jthread> threads;
 

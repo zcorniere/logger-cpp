@@ -1,5 +1,6 @@
 #include "cpplogger/Logger.hpp"
 
+#include <cassert>
 #include <unordered_map>
 
 static std::unordered_map<std::string, cpplogger::Logger &> s_LoggerStorage;
@@ -9,13 +10,10 @@ namespace cpplogger
 
 Logger::Logger(const std::string &name): m_Name(name) { internal::LoggerStorage::registerLogger(*this); }
 
-Logger::~Logger() { internal::LoggerStorage::removeLogger(*this); }
-
-void Logger::addSink(std::unique_ptr<ISink> sink, std::unique_ptr<IFormatter> formatter)
+Logger::~Logger()
 {
-    if (!sink) throw std::runtime_error("Null sink");
-    if (formatter) sink->SetFormatter(std::move(formatter));
-    loggerSinks.emplace_back(std::move(sink));
+    for (ISink *Sink: loggerSinks) { delete Sink; }
+    internal::LoggerStorage::removeLogger(*this);
 }
 
 void Logger::log(const cpplogger::Message &message)
@@ -29,7 +27,13 @@ namespace internal
 
     void LoggerStorage::removeLogger(Logger &logger) { s_LoggerStorage.erase(logger.getName()); }
 
-    Logger &LoggerStorage::getLogger(const std::string &name) { return s_LoggerStorage.at(name); }
+    Logger &LoggerStorage::getLogger(const std::string &name)
+    {
+        auto iter = s_LoggerStorage.begin();
+        if (iter != s_LoggerStorage.end()) { return iter->second; }
+
+        throw LoggerError(fmt::format("{:s} logger not registered !", name));
+    }
 
 }    // namespace internal
 

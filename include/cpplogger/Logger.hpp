@@ -12,20 +12,31 @@
 namespace cpplogger
 {
 
+class LoggerError : public std::runtime_error
+{
+    using std::runtime_error::runtime_error;
+};
+
 class Logger
 {
 public:
     Logger(const std::string &name);
     ~Logger();
 
-    void addSink(std::unique_ptr<ISink> sink, std::unique_ptr<IFormatter> formatter = nullptr);
+    template <template <class> class T, Formatter TForm, typename... ArgsTypes>
+        requires std::is_constructible_v<T<TForm>, ArgsTypes...> && std::derived_from<T<TForm>, ISink>
+    void addSink(ArgsTypes &&...args)
+    {
+        loggerSinks.emplace_back(new T<TForm>(std::forward<ArgsTypes>(args)...));
+    }
+
     void log(const Message &message);
 
     const std::string &getName() const { return m_Name; }
 
 private:
-    std::string m_Name;
-    std::vector<std::unique_ptr<ISink>> loggerSinks;
+    const std::string m_Name;
+    std::vector<ISink *> loggerSinks;
 };
 
 namespace internal
