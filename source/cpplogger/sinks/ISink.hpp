@@ -11,7 +11,7 @@ template <typename T>
 concept Formatter = requires() {
                         {
                             T::format(typename cpplogger::Message{})
-                        };
+                            } -> std::convertible_to<std::string>;
                     };
 
 class ISink

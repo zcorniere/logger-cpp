@@ -1,20 +1,14 @@
 cmake_minimum_required(VERSION 3.11)
-include(FetchContent)
-project(logger)
+project(cpplogger)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-
-find_package(Threads REQUIRED)
 
 add_library(
     ${PROJECT_NAME} STATIC
     source/Logger.cpp
 )
-
-target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
-target_include_directories(${PROJECT_NAME} PUBLIC include/)
+target_include_directories(${PROJECT_NAME} PUBLIC source/)
 
 target_compile_options(
     ${PROJECT_NAME}
