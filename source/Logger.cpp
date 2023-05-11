@@ -16,11 +16,6 @@ Logger::~Logger()
     internal::LoggerStorage::removeLogger(*this);
 }
 
-void Logger::log(const cpplogger::Message &message)
-{
-    for (auto &sink: loggerSinks) { sink->write(message); }
-}
-
 namespace internal
 {
     void LoggerStorage::registerLogger(Logger &logger) { s_LoggerStorage.emplace(logger.getName(), logger); }
@@ -32,7 +27,7 @@ namespace internal
         auto iter = s_LoggerStorage.begin();
         if (iter != s_LoggerStorage.end()) { return iter->second; }
 
-        throw LoggerError(fmt::format("{:s} logger not registered !", name));
+        throw LoggerError(std::format("{:s} logger not registered !", name));
     }
 
 }    // namespace internal

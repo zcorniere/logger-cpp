@@ -5,6 +5,7 @@
 #include "cpplogger/types/Message.hpp"
 #include "cpplogger/internal/StringLiteral.hpp"
 
+#include <format>
 #include <memory>
 #include <string>
 #include <vector>
@@ -25,14 +26,17 @@ public:
 
     template <template <class> class T, Formatter TForm, typename... ArgsTypes>
         requires std::is_constructible_v<T<TForm>, ArgsTypes...> && std::derived_from<T<TForm>, ISink>
-    void addSink(ArgsTypes &&...args)
+    inline void addSink(ArgsTypes &&...args)
     {
         loggerSinks.emplace_back(new T<TForm>(std::forward<ArgsTypes>(args)...));
     }
 
-    void log(const Message &message);
+    inline void log(const Message &message)
+    {
+        for (auto &sink: loggerSinks) { sink->write(message); }
+    }
 
-    const std::string &getName() const { return m_Name; }
+    constexpr const std::string &getName() const { return m_Name; }
 
 private:
     const std::string m_Name;
@@ -55,27 +59,27 @@ class LoggerScope
 {
 public:
     template <Level Loglevel, typename... Args>
-    static void log(const std::string_view &patern, const Args &...args)
+    static inline void log(const std::string_view &patern, const Args &...args)
     {
-        if constexpr (Loglevel >= CompileTimeVerbosity) {
+        if constexpr (Loglevel <= CompileTimeVerbosity) {
             internal::LoggerStorage::getLogger(Logger.value)
                 .log(Message{
                     .LogLevel = Loglevel,
                     .CategoryName = Name.value,
-                    .Message = fmt::format(fmt::runtime(patern), args...),
+                    .Message = std::vformat(patern, std::make_format_args(args...)),
                 });
         }
     }
 
     template <typename... Args>
-    static void log(Level level, const std::string_view &patern, const Args &...args)
+    static inline void log(Level level, const std::string_view &patern, const Args &...args)
     {
-        if (level >= CompileTimeVerbosity) {
+        if (level <= CompileTimeVerbosity) {
             internal::LoggerStorage::getLogger(Logger.value)
                 .log(Message{
                     .LogLevel = level,
                     .CategoryName = Name.value,
-                    .Message = fmt::format(fmt::runtime(patern), args...),
+                    .Message = std::vformat(patern, std::make_format_args(args...)),
                 });
         }
     }

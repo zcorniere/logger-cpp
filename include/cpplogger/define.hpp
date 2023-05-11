@@ -23,23 +23,6 @@
 
 #include <version>
 
-#if CPPLOGGER_USE_STD_FORMAT == 1 && __cpp_lib_format >= 202207L
-
-    #include <format>
-
-namespace cpplogger
-{
-namespace fmt = std::format;
-}
-
-#else
-
-    #include <fmt/chrono.h>
-    #include <fmt/core.h>
-
-namespace cpplogger
-{
-namespace fmt = ::fmt::v9;
-}
-
+#if __cpp_lib_format < 202106L
+    #error "The std::format library is not available !"
 #endif

@@ -8,37 +8,37 @@ namespace cpplogger
 {
 
 enum class Level {
-    Trace = 0,
-    Debug = 1,
-    Info = 2,
-    Warn = 3,
-    Error = 4,
-    Fatal = 5,
+    Nothing = 0,
+    Fatal,
+    Error,
+    Warning,
+    Info,
+    Trace,
+    NumVerbority,
 };
 
 constexpr std::string_view to_string(const Level &level) noexcept
 {
     switch (level) {
-        case Level::Trace: return "TRACE";
-        case Level::Debug: return "DEBUG";
-        case Level::Info: return "INFO";
-        case Level::Warn: return "WARN";
-        case Level::Error: return "ERROR";
-        case Level::Fatal: return "FATAL";
-        default: return "UNKNOWN";
+        case Level::Nothing: return "Nothing";
+        case Level::Fatal: return "Fatal";
+        case Level::Error: return "Trace";
+        case Level::Warning: return "Warning";
+        case Level::Info: return "Info";
+        case Level::Trace: return "Trace";
+        default: return "Unkown";
     }
 }
 
 constexpr ColorPair levelColor(const Level &level)
 {
-
     switch (level) {
-        case Level::Trace: return ColorPair{.fg = Color::Green, .bg = Color::Black};
-        case Level::Debug: return ColorPair{.fg = Color::Magenta, .bg = Color::Black};
-        case Level::Info: return ColorPair{.fg = Color::Cyan, .bg = Color::Black};
-        case Level::Warn: return ColorPair{.fg = Color::Yellow, .bg = Color::Black};
-        case Level::Error: return ColorPair{.fg = Color::Red, .bg = Color::Black};
+        case Level::Nothing: return ColorPair{.fg = Color::Red, .bg = Color::White};
         case Level::Fatal: return ColorPair{.fg = Color::White, .bg = Color::Red};
+        case Level::Error: return ColorPair{.fg = Color::Red, .bg = Color::Black};
+        case Level::Warning: return ColorPair{.fg = Color::Yellow, .bg = Color::Black};
+        case Level::Info: return ColorPair{.fg = Color::Cyan, .bg = Color::Black};
+        case Level::Trace: return ColorPair{.fg = Color::Green, .bg = Color::Black};
         default: return ColorPair{.fg = Color::White, .bg = Color::Black};
     }
 }
