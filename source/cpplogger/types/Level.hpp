@@ -22,7 +22,7 @@ constexpr std::string_view to_string(const Level &level) noexcept
     switch (level) {
         case Level::Nothing: return "Nothing";
         case Level::Fatal: return "Fatal";
-        case Level::Error: return "Trace";
+        case Level::Error: return "Error";
         case Level::Warning: return "Warning";
         case Level::Info: return "Info";
         case Level::Trace: return "Trace";
