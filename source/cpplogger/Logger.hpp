@@ -59,27 +59,27 @@ class LoggerScope
 {
 public:
     template <Level Loglevel, typename... Args>
-    static inline void log(const std::string_view &patern, const Args &...args)
+    static inline void log(const std::format_string<Args...> &patern, Args &&...args)
     {
         if constexpr (Loglevel <= CompileTimeVerbosity) {
             internal::LoggerStorage::getLogger(Logger.value)
                 .log(Message{
                     .LogLevel = Loglevel,
                     .CategoryName = Name.value,
-                    .Message = std::vformat(patern, std::make_format_args(args...)),
+                    .Message = std::format(patern, std::forward<Args>(args)...),
                 });
         }
     }
 
     template <typename... Args>
-    static inline void log(Level level, const std::string_view &patern, const Args &...args)
+    static inline void log(Level level, const std::format_string<Args...> &patern, Args &&...args)
     {
         if (level <= CompileTimeVerbosity) {
             internal::LoggerStorage::getLogger(Logger.value)
                 .log(Message{
                     .LogLevel = level,
                     .CategoryName = Name.value,
-                    .Message = std::vformat(patern, std::make_format_args(args...)),
+                    .Message = std::format(patern, std::forward<Args>(args)...),
                 });
         }
     }
