@@ -23,7 +23,6 @@ public:
 
         std::unique_lock lock(r_Mutex);
         std::fwrite(formatter_string.data(), sizeof(char), formatter_string.size(), p_File);
-        std::fflush(p_File);
     }
     virtual void flush() override
     {

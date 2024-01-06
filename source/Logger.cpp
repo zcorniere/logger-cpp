@@ -11,7 +11,10 @@ Logger::Logger(const std::string &name): m_Name(name) { internal::LoggerStorage:
 
 Logger::~Logger()
 {
-    for (ISink *Sink: loggerSinks) { delete Sink; }
+    for (ISink *const Sink: loggerSinks) {
+        Sink->flush();
+        delete Sink;
+    }
     internal::LoggerStorage::removeLogger(*this);
 }
 

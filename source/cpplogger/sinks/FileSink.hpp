@@ -30,7 +30,6 @@ public:
         std::string formatter_string = T::format(message) + "\n";
 
         std::fwrite(formatter_string.data(), sizeof(char), formatter_string.size(), p_File);
-        std::fflush(p_File);
     }
     virtual void flush() override { std::fflush(p_File); }
 
