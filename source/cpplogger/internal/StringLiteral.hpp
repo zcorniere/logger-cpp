@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include <algorithm>
 
 namespace cpplogger::internal
 {
@@ -9,7 +9,7 @@ template <std::size_t N>
 class StringLiteral
 {
 public:
-    constexpr StringLiteral(const char (&str)[N]) { std::copy_n(str, N, value); }
+    consteval StringLiteral(const char (&str)[N]) { std::copy_n(str, N, value); }
 
     char value[N];
 };

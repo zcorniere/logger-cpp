@@ -1,9 +1,5 @@
 #pragma once
 
-#if __has_include(<cxxabi.h>)
-    #define LOGGER_CXXABI_AVAILABLE
-#endif
-
 #if defined(_WIN32) || defined(_WIN64)
     #define TERMINAL_TARGET_WINDOWS
 #elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))

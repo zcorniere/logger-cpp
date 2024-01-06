@@ -3,7 +3,6 @@
 #include <chrono>
 #include <source_location>
 #include <string>
-#include <string_view>
 
 #include "cpplogger/types/Level.hpp"
 

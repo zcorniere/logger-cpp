@@ -13,7 +13,8 @@ template <Formatter T>
 class StdoutSink : public TSink<T>
 {
 public:
-    StdoutSink(std::FILE *file): p_File(file), r_Mutex(internal::ConsoleMutex::mutex()) {}
+    StdoutSink(std::FILE *const file): p_File(file), r_Mutex(internal::ConsoleMutex::mutex()) {}
+    virtual ~StdoutSink() {}
 
     virtual void write(const Message &message) override
     {
@@ -30,7 +31,7 @@ public:
     }
 
 private:
-    static unsigned initialize_terminal(std::FILE *p_File)
+    static unsigned initialize_terminal(std::FILE *const p_File)
     {
 #if defined(TERMINAL_TARGET_WINDOWS)
         HANDLE hOut = reinterpret_cast<HANDLE>(::_get_osfhandle(::_fileno(p_File)));

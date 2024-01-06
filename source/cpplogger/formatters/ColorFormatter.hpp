@@ -1,7 +1,6 @@
 #pragma once
 
-#include "cpplogger/define.hpp"
-#include "cpplogger/types/Level.hpp"
+#include "cpplogger/types/Message.hpp"
 
 namespace cpplogger
 {

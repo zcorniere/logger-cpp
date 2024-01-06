@@ -2,17 +2,15 @@
 
 #include "cpplogger/types/Message.hpp"
 
-#include <memory>
-
 namespace cpplogger
 {
 
 template <typename T>
 concept Formatter = requires() {
-                        {
-                            T::format(typename cpplogger::Message{})
-                            } -> std::convertible_to<std::string>;
-                    };
+    {
+        T::format(typename cpplogger::Message{})
+    } -> std::convertible_to<std::string>;
+};
 
 class ISink
 {
@@ -25,6 +23,8 @@ public:
 template <Formatter TForm>
 class TSink : public ISink
 {
+public:
+    using FormatterType = TForm;
 };
 
 }    // namespace cpplogger

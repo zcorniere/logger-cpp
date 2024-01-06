@@ -1,6 +1,5 @@
 #include "cpplogger/Logger.hpp"
 
-#include <cassert>
 #include <unordered_map>
 
 static std::unordered_map<std::string, cpplogger::Logger &> s_LoggerStorage;

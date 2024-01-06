@@ -1,12 +1,10 @@
 #pragma once
 
-#include "cpplogger/define.hpp"
+#include "cpplogger/internal/StringLiteral.hpp"
 #include "cpplogger/sinks/ISink.hpp"
 #include "cpplogger/types/Message.hpp"
-#include "cpplogger/internal/StringLiteral.hpp"
 
 #include <format>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -26,9 +24,9 @@ public:
 
     template <template <class> class T, Formatter TForm, typename... ArgsTypes>
         requires std::is_constructible_v<T<TForm>, ArgsTypes...> && std::derived_from<T<TForm>, ISink>
-    inline void addSink(ArgsTypes &&...args)
+    inline T<TForm> *addSink(ArgsTypes &&...args)
     {
-        loggerSinks.emplace_back(new T<TForm>(std::forward<ArgsTypes>(args)...));
+        return dynamic_cast<T<TForm> *>(loggerSinks.emplace_back(new T<TForm>(std::forward<ArgsTypes>(args)...)));
     }
 
     inline void log(const Message &message)
@@ -72,7 +70,7 @@ public:
     }
 
     template <typename... Args>
-    static inline void log(Level level, const std::format_string<Args...> &patern, Args &&...args)
+    static inline void log(const Level level, const std::format_string<Args...> &patern, Args &&...args)
     {
         if (level <= CompileTimeVerbosity) {
             internal::LoggerStorage::getLogger(Logger.value)
@@ -90,5 +88,5 @@ public:
 #define DECLARE_LOGGER_CATEGORY(Logger, Name, Verbosity) \
     using Name = ::cpplogger::LoggerScope<#Logger, #Name, ::cpplogger::Level::Verbosity>;
 
-#define LOG_V(Name, Verbosity, Pattern, ...) Name::log(Verbosity, Pattern __VA_OPT__(, )  __VA_ARGS__)
+#define LOG_V(Name, Verbosity, Pattern, ...) Name::log(Verbosity, Pattern __VA_OPT__(, ) __VA_ARGS__)
 #define LOG(Name, Verbosity, Pattern, ...) Name::log<::cpplogger::Level::Verbosity>(Pattern __VA_OPT__(, ) __VA_ARGS__)

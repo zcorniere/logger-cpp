@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+#include <string>
+
 namespace cpplogger
 {
 
@@ -25,9 +28,9 @@ namespace internal
 
     constexpr static auto resetSequence = "\033[0m";
 
-    inline std::string color(const ColorPair &color)
+    constexpr std::string color(const ColorPair &color)
     {
-        const std::string_view BaseCode("\033[30m\033[40m");
+        const std::string BaseCode("\033[30m\033[40m");
 
         std::string code(BaseCode);
         code[3] = char(static_cast<std::uint8_t>(color.fg) + 48);
@@ -35,6 +38,6 @@ namespace internal
         return code;
     }
 
-}    // namespace internals
+}    // namespace internal
 
 }    // namespace cpplogger
