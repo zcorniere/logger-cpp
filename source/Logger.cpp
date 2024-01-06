@@ -26,7 +26,7 @@ namespace internal
 
     Logger &LoggerStorage::getLogger(const std::string &name)
     {
-        auto iter = s_LoggerStorage.begin();
+        const auto iter = s_LoggerStorage.find(name);
         if (iter != s_LoggerStorage.end()) { return iter->second; }
 
         throw LoggerError(std::format("{:s} logger not registered !", name));
