@@ -26,12 +26,14 @@ public:
         requires std::is_constructible_v<T<TForm>, ArgsTypes...> && std::derived_from<T<TForm>, ISink>
     inline T<TForm> *addSink(ArgsTypes &&...args)
     {
-        return dynamic_cast<T<TForm> *>(loggerSinks.emplace_back(new T<TForm>(std::forward<ArgsTypes>(args)...)));
+        T<TForm> *const NewSink = new T<TForm>(std::forward<ArgsTypes>(args)...);
+        loggerSinks.push_back(NewSink);
+        return NewSink;
     }
 
     inline void log(const Message &message)
     {
-        for (auto &sink: loggerSinks) { sink->write(message); }
+        for (ISink *const sink: loggerSinks) { sink->write(message); }
     }
 
     constexpr const std::string &getName() const { return m_Name; }
