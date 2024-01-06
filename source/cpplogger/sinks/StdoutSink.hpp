@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cpplogger/define.hpp"
 #include "cpplogger/internal/GlobalMutex.hpp"
 #include "cpplogger/sinks/ISink.hpp"
 
@@ -42,6 +43,9 @@ private:
         if (!::SetConsoleMode(hOut, dwMode)) return ::GetLastError();
 #elif defined(TERMINAL_TARGET_POSIX)
         (void)p_File;
+        // nothing to do ANSI codes are enabled by default on POSIX terminals
+#else
+    #error "Unsupported platform"
 #endif
         return 0;
     }
