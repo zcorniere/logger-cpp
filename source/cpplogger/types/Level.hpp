@@ -1,5 +1,6 @@
 #pragma once
 
+#include <format>
 #include <string_view>
 
 #include "cpplogger/types/ColorCodes.hpp"
@@ -44,3 +45,38 @@ constexpr ColorPair levelColor(const Level &level)
 }
 
 }    // namespace cpplogger
+
+template <>
+struct std::formatter<cpplogger::Level, char> {
+    bool isColored = false;
+
+    template <class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext &ctx)
+    {
+        auto it = ctx.begin();
+        if (it == ctx.end()) return it;
+
+        if (*it == '#') {
+            isColored = true;
+            ++it;
+        }
+        if (*it != '}') throw std::format_error("Invalid format args for cpplogger::Level.");
+
+        return it;
+    }
+
+    template <class FmtContext>
+    FmtContext::iterator format(cpplogger::Level Level, FmtContext &ctx) const
+    {
+        using namespace cpplogger;
+
+        auto &&out = ctx.out();
+        if (isColored) {
+            format_to(out, "{0:s}{1:s}{2:s}", internal::color(levelColor(Level)), to_string(Level),
+                      internal::resetSequence);
+        } else {
+            format_to(out, "{0:s}", to_string(Level));
+        }
+        return out;
+    }
+};
