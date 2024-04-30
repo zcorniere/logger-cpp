@@ -13,7 +13,7 @@ class FileSink : public TSink<T>
 {
 public:
     FileSink(const std::filesystem::path FilePath, bool AppendToOutput)
-        : p_File(fopen(FilePath.c_str(), AppendToOutput ? "a" : "w"))
+        : p_File(fopen(FilePath.string().c_str(), AppendToOutput ? "a" : "w"))
     {
         if (!p_File) { perror("fopen() failed"); }
     }
