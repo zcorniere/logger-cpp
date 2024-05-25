@@ -15,7 +15,8 @@ int main(int ac, char **av)
 {
     cpplogger::Logger logger("Example");
     logger.addSink<cpplogger::StdoutSink, cpplogger::ColorFormatter>(stdout);
-    logger.addSink<cpplogger::FileSink, cpplogger::DefaultFormatter>("TestFile.txt", false);
+    logger.addSink<cpplogger::FileSink, cpplogger::ColorFormatter>("TestFile_Color.txt", false);
+    logger.addSink<cpplogger::FileSink, cpplogger::DefaultFormatter>("TestFile_NoColor.txt", false);
 
     std::vector<std::jthread> threads;
     for (unsigned j = 0; j < 20; j++) {
