@@ -12,11 +12,17 @@ template <Formatter T>
 class FileSink : public TSink<T>
 {
 public:
+    /// @brief Construct a FileSink object from a file path
+    /// @param FilePath The path to the file to write to
     FileSink(const std::filesystem::path FilePath, bool AppendToOutput)
         : p_File(fopen(FilePath.string().c_str(), AppendToOutput ? "a" : "w"))
     {
         if (!p_File) { perror("fopen() failed"); }
     }
+    /// @brief Construct a FileSink object from a FILE pointer
+    /// @param InFile The FILE pointer to write to (will take ownership of the pointer)
+    FileSink(FILE *const InFile): p_File(InFile) {}
+
     virtual ~FileSink()
     {
         if (p_File) { fclose(p_File); }
