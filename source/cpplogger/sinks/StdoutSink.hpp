@@ -14,7 +14,7 @@ template <Formatter T>
 class StdoutSink : public TSink<T>
 {
 public:
-    StdoutSink(std::FILE *const file): p_File(file), r_Mutex(internal::ConsoleMutex::mutex()) {}
+    StdoutSink(std::FILE *const file): p_File(file), r_Mutex(internal::ConsoleMutex::mutex()) { initialize_terminal(); }
     virtual ~StdoutSink() {}
 
     virtual void write(const Message &message) override
@@ -31,17 +31,16 @@ public:
     }
 
 private:
-    static unsigned initialize_terminal(std::FILE *const p_File)
+    static unsigned initialize_terminal()
     {
 #if defined(TERMINAL_TARGET_WINDOWS)
-        HANDLE hOut = reinterpret_cast<HANDLE>(::_get_osfhandle(::_fileno(p_File)));
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
         if (hOut == INVALID_HANDLE_VALUE) return ::GetLastError();
         DWORD dwMode = 0;
         if (!::GetConsoleMode(hOut, &dwMode)) return ::GetLastError();
         dwMode |= DWORD(ENABLE_VIRTUAL_TERMINAL_PROCESSING);
         if (!::SetConsoleMode(hOut, dwMode)) return ::GetLastError();
 #elif defined(TERMINAL_TARGET_POSIX)
-        (void)p_File;
         // nothing to do ANSI codes are enabled by default on POSIX terminals
 #else
     #error "Unsupported platform"
