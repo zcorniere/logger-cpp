@@ -9,7 +9,7 @@
 
 DECLARE_LOGGER_CATEGORY(Example, TestCategory, Info)
 
-DECLARE_LOGGER_CATEGORY(Examoke, TestMuteCateogry, Nothing);
+DECLARE_LOGGER_CATEGORY(Example, TestMuteCateogry, Nothing);
 
 int main(int ac, char **av)
 {
@@ -21,13 +21,13 @@ int main(int ac, char **av)
     std::vector<std::jthread> threads;
     for (unsigned j = 0; j < 20; j++) {
 
-        threads.push_back(std::jthread([ac]() {
+        threads.push_back(std::jthread([j]() {
             for (unsigned i = 0; i < 2000; i++) {
-                LOG(TestMuteCateogry, Info, "Info text {}", ac);
+                LOG(TestMuteCateogry, Info, "Info text {}", i);
                 LOG(TestMuteCateogry, Error, "Error text");
                 LOG(TestMuteCateogry, Fatal, "LOL");
 
-                LOG(TestCategory, Info, "Info text {}", ac);
+                LOG(TestCategory, Info, "Info text {} {}", j, i);
                 LOG(TestCategory, Error, "Error text");
                 LOG(TestCategory, Fatal, "LOL");
             }

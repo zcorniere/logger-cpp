@@ -53,16 +53,12 @@ struct std::formatter<cpplogger::Level, char> {
     template <class ParseContext>
     constexpr ParseContext::iterator parse(ParseContext &ctx)
     {
-        auto it = ctx.begin();
-        if (it == ctx.end()) return it;
-
-        if (*it == '#') {
-            isColored = true;
-            ++it;
+        typename ParseContext::iterator pos = ctx.begin();
+        while (pos != ctx.end() && *pos != '}') {
+            if (*pos == '#') isColored = true;
+            ++pos;
         }
-        if (*it != '}') throw std::format_error("Invalid format args for cpplogger::Level.");
-
-        return it;
+        return pos;
     }
 
     template <class FmtContext>
@@ -70,13 +66,12 @@ struct std::formatter<cpplogger::Level, char> {
     {
         using namespace cpplogger;
 
-        auto &&out = ctx.out();
         if (isColored) {
-            format_to(out, "{0:s}{1:s}{2:s}", internal::color(levelColor(Level)), to_string(Level),
+            format_to(ctx.out(), "{0:s}{1:s}{2:s}", internal::color(levelColor(Level)), to_string(Level),
                       internal::resetSequence);
         } else {
-            format_to(out, "{0:s}", to_string(Level));
+            format_to(ctx.out(), "{0:s}", to_string(Level));
         }
-        return out;
+        return ctx.out();
     }
 };

@@ -9,6 +9,13 @@ add_library(
     source/Logger.cpp
 )
 target_include_directories(${PROJECT_NAME} PUBLIC source/)
+    
+option(CPPLOGGER_NO_EXCEPTIONS ON)
+if (CPPLOGGER_NO_EXCEPTIONS)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC CPPLOGGER_NO_EXCEPTIONS=1)
+else()
+    target_compile_definitions(${PROJECT_NAME} PUBLIC CPPLOGGER_NO_EXCEPTIONS=0)
+endif(CPPLOGGER_NO_EXCEPTIONS)
 
 target_compile_options(
     ${PROJECT_NAME}

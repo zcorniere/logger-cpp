@@ -36,10 +36,10 @@ public:
         for (ISink *const sink: loggerSinks) { sink->write(message); }
     }
 
-    constexpr const std::string &getName() const { return m_Name; }
+    constexpr const std::string &getName() const { return Name; }
 
 private:
-    const std::string m_Name;
+    const std::string Name;
     std::vector<ISink *> loggerSinks;
 };
 
@@ -58,28 +58,28 @@ template <internal::StringLiteral Logger, internal::StringLiteral Name, Level Co
 class LoggerScope
 {
 public:
-    template <Level Loglevel, typename... Args>
-    static inline void log(const std::format_string<Args...> &patern, Args &&...args)
+    template <Level Loglevel, typename... ArgsType>
+    static inline void log(const std::format_string<ArgsType...> &patern, ArgsType &&...args)
     {
         if constexpr (Loglevel <= CompileTimeVerbosity) {
             internal::LoggerStorage::getLogger(Logger.value)
                 .log(Message{
                     .LogLevel = Loglevel,
                     .CategoryName = Name.value,
-                    .Message = std::format(patern, std::forward<Args>(args)...),
+                    .Message = std::format(patern, std::forward<ArgsType>(args)...),
                 });
         }
     }
 
-    template <typename... Args>
-    static inline void log(const Level level, const std::format_string<Args...> &patern, Args &&...args)
+    template <typename... ArgsType>
+    static inline void log(const Level level, const std::format_string<ArgsType...> &patern, ArgsType &&...args)
     {
         if (level <= CompileTimeVerbosity) {
             internal::LoggerStorage::getLogger(Logger.value)
                 .log(Message{
                     .LogLevel = level,
                     .CategoryName = Name.value,
-                    .Message = std::format(patern, std::forward<Args>(args)...),
+                    .Message = std::format(patern, std::forward<ArgsType>(args)...),
                 });
         }
     }

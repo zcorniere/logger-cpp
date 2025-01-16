@@ -19,7 +19,7 @@ public:
 
     virtual void write(const Message &message) override
     {
-        std::string formatter_string = T::format(message) + "\n";
+        const std::string formatter_string = T::format(message) + "\n";
 
         std::unique_lock lock(r_Mutex);
         std::fwrite(formatter_string.data(), sizeof(char), formatter_string.size(), p_File);
@@ -31,7 +31,7 @@ public:
     }
 
 private:
-    static unsigned initialize_terminal()
+    static void initialize_terminal()
     {
 #if defined(TERMINAL_TARGET_WINDOWS)
         HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -45,7 +45,6 @@ private:
 #else
     #error "Unsupported platform"
 #endif
-        return 0;
     }
 
 private:
