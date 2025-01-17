@@ -35,11 +35,11 @@ private:
     {
 #if defined(TERMINAL_TARGET_WINDOWS)
         HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (hOut == INVALID_HANDLE_VALUE) return ::GetLastError();
+        if (hOut == INVALID_HANDLE_VALUE) { return; }
         DWORD dwMode = 0;
-        if (!::GetConsoleMode(hOut, &dwMode)) return ::GetLastError();
+        if (!::GetConsoleMode(hOut, &dwMode)) { return; }
         dwMode |= DWORD(ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-        if (!::SetConsoleMode(hOut, dwMode)) return ::GetLastError();
+        if (!::SetConsoleMode(hOut, dwMode)) { return; }
 #elif defined(TERMINAL_TARGET_POSIX)
         // nothing to do ANSI codes are enabled by default on POSIX terminals
 #else

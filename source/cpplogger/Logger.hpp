@@ -68,6 +68,9 @@ public:
                     .CategoryName = Name.value,
                     .Message = std::format(patern, std::forward<ArgsType>(args)...),
                 });
+        } else {
+            (void)patern;
+            (void(args), ...);
         }
     }
 

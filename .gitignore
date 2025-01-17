@@ -18,4 +18,5 @@ cmake-build-*
 
 # Ignore vscode
 .vscode/*
-.cache
+.cache/*
+.vs/*

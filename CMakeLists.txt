@@ -26,6 +26,8 @@ target_compile_options(
             /W4>
 )
 
+target_compile_definitions(${PROJECT_NAME} PUBLIC _CRT_SECURE_NO_WARNINGS)
+
 target_compile_options(
     ${PROJECT_NAME}
     PUBLIC $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
