@@ -26,19 +26,33 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+    - name: Get number of CPU cores
+      uses: SimenB/github-actions-cpu-cores@v1
+      id: cpu-cores
+
     - name: Checkout code
       uses: actions/checkout@v2
+
+    - name: "Setup Cpp"
+      uses: aminya/setup-cpp@v1
+      with:
+        compiler: ${{ matrix.compiler }}
+        vcvarsall: ${{ contains(matrix.os, 'windows' )}}
+        cmake: true
+        ninja: true
+        clangtidy: false
+        cppcheck: false
 
     - name: Create build directory
       run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
     - name: Configure CMake
-      run: |
-        if [ ${{ matrix.compiler }} == "msvc" ]; then
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -G "Visual Studio 17 2022" -A x64
-        else
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_C_COMPILER=${{ matrix.compiler }} -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}++
-        fi
+      run: >
+        cmake -S .
+        -B ./build
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -S ${{ github.workspace }}
 
     - name: Build
-      run: cmake --build build --config ${{ matrix.build_type }}
+      run: cmake --build ./build --config=${{ matrix.build_type }} --parallel ${{ steps.cpu-cores.outputs.count }} 
+
