@@ -34,12 +34,17 @@ private:
     static void initialize_terminal()
     {
 #if defined(TERMINAL_TARGET_WINDOWS)
-        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (hOut == INVALID_HANDLE_VALUE) { return; }
-        DWORD dwMode = 0;
-        if (!::GetConsoleMode(hOut, &dwMode)) { return; }
-        dwMode |= DWORD(ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-        if (!::SetConsoleMode(hOut, dwMode)) { return; }
+        auto HandleStdOutput = [](DWORD Input) {
+            HANDLE hOut = GetStdHandle(Input);
+            if (hOut == INVALID_HANDLE_VALUE) { return; }
+            DWORD dwMode = 0;
+            if (!::GetConsoleMode(hOut, &dwMode)) { return; }
+            dwMode |= DWORD(ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+            if (!::SetConsoleMode(hOut, dwMode)) { return; }
+        };
+        HandleStdOutput(STD_OUTPUT_HANDLE);
+        HandleStdOutput(STD_ERROR_HANDLE);
+
 #elif defined(TERMINAL_TARGET_POSIX)
         // nothing to do ANSI codes are enabled by default on POSIX terminals
 #else
