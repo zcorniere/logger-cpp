@@ -8,7 +8,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(CPPLOGGER_NO_EXCEPTIONS ON)
-option(CPPLOGGER_SHARED_LIB ON)
+
+option(CPPLOGGER_SHARED_LIB OFF)
 if(CPPLOGGER_SHARED_LIB)
     set(CPPLOGGER_VISIBILITY SHARED)
 else()
@@ -23,7 +24,7 @@ generate_build_config_header(
     VERSION
     "2.1.1"
     TEMPLATE
-    "${CMAKE_SOURCE_DIR}/cmake/BuildConfig.hpp.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/BuildConfig.hpp.in"
 )
 
 add_library(${PROJECT_NAME} ${CPPLOGGER_VISIBILITY} "source/Logger.cpp")
