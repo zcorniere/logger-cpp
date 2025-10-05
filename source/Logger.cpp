@@ -1,7 +1,6 @@
 #include "cpplogger/Logger.hpp"
-#include <cstdlib>
 
-#if !CPPLOGGER_NO_EXCEPTIONS
+#if CPPLOGGER_NO_EXCEPTIONS
     #include <cassert>
 #endif    // !CPPLOGGER_NO_EXCEPTIONS
 
@@ -47,7 +46,7 @@ namespace internal
         const std::unordered_map<std::string, cpplogger::Logger &>::const_iterator iter = s_LoggerStorage.find(name);
         if (iter != s_LoggerStorage.end()) { return iter->second; }
 
-#if CPPLOGGER_NO_EXCEPTIONS
+#if !CPPLOGGER_NO_EXCEPTIONS
         throw LoggerError(std::format("{:s} logger not registered !", name));
 #else
         assert("Logger is not registered");

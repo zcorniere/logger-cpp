@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cpploggerBuildConfig.hpp"
+
 #include "cpplogger/internal/StringLiteral.hpp"
 #include "cpplogger/sinks/ISink.hpp"
 #include "cpplogger/types/Message.hpp"
@@ -11,10 +13,12 @@
 namespace cpplogger
 {
 
+#if !CPPLOGGER_NO_EXCEPTIONS
 class LoggerError : public std::runtime_error
 {
     using std::runtime_error::runtime_error;
 };
+#endif    // CPPLOGGER_NO_EXCEPTIONS
 
 class Logger
 {
@@ -45,7 +49,7 @@ private:
 
 namespace internal
 {
-    class LoggerStorage
+    class CPPLOGGER_API LoggerStorage
     {
     public:
         static void registerLogger(Logger &logger);

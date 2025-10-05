@@ -1,0 +1,23 @@
+#pragma once
+
+#define CPPLOGGER_APP_VERSION "@GBCH_VERSION@"
+#define CPPLOGGER_GIT_HASH "@GBCH_GIT_HASH@"
+
+#cmakedefine01 CPPLOGGER_NO_EXCEPTIONS
+
+#cmakedefine01 CPPLOGGER_SHARED_LIB
+#if CPPLOGGER_SHARED_LIB
+    #if defined(_WIN32) || defined(_WIN64)
+        #ifdef @EXPORT_DEFINE@
+            #define @EXPORT_MACRO@ __declspec(dllexport)
+        #else
+            #define @EXPORT_MACRO@ __declspec(dllimport)
+        #endif
+    #elif defined(__GNUC__) && __GNUC__ >= 4
+        #define @EXPORT_MACRO@ __attribute__((visibility("default")))
+    #else
+        #define @EXPORT_MACRO@
+    #endif
+#else
+    #define @EXPORT_MACRO@
+#endif
