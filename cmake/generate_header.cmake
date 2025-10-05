@@ -1,9 +1,4 @@
-function(generate_export_header macro_name output_path)
-
-    configure_file("${CMAKE_SOURCE_DIR}/cmake/EngineExport.hxx.in" "${output_path}" @ONLY)
-endfunction(generate_export_header)
-
-function(generate_build_config_header)
+function(cpplogger_generate_build_config)
     set(options)
     set(oneValueArgs MACRO_NAME OUTPUT_PATH VERSION TEMPLATE)
     set(multiValueArgs)
@@ -35,4 +30,4 @@ function(generate_build_config_header)
     message(STATUS "Generated build config header at ${GBCH_OUTPUT_PATH}:")
     message(STATUS "  Version: ${GBCH_VERSION}")
     message(STATUS "  Git Hash: ${GBCH_GIT_HASH}")
-endfunction(generate_build_config_header)
+endfunction(cpplogger_generate_build_config)

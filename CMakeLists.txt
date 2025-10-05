@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.11)
 project(cpplogger)
 
 include(cmake/generate_header.cmake)
-include(cmake/force_include_header.cmake)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,7 +15,7 @@ else()
     set(CPPLOGGER_VISIBILITY STATIC)
 endif()
 
-generate_build_config_header(
+cpplogger_generate_build_config(
     MACRO_NAME
     "CPPLOGGER_API"
     OUTPUT_PATH
