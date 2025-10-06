@@ -28,6 +28,7 @@ cpplogger_generate_build_config(
 
 add_library(${PROJECT_NAME} ${CPPLOGGER_VISIBILITY} "source/Logger.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC "source/" "${CMAKE_CURRENT_BINARY_DIR}/generated/")
+target_compile_definitions(${PROJECT_NAME} PRIVATE CPPLOGGER_EXPORTS)
 target_compile_options(
     ${PROJECT_NAME}
     PRIVATE $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:

@@ -23,8 +23,8 @@ class LoggerError : public std::runtime_error
 class Logger
 {
 public:
-    Logger(const std::string &name);
-    ~Logger();
+    CPPLOGGER_API Logger(const std::string &name);
+    CPPLOGGER_API ~Logger();
 
     template <template <class> class T, Formatter TForm, typename... ArgsTypes>
         requires std::is_constructible_v<T<TForm>, ArgsTypes...> && std::derived_from<T<TForm>, ISink>
@@ -49,12 +49,12 @@ private:
 
 namespace internal
 {
-    class CPPLOGGER_API LoggerStorage
+    class LoggerStorage
     {
     public:
-        static void registerLogger(Logger &logger);
-        static void removeLogger(Logger &logger);
-        static Logger &getLogger(const std::string &name);
+        CPPLOGGER_API static void registerLogger(Logger &logger);
+        CPPLOGGER_API static void removeLogger(Logger &logger);
+        CPPLOGGER_API static Logger &getLogger(const std::string &name);
     };
 }    // namespace internal
 
