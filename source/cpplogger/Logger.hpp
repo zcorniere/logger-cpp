@@ -23,12 +23,19 @@ class LoggerError : public std::runtime_error
 class Logger
 {
 public:
-    CPPLOGGER_API Logger(const std::string &name);
-    CPPLOGGER_API ~Logger();
+    CPPLOGGER_API Logger(const std::string &name): Name(name) { AddToStorage(); }
+    CPPLOGGER_API ~Logger()
+    {
+        for (ISink *const Sink: loggerSinks) {
+            Sink->flush();
+            delete Sink;
+        }
+        RemoveFromStorage();
+    }
 
     template <template <class> class T, Formatter TForm, typename... ArgsTypes>
         requires std::is_constructible_v<T<TForm>, ArgsTypes...> && std::derived_from<T<TForm>, ISink>
-    inline T<TForm> *addSink(ArgsTypes &&...args)
+    T<TForm> *addSink(ArgsTypes &&...args)
     {
         T<TForm> *const NewSink = new T<TForm>(std::forward<ArgsTypes>(args)...);
         loggerSinks.push_back(NewSink);
@@ -41,6 +48,10 @@ public:
     }
 
     constexpr const std::string &getName() const { return Name; }
+
+private:
+    CPPLOGGER_API void RemoveFromStorage();
+    CPPLOGGER_API void AddToStorage();
 
 private:
     const std::string Name;

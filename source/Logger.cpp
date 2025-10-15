@@ -14,16 +14,9 @@ static std::shared_mutex s_LoggerStorageMutex;
 namespace cpplogger
 {
 
-Logger::Logger(const std::string &name): Name(name) { internal::LoggerStorage::registerLogger(*this); }
+void Logger::AddToStorage() { internal::LoggerStorage::registerLogger(*this); }
 
-Logger::~Logger()
-{
-    for (ISink *const Sink: loggerSinks) {
-        Sink->flush();
-        delete Sink;
-    }
-    internal::LoggerStorage::removeLogger(*this);
-}
+void Logger::RemoveFromStorage() { internal::LoggerStorage::removeLogger(*this); }
 
 namespace internal
 {
