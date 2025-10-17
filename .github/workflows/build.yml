@@ -15,6 +15,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         compiler: [gcc, clang, msvc]
         build_type: [Debug, Release]
+        shared_library: [ON, OFF]
         exclude:
           - os: windows-latest
             compiler: gcc
@@ -26,33 +27,33 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Get number of CPU cores
-      uses: SimenB/github-actions-cpu-cores@v1
-      id: cpu-cores
+      - name: Get number of CPU cores
+        uses: SimenB/github-actions-cpu-cores@v1
+        id: cpu-cores
 
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: "Setup Cpp"
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: ${{ matrix.compiler }}
-        vcvarsall: ${{ contains(matrix.os, 'windows' )}}
-        cmake: true
-        ninja: true
-        clangtidy: false
-        cppcheck: false
+      - name: "Setup Cpp"
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: ${{ matrix.compiler }}
+          vcvarsall: ${{ contains(matrix.os, 'windows' )}}
+          cmake: true
+          ninja: true
+          clangtidy: false
+          cppcheck: false
 
-    - name: Create build directory
-      run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+      - name: Create build directory
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
-    - name: Configure CMake
-      run: >
-        cmake -S .
-        -B ./build
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -S ${{ github.workspace }}
+      - name: Configure CMake
+        run: >
+          cmake -S .
+          -B ./build
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCPPLOGGER_SHARED_LIB=${{ matrix.shared_library }}
+          -S ${{ github.workspace }}
 
-    - name: Build
-      run: cmake --build ./build --config=${{ matrix.build_type }} --parallel ${{ steps.cpu-cores.outputs.count }} 
-
+      - name: Build
+        run: cmake --build ./build --config=${{ matrix.build_type }} --parallel ${{ steps.cpu-cores.outputs.count }}
