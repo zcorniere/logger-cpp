@@ -7,6 +7,7 @@
 #include "cpplogger/types/Message.hpp"
 
 #include <format>
+#include <span>
 #include <string>
 #include <vector>
 
