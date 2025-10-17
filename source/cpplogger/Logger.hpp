@@ -26,6 +26,7 @@ public:
     CPPLOGGER_API Logger(const std::string &name);
     CPPLOGGER_API ~Logger();
 
+#if !CPPLOGGER_SHARED_LIB
     /// Create a new sink and add it to the logger
     /// @note not recommended to use if compiling as a shared library and defining global new/delete operator
     template <template <class> class T, Formatter TForm, typename... ArgsTypes>
@@ -36,13 +37,14 @@ public:
         loggerSinks.push_back(NewSink);
         return NewSink;
     }
+#endif    // CPPLOGGER_SHARED_LIB
 
     /// Add a sink to the logger.
     /// @note the logger **DOES NOT** take ownership of the sink
-    ISink *addSink(ISink *const sink);
+    CPPLOGGER_API ISink *addSink(ISink *const sink);
 
     /// Remove a sink from the logger
-    bool removeSink(ISink *const sink);
+    CPPLOGGER_API bool removeSink(ISink *const sink);
 
     /// Return the list of sinks attached to the logger
     std::span<ISink *> getSinks() { return {loggerSinks.begin(), loggerSinks.end()}; }

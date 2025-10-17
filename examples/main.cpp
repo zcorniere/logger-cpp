@@ -16,10 +16,18 @@ int main(int ac, char **av)
     cpplogger::Logger logger("Example");
 
     logger.addSink(&stdoutSink);
+
+#if CPPLOGGER_SHARED_LIB
+    auto FileSink = std::make_unique<cpplogger::FileSink<cpplogger::ColorFormatter>>("TestFile_Color.txt", false);
+    auto FileSink2 = std::make_unique<cpplogger::FileSink<cpplogger::DefaultFormatter>>("TestFile_NoColor.txt", false);
+    logger.addSink(FileSink.get());
+    logger.addSink(FileSink2.get());
+#else
     std::unique_ptr<cpplogger::ISink> FileSink(
         logger.addSink<cpplogger::FileSink, cpplogger::ColorFormatter>("TestFile_Color.txt", false));
     std::unique_ptr<cpplogger::ISink> FileSink2(
         logger.addSink<cpplogger::FileSink, cpplogger::DefaultFormatter>("TestFile_NoColor.txt", false));
+#endif    // CPPLOGGER_SHARED_LIB
 
     std::vector<std::jthread> threads;
     for (unsigned j = 0; j < 20; j++) {
