@@ -40,11 +40,11 @@ target_compile_options(
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC _CRT_SECURE_NO_WARNINGS)
 
-target_compile_options(
-    ${PROJECT_NAME} PUBLIC $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>: >
-                           $<$<CXX_COMPILER_ID:MSVC>: /Zc:preprocessor>
-)
-
+if(WIN32)
+    target_compile_options(${PROJECT_NAME} PUBLIC /Zc:preprocessor)
+elseif(UNIX)
+    set_target_properties(${PROJECT_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN 1)
+endif()
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     add_subdirectory(examples/)
 endif()

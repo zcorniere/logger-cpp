@@ -23,16 +23,11 @@ class LoggerError : public std::runtime_error
 class Logger
 {
 public:
-    CPPLOGGER_API Logger(const std::string &name): Name(name) { AddToStorage(); }
-    CPPLOGGER_API ~Logger()
-    {
-        for (ISink *const Sink: loggerSinks) {
-            Sink->flush();
-            delete Sink;
-        }
-        RemoveFromStorage();
-    }
+    CPPLOGGER_API Logger(const std::string &name);
+    CPPLOGGER_API ~Logger();
 
+    /// Create a new sink and add it to the logger
+    /// @note not recommended to use if compiling as a shared library and defining global new/delete operator
     template <template <class> class T, Formatter TForm, typename... ArgsTypes>
         requires std::is_constructible_v<T<TForm>, ArgsTypes...> && std::derived_from<T<TForm>, ISink>
     T<TForm> *addSink(ArgsTypes &&...args)
@@ -42,16 +37,33 @@ public:
         return NewSink;
     }
 
+    /// Add a sink to the logger.
+    /// @note the logger **DOES NOT** take ownership of the sink
+    ISink *addSink(ISink *const sink)
+    {
+        loggerSinks.push_back(sink);
+        return sink;
+    }
+
+    /// Remove a sink from the logger
+    bool removeSink(ISink *const sink)
+    {
+        const auto iter = std::find(loggerSinks.begin(), loggerSinks.end(), sink);
+        if (iter != loggerSinks.end()) {
+            loggerSinks.erase(iter);
+            return true;
+        }
+        return false;
+    }
+
+    /// Log a message to all the sinks of the logger
     inline void log(const Message &message)
     {
         for (ISink *const sink: loggerSinks) { sink->write(message); }
     }
 
     constexpr const std::string &getName() const { return Name; }
-
-private:
-    CPPLOGGER_API void RemoveFromStorage();
-    CPPLOGGER_API void AddToStorage();
+    std::vector<ISink *> &getSinks() { return loggerSinks; }
 
 private:
     const std::string Name;
@@ -63,8 +75,8 @@ namespace internal
     class LoggerStorage
     {
     public:
-        CPPLOGGER_API static void registerLogger(Logger &logger);
-        CPPLOGGER_API static void removeLogger(Logger &logger);
+        static void registerLogger(Logger &logger);
+        static void removeLogger(Logger &logger);
         CPPLOGGER_API static Logger &getLogger(const std::string &name);
     };
 }    // namespace internal
@@ -105,8 +117,10 @@ public:
 
 }    // namespace cpplogger
 
+/// Declare a new logger category, with a given name and verbosity level
 #define DECLARE_LOGGER_CATEGORY(Logger, Name, Verbosity) \
     using Name = ::cpplogger::LoggerScope<#Logger, #Name, ::cpplogger::Level::Verbosity>;
 
+/// Log a message to a logger category with a given verbosity level
 #define LOG_V(Name, Verbosity, Pattern, ...) Name::log(Verbosity, Pattern __VA_OPT__(, ) __VA_ARGS__)
 #define LOG(Name, Verbosity, Pattern, ...) Name::log<::cpplogger::Level::Verbosity>(Pattern __VA_OPT__(, ) __VA_ARGS__)

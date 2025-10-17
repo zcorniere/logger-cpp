@@ -4,7 +4,6 @@
 #include <cpplogger/sinks/FileSink.hpp>
 #include <cpplogger/sinks/StdoutSink.hpp>
 
-#include <cstdio>
 #include <thread>
 
 DECLARE_LOGGER_CATEGORY(Example, TestCategory, Info)
@@ -13,10 +12,14 @@ DECLARE_LOGGER_CATEGORY(Example, TestMuteCateogry, Nothing);
 
 int main(int ac, char **av)
 {
+    cpplogger::StdoutSink<cpplogger::ColorFormatter> stdoutSink(stdout);
     cpplogger::Logger logger("Example");
-    logger.addSink<cpplogger::StdoutSink, cpplogger::ColorFormatter>(stdout);
-    logger.addSink<cpplogger::FileSink, cpplogger::ColorFormatter>("TestFile_Color.txt", false);
-    logger.addSink<cpplogger::FileSink, cpplogger::DefaultFormatter>("TestFile_NoColor.txt", false);
+
+    logger.addSink(&stdoutSink);
+    std::unique_ptr<cpplogger::ISink> FileSink(
+        logger.addSink<cpplogger::FileSink, cpplogger::ColorFormatter>("TestFile_Color.txt", false));
+    std::unique_ptr<cpplogger::ISink> FileSink2(
+        logger.addSink<cpplogger::FileSink, cpplogger::DefaultFormatter>("TestFile_NoColor.txt", false));
 
     std::vector<std::jthread> threads;
     for (unsigned j = 0; j < 20; j++) {

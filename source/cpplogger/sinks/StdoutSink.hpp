@@ -11,7 +11,7 @@ namespace cpplogger
 {
 
 template <Formatter T>
-class StdoutSink : public TSink<T>
+class StdoutSink : public ISink
 {
 public:
     StdoutSink(std::FILE *const file): p_File(file), r_Mutex(internal::ConsoleMutex::mutex()) { initialize_terminal(); }

@@ -13,10 +13,9 @@ static std::shared_mutex s_LoggerStorageMutex;
 
 namespace cpplogger
 {
+Logger::Logger(const std::string &name): Name(name) { internal::LoggerStorage::registerLogger(*this); }
 
-void Logger::AddToStorage() { internal::LoggerStorage::registerLogger(*this); }
-
-void Logger::RemoveFromStorage() { internal::LoggerStorage::removeLogger(*this); }
+Logger::~Logger() { internal::LoggerStorage::removeLogger(*this); }
 
 namespace internal
 {
@@ -37,7 +36,7 @@ namespace internal
         std::shared_lock Lock(s_LoggerStorageMutex);
 
         const std::unordered_map<std::string, cpplogger::Logger &>::const_iterator iter = s_LoggerStorage.find(name);
-        if (iter != s_LoggerStorage.end()) { return iter->second; }
+        if (iter != s_LoggerStorage.end()) [[likely]] { return iter->second; }
 
 #if !CPPLOGGER_NO_EXCEPTIONS
         throw LoggerError(std::format("{:s} logger not registered !", name));

@@ -9,7 +9,7 @@ namespace cpplogger
 {
 
 template <Formatter T>
-class FileSink : public TSink<T>
+class FileSink : public ISink
 {
 public:
     /// @brief Construct a FileSink object from a file path
