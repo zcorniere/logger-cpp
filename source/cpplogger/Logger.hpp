@@ -39,22 +39,13 @@ public:
 
     /// Add a sink to the logger.
     /// @note the logger **DOES NOT** take ownership of the sink
-    ISink *addSink(ISink *const sink)
-    {
-        loggerSinks.push_back(sink);
-        return sink;
-    }
+    ISink *addSink(ISink *const sink);
 
     /// Remove a sink from the logger
-    bool removeSink(ISink *const sink)
-    {
-        const auto iter = std::find(loggerSinks.begin(), loggerSinks.end(), sink);
-        if (iter != loggerSinks.end()) {
-            loggerSinks.erase(iter);
-            return true;
-        }
-        return false;
-    }
+    bool removeSink(ISink *const sink);
+
+    /// Return the list of sinks attached to the logger
+    std::span<ISink *> getSinks() { return {loggerSinks.begin(), loggerSinks.end()}; }
 
     /// Log a message to all the sinks of the logger
     inline void log(const Message &message)
@@ -63,7 +54,6 @@ public:
     }
 
     constexpr const std::string &getName() const { return Name; }
-    std::vector<ISink *> &getSinks() { return loggerSinks; }
 
 private:
     const std::string Name;

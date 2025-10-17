@@ -17,6 +17,22 @@ Logger::Logger(const std::string &name): Name(name) { internal::LoggerStorage::r
 
 Logger::~Logger() { internal::LoggerStorage::removeLogger(*this); }
 
+ISink *Logger::addSink(ISink *const sink)
+{
+    loggerSinks.push_back(sink);
+    return sink;
+}
+
+bool Logger::removeSink(ISink *const sink)
+{
+    const auto iter = std::find(loggerSinks.begin(), loggerSinks.end(), sink);
+    if (iter != loggerSinks.end()) {
+        loggerSinks.erase(iter);
+        return true;
+    }
+    return false;
+}
+
 namespace internal
 {
     void LoggerStorage::registerLogger(Logger &logger)
