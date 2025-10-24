@@ -6,7 +6,12 @@
 #include "cpplogger/sinks/ISink.hpp"
 #include "cpplogger/types/Message.hpp"
 
-#include <format>
+#if CPPLOGGER_USE_STD_FORMAT
+    #include <format>
+#else
+    #include <fmt/core.h>
+#endif
+
 #include <span>
 #include <string>
 #include <vector>

@@ -55,7 +55,11 @@ namespace internal
         if (iter != s_LoggerStorage.end()) [[likely]] { return iter->second; }
 
 #if !CPPLOGGER_NO_EXCEPTIONS
+    #if CPPLOGGER_USE_STD_FORMAT
         throw LoggerError(std::format("{:s} logger not registered !", name));
+    #else
+        throw LoggerError(fmt::format("{:s} logger not registered !", name));
+    #endif
 #else
         assert("Logger is not registered");
         std::abort();

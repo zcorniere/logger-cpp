@@ -15,6 +15,7 @@ else()
     set(CPPLOGGER_VISIBILITY STATIC)
 endif()
 
+
 cpplogger_generate_build_config(
     MACRO_NAME
     "CPPLOGGER_API"
@@ -37,6 +38,21 @@ target_compile_options(
             $<$<CXX_COMPILER_ID:MSVC>:
             /W4>
 )
+
+option(CPPLOGGER_USE_STD_FORMAT ON)
+if (NOT CPPLOGGER_USE_STD_FORMAT)
+    include(FetchContent)
+    FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG        12.0.0 
+    )
+    FetchContent_MakeAvailable(fmt)
+    if(CPPLOGGER_SHARED_LIB)
+        set_target_properties(fmt PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    endif()
+    target_link_libraries(${PROJECT_NAME} PUBLIC fmt)
+endif()
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC _CRT_SECURE_NO_WARNINGS)
 

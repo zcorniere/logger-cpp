@@ -1,6 +1,11 @@
 #pragma once
 
-#include <format>
+#if CPPLOGGER_USE_STD_FORMAT
+    #include <format>
+#else
+    #include <fmt/core.h>
+#endif
+
 #include <string_view>
 
 #include "cpplogger/types/ColorCodes.hpp"
@@ -47,7 +52,11 @@ constexpr ColorPair levelColor(const Level &level)
 }    // namespace cpplogger
 
 template <>
+#if CPPLOGGER_USE_STD_FORMAT
 struct std::formatter<cpplogger::Level, char> {
+#else
+struct fmt::formatter<cpplogger::Level, char> {
+#endif
     bool isColored = false;
 
     template <class ParseContext>
