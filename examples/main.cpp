@@ -7,27 +7,20 @@
 #include <thread>
 
 DECLARE_LOGGER_CATEGORY(Example, TestCategory, Info)
-
 DECLARE_LOGGER_CATEGORY(Example, TestMuteCateogry, Nothing);
 
-int main(int ac, char **av)
+int main(void)
 {
-    cpplogger::StdoutSink<cpplogger::ColorFormatter> stdoutSink(stdout);
     cpplogger::Logger logger("Example");
 
+    cpplogger::StdoutSink<cpplogger::ColorFormatter> stdoutSink(stdout);
     logger.addSink(&stdoutSink);
 
-#if CPPLOGGER_SHARED_LIB
     auto FileSink = std::make_unique<cpplogger::FileSink<cpplogger::ColorFormatter>>("TestFile_Color.txt", false);
-    auto FileSink2 = std::make_unique<cpplogger::FileSink<cpplogger::DefaultFormatter>>("TestFile_NoColor.txt", false);
     logger.addSink(FileSink.get());
-    logger.addSink(FileSink2.get());
-#else
-    std::unique_ptr<cpplogger::ISink> FileSink(
-        logger.addSink<cpplogger::FileSink, cpplogger::ColorFormatter>("TestFile_Color.txt", false));
-    std::unique_ptr<cpplogger::ISink> FileSink2(
-        logger.addSink<cpplogger::FileSink, cpplogger::DefaultFormatter>("TestFile_NoColor.txt", false));
-#endif    // CPPLOGGER_SHARED_LIB
+
+    auto FileSink2 = new cpplogger::FileSink<cpplogger::DefaultFormatter>("TestFile_NoColor.txt", false);
+    logger.addSink(FileSink2);
 
     std::vector<std::jthread> threads;
     for (unsigned j = 0; j < 20; j++) {
@@ -44,4 +37,8 @@ int main(int ac, char **av)
             }
         }));
     }
+    threads.clear();
+
+    logger.removeSink(FileSink2);
+    delete FileSink2;
 }

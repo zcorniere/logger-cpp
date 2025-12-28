@@ -27,19 +27,6 @@ public:
     CPPLOGGER_API Logger(const std::string &name);
     CPPLOGGER_API ~Logger();
 
-#if !CPPLOGGER_SHARED_LIB
-    /// Create a new sink and add it to the logger
-    /// @note not recommended to use if compiling as a shared library and defining global new/delete operator
-    template <template <class> class T, Formatter TForm, typename... ArgsTypes>
-        requires std::is_constructible_v<T<TForm>, ArgsTypes...> && std::derived_from<T<TForm>, ISink>
-    T<TForm> *addSink(ArgsTypes &&...args)
-    {
-        T<TForm> *const NewSink = new T<TForm>(std::forward<ArgsTypes>(args)...);
-        loggerSinks.push_back(NewSink);
-        return NewSink;
-    }
-#endif    // CPPLOGGER_SHARED_LIB
-
     /// Add a sink to the logger.
     /// @note the logger **DOES NOT** take ownership of the sink
     CPPLOGGER_API ISink *addSink(ISink *const sink);
